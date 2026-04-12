@@ -283,7 +283,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 
       <!-- AI PANEL -->
       <div class="panel-content" id="panel-ai">
-        <div class="ai-badge">Claude AI</div>
+        <div class="ai-badge">Claude + Replicate AI</div>
         <div class="section-label">Describe your GIF</div>
         <textarea class="prompt-area" id="prompt-input" placeholder="e.g. A rocket blasting off to the moon with $ANALTENA text, crypto charts going up, confetti explosion, cartoon style" rows="4"></textarea>
 
@@ -910,7 +910,7 @@ async function generateWithAI() {
     const txSig = await sendAnalPayment();
 
     // Step 2: Call backend
-    setProgress(15, 'AI generuje…', 'Tworzę obrazy dla każdej klatki');
+    setProgress(15, 'AI generuje…', 'Claude planuje sceny → Replicate rysuje obrazy');
     log('► Wywołuję API…', 'ai');
 
     const apiResp = await fetch('/api/generate', {
@@ -934,23 +934,45 @@ async function generateWithAI() {
     state.frames = [];
     setCanvasSize(sz);
 
-    if (result.mode === 'dalle') {
-      // ── DALL-E: load real images onto canvas ──
-      log('► Wczytuję obrazy DALL-E 3 HD…', 'ai');
+    if (result.mode === 'replicate') {
+      // ── REPLICATE: prawdziwe obrazy AI ──
+      log('► Wczytuję obrazy z Replicate (Flux AI)…', 'ai');
       const images = result.images || [];
       for (let i = 0; i < images.length; i++) {
         setProgress(30 + (i / images.length) * 60,
-          `Ładuję obraz ${i+1} z ${images.length}`,
-          'Obrazy HD 1024×1024');
+          `Klatka ${i+1} z ${images.length}`,
+          images[i].description || '');
+        if (images[i].error || !images[i].url) {
+          log(`► Klatka ${i+1} pominięta: ${images[i].error || 'brak obrazu'}`, 'err');
+          continue;
+        }
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        await new Promise((res, rej) => {
+          img.onload = res;
+          img.onerror = () => res(); // nie blokuj przy błędzie CORS
+          img.src = images[i].url;
+        });
+        const oc = document.createElement('canvas'); oc.width = sz; oc.height = sz;
+        const oc2 = oc.getContext('2d');
+        try { oc2.drawImage(img, 0, 0, sz, sz); } catch(e) {}
+        if (state.overlayText) applyOverlayToCtxDirect(oc2, sz);
+        state.frames.push(oc2.getImageData(0, 0, sz, sz));
+        log(`► Obraz ${i+1} wczytany ✓ — ${images[i].description}`, 'ok');
+        await sleep(30);
+      }
+
+    } else if (result.mode === 'dalle') {
+      // ── DALL-E fallback ──
+      log('► Wczytuję obrazy DALL-E…', 'ai');
+      const images = result.images || [];
+      for (let i = 0; i < images.length; i++) {
+        setProgress(30 + (i / images.length) * 60, `Obraz ${i+1} z ${images.length}`, '');
         const img = new Image();
         await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = images[i]; });
         const oc = document.createElement('canvas'); oc.width = sz; oc.height = sz;
-        const oc2 = oc.getContext('2d');
-        oc2.drawImage(img, 0, 0, sz, sz);
-        // Apply overlay text if set
-        if (state.overlayText) applyOverlayToCtxDirect(oc2, sz);
-        state.frames.push(oc2.getImageData(0, 0, sz, sz));
-        log(`► Obraz ${i+1} wczytany ✓`, 'ok');
+        oc.getContext('2d').drawImage(img, 0, 0, sz, sz);
+        state.frames.push(oc.getContext('2d').getImageData(0, 0, sz, sz));
         await sleep(50);
       }
 
@@ -1007,104 +1029,286 @@ function applyOverlayToCtxDirect(c, sz) {
 // FRAME RENDERER
 // ════════════════════════════════
 function renderFrame(ctx2, sz, frame, frameIdx, totalFrames) {
+  // ── BACKGROUND ──────────────────────────────────────────────────────
   if (frame.bgGradient) {
-    const lg = ctx2.createLinearGradient(0,0,sz,sz);
+    const lg = ctx2.createLinearGradient(0, 0, sz, sz);
     lg.addColorStop(0, frame.bgGradient.from || '#080810');
     lg.addColorStop(1, frame.bgGradient.to   || '#1a0a2e');
     ctx2.fillStyle = lg;
   } else {
     ctx2.fillStyle = frame.bgColor || '#080810';
   }
-  ctx2.fillRect(0,0,sz,sz);
-  const grad = ctx2.createRadialGradient(sz/2,sz/2,0,sz/2,sz/2,sz*0.7);
-  grad.addColorStop(0,'rgba(255,255,255,0.04)');
-  grad.addColorStop(1,'rgba(0,0,0,0.35)');
-  ctx2.fillStyle = grad; ctx2.fillRect(0,0,sz,sz);
+  ctx2.fillRect(0, 0, sz, sz);
+
+  // Subtle radial light source in centre
+  const centreGlow = ctx2.createRadialGradient(sz/2, sz/2, 0, sz/2, sz/2, sz*0.6);
+  centreGlow.addColorStop(0, 'rgba(255,255,255,0.06)');
+  centreGlow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx2.fillStyle = centreGlow; ctx2.fillRect(0, 0, sz, sz);
+
   const elements = frame.elements || [];
 
+  // ── HELPERS ──────────────────────────────────────────────────────────
+  function glowStyle(color, radius) {
+    ctx2.shadowColor = color;
+    ctx2.shadowBlur  = radius * (sz / 480);
+  }
+  function resetGlow() { ctx2.shadowBlur = 0; ctx2.shadowColor = 'transparent'; }
+
+  function drawStar(cx, cy, outerR, innerR, points, color, alpha) {
+    ctx2.globalAlpha = alpha || 1;
+    ctx2.fillStyle = color;
+    ctx2.beginPath();
+    for (let i = 0; i < points * 2; i++) {
+      const angle = (i * Math.PI) / points - Math.PI / 2;
+      const r = i % 2 === 0 ? outerR : innerR;
+      i === 0 ? ctx2.moveTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle))
+              : ctx2.lineTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle));
+    }
+    ctx2.closePath(); ctx2.fill();
+    ctx2.globalAlpha = 1;
+  }
+
+  // ── ELEMENTS ─────────────────────────────────────────────────────────
   elements.forEach(el => {
     const x = (el.x || 0.5) * sz;
     const y = (el.y || 0.5) * sz;
 
+    // EMOJI — with optional glow and shadow
     if (el.type === 'emoji') {
-      const esz = (el.size || 0.2) * sz;
-      ctx2.font = esz+'px serif';
-      ctx2.textAlign='center'; ctx2.textBaseline='middle';
-      ctx2.fillText(el.value || '🚀', x, y);
+      const esz = (el.size || 0.22) * sz;
+      if (el.glow) glowStyle(el.glowColor || '#FFE500', 24);
+      ctx2.save();
+      ctx2.translate(x, y);
+      if (el.rotate) ctx2.rotate(el.rotate);
+      ctx2.scale(el.scale || 1, el.scale || 1);
+      ctx2.font = esz + 'px serif';
+      ctx2.textAlign = 'center'; ctx2.textBaseline = 'middle';
+      ctx2.globalAlpha = el.alpha || 1;
+      ctx2.fillText(el.value || '🚀', 0, 0);
+      ctx2.globalAlpha = 1;
+      ctx2.restore();
+      resetGlow();
 
+    // TEXT — outlined, with optional glow
     } else if (el.type === 'text') {
-      const tsz = Math.max(12, (el.size || 0.08) * sz);
+      const tsz = Math.max(14, (el.size || 0.09) * sz);
       ctx2.font = `900 ${tsz}px Syne, sans-serif`;
-      ctx2.textAlign='center'; ctx2.textBaseline='middle';
-      ctx2.strokeStyle='rgba(0,0,0,0.8)'; ctx2.lineWidth=tsz*0.15;
-      ctx2.strokeText(el.value||'', x, y);
-      ctx2.fillStyle = el.color||'#FFE500';
-      ctx2.fillText(el.value||'', x, y);
+      ctx2.textAlign = 'center'; ctx2.textBaseline = 'middle';
+      if (el.glow !== false) glowStyle(el.color || '#FFE500', 18);
+      // thick black outline
+      ctx2.strokeStyle = 'rgba(0,0,0,0.9)';
+      ctx2.lineWidth   = tsz * 0.2;
+      ctx2.lineJoin    = 'round';
+      ctx2.globalAlpha = el.alpha || 1;
+      ctx2.strokeText(el.value || '', x, y);
+      ctx2.fillStyle = el.color || '#FFE500';
+      ctx2.fillText(el.value || '', x, y);
+      ctx2.globalAlpha = 1;
+      resetGlow();
 
+    // RECT — rounded corners, optional glow
     } else if (el.type === 'rect') {
-      ctx2.fillStyle = el.color||'#00ffcc';
-      ctx2.globalAlpha = el.alpha||0.8;
-      ctx2.fillRect((el.x||0)*sz, (el.y||0)*sz, (el.w||0.5)*sz, (el.h||0.1)*sz);
-      ctx2.globalAlpha=1;
+      const rx2 = (el.x || 0) * sz, ry2 = (el.y || 0) * sz;
+      const rw  = (el.w || 0.5) * sz, rh  = (el.h || 0.1) * sz;
+      const rad = el.radius !== undefined ? el.radius * sz : rh * 0.4;
+      ctx2.globalAlpha = el.alpha || 0.85;
+      if (el.glow) glowStyle(el.color || '#00ffcc', 20);
+      ctx2.fillStyle = el.color || '#00ffcc';
+      ctx2.beginPath();
+      ctx2.roundRect(rx2, ry2, rw, rh, rad);
+      ctx2.fill();
+      ctx2.globalAlpha = 1; resetGlow();
 
+    // CIRCLE — with optional glow ring
     } else if (el.type === 'circle') {
-      ctx2.fillStyle = el.color||'#ff2d78';
-      ctx2.globalAlpha = el.alpha||0.8;
-      ctx2.beginPath();
-      ctx2.arc(x, y, (el.r||0.1)*sz, 0, Math.PI*2);
-      ctx2.fill(); ctx2.globalAlpha=1;
+      const r = (el.r || 0.1) * sz;
+      ctx2.globalAlpha = el.alpha || 0.85;
+      if (el.glow) glowStyle(el.color || '#ff2d78', 28);
+      ctx2.fillStyle = el.color || '#ff2d78';
+      ctx2.beginPath(); ctx2.arc(x, y, r, 0, Math.PI * 2); ctx2.fill();
+      // ring
+      if (el.ring) {
+        ctx2.strokeStyle = el.ringColor || el.color || '#ff2d78';
+        ctx2.lineWidth = r * 0.15;
+        ctx2.globalAlpha = 0.4;
+        ctx2.beginPath(); ctx2.arc(x, y, r * 1.35, 0, Math.PI * 2); ctx2.stroke();
+      }
+      ctx2.globalAlpha = 1; resetGlow();
 
+    // STARS — twinkling field
     } else if (el.type === 'stars') {
-      ctx2.fillStyle = el.color||'#ffffff';
-      for (let s=0;s<(el.count||15);s++) {
-        const sx=Math.random()*sz, sy=Math.random()*sz;
-        const r=(Math.random()*1.5+0.5)*(sz/200);
-        ctx2.globalAlpha=Math.random()*0.8+0.2;
-        ctx2.beginPath();ctx2.arc(sx,sy,r,0,Math.PI*2);ctx2.fill();
+      const seed = frameIdx * 137;
+      for (let s = 0; s < (el.count || 25); s++) {
+        const sx  = ((s * 173.3 + seed * 7.1) % sz);
+        const sy  = ((s * 97.7  + seed * 3.3) % sz);
+        const r   = (((s * 31 + frameIdx * 11) % 12) / 12) * 2.2 + 0.4;
+        const bri = (((s * 53 + frameIdx * 7)  % 10) / 10) * 0.7 + 0.3;
+        ctx2.globalAlpha = bri;
+        ctx2.fillStyle   = el.color || '#ffffff';
+        if (s % 5 === 0) drawStar(sx, sy, r * 1.8, r * 0.7, 4, el.color || '#ffffff', bri);
+        else { ctx2.beginPath(); ctx2.arc(sx, sy, r, 0, Math.PI * 2); ctx2.fill(); }
       }
-      ctx2.globalAlpha=1;
+      ctx2.globalAlpha = 1;
 
+    // BARS — candlestick-style chart with glow
     } else if (el.type === 'bars') {
-      const vals = el.values||[0.3,0.6,0.9,0.5,0.7];
-      const bw = sz*0.12; const gap = sz*0.04;
-      const totalW = vals.length*(bw+gap);
-      const startX = (sz-totalW)/2;
-      const baseY = sz*0.85;
-      vals.forEach((v,i) => {
-        const bh = v*sz*0.5;
-        const alpha = 0.6 + v*0.4;
-        ctx2.globalAlpha=alpha;
-        ctx2.fillStyle=el.color||'#00ff88';
-        ctx2.fillRect(startX+i*(bw+gap), baseY-bh, bw, bh);
+      const vals   = el.values || [0.2, 0.5, 0.8, 0.6, 0.9, 0.7, 0.4];
+      const count  = vals.length;
+      const bw     = sz * 0.1;
+      const gap    = sz * 0.03;
+      const totalW = count * (bw + gap);
+      const startX = (sz - totalW) / 2;
+      const baseY  = sz * 0.88;
+      if (el.glow) glowStyle(el.color || '#00ff88', 16);
+      vals.forEach((v, i) => {
+        const bh    = v * sz * 0.55;
+        const shade = 0.5 + v * 0.5;
+        ctx2.globalAlpha = shade;
+        // gradient bar
+        const barGrad = ctx2.createLinearGradient(0, baseY - bh, 0, baseY);
+        barGrad.addColorStop(0, el.color || '#00ff88');
+        barGrad.addColorStop(1, 'rgba(0,0,0,0.2)');
+        ctx2.fillStyle = barGrad;
+        ctx2.beginPath();
+        ctx2.roundRect(startX + i * (bw + gap), baseY - bh, bw, bh, bw * 0.25);
+        ctx2.fill();
+        // wick
+        ctx2.globalAlpha = 0.4;
+        ctx2.strokeStyle = el.color || '#00ff88';
+        ctx2.lineWidth   = 1.5;
+        ctx2.beginPath();
+        ctx2.moveTo(startX + i * (bw + gap) + bw / 2, baseY - bh);
+        ctx2.lineTo(startX + i * (bw + gap) + bw / 2, baseY - bh - bh * 0.15);
+        ctx2.stroke();
       });
-      ctx2.globalAlpha=1;
+      ctx2.globalAlpha = 1; resetGlow();
 
+    // RAIN — falling emoji scattered across frame
     } else if (el.type === 'rain') {
-      const emoji = el.emoji||'💰';
-      ctx2.font = (sz*0.08)+'px serif';
-      for (let r=0;r<(el.count||8);r++) {
-        const rx=Math.random()*sz, ry=Math.random()*sz;
-        ctx2.globalAlpha=Math.random()*0.7+0.3;
-        ctx2.fillText(emoji,rx,ry);
+      const emoji  = el.emoji || '💰';
+      const count  = el.count || 12;
+      const esz    = (el.size || 0.08) * sz;
+      ctx2.font    = esz + 'px serif';
+      for (let r = 0; r < count; r++) {
+        const rx = ((r * 173 + frameIdx * 31) % sz);
+        const ry = ((r * 97  + frameIdx * 53) % sz);
+        ctx2.globalAlpha = 0.4 + ((r * 37 + frameIdx * 13) % 10) / 10 * 0.6;
+        ctx2.fillText(emoji, rx, ry);
       }
-      ctx2.globalAlpha=1;
+      ctx2.globalAlpha = 1;
 
-    } else if (el.type === 'line') {
-      ctx2.strokeStyle=el.color||'#00ffcc';
-      ctx2.lineWidth=(el.width||0.01)*sz;
-      ctx2.globalAlpha=el.alpha||0.8;
+    // BURST — radial rays like a sun/explosion
+    } else if (el.type === 'burst') {
+      const rays    = el.rays || 12;
+      const outerR  = (el.outerR || 0.35) * sz;
+      const innerR  = (el.innerR || 0.12) * sz;
+      const rot     = (el.rotation || 0) + (frameIdx * Math.PI / (rays * 2));
+      if (el.glow !== false) glowStyle(el.color || '#FFE500', 30);
+      for (let i = 0; i < rays; i++) {
+        const angle  = rot + (i / rays) * Math.PI * 2;
+        const angle2 = rot + ((i + 0.5) / rays) * Math.PI * 2;
+        ctx2.globalAlpha = 0.15 + (i % 3) * 0.08;
+        ctx2.fillStyle   = el.color || '#FFE500';
+        ctx2.beginPath();
+        ctx2.moveTo(x, y);
+        ctx2.lineTo(x + outerR * Math.cos(angle), y + outerR * Math.sin(angle));
+        ctx2.lineTo(x + innerR * Math.cos(angle2), y + innerR * Math.sin(angle2));
+        ctx2.closePath(); ctx2.fill();
+      }
+      ctx2.globalAlpha = 1; resetGlow();
+
+    // WAVE — animated sine wave
+    } else if (el.type === 'wave') {
+      const wy  = (el.y || 0.7) * sz;
+      const amp = (el.amplitude || 0.04) * sz;
+      const freq = el.freq || 3;
+      const phase = (frameIdx / (totalFrames || 8)) * Math.PI * 2;
+      ctx2.strokeStyle = el.color || '#7b61ff';
+      ctx2.lineWidth   = (el.width || 0.008) * sz;
+      ctx2.globalAlpha = el.alpha || 0.7;
+      if (el.glow) glowStyle(el.color || '#7b61ff', 16);
       ctx2.beginPath();
-      ctx2.moveTo((el.x1||0)*sz,(el.y1||0.5)*sz);
-      ctx2.lineTo((el.x2||1)*sz,(el.y2||0.5)*sz);
-      ctx2.stroke(); ctx2.globalAlpha=1;
+      for (let px = 0; px <= sz; px += 2) {
+        const py = wy + Math.sin((px / sz) * Math.PI * 2 * freq + phase) * amp;
+        px === 0 ? ctx2.moveTo(px, py) : ctx2.lineTo(px, py);
+      }
+      ctx2.stroke();
+      ctx2.globalAlpha = 1; resetGlow();
+
+    // LINE — straight connector
+    } else if (el.type === 'line') {
+      ctx2.strokeStyle = el.color || '#00ffcc';
+      ctx2.lineWidth   = (el.width || 0.006) * sz;
+      ctx2.globalAlpha = el.alpha || 0.8;
+      ctx2.lineCap     = 'round';
+      if (el.glow) glowStyle(el.color || '#00ffcc', 14);
+      ctx2.beginPath();
+      ctx2.moveTo((el.x1 || 0) * sz, (el.y1 || 0.5) * sz);
+      ctx2.lineTo((el.x2 || 1) * sz, (el.y2 || 0.5) * sz);
+      ctx2.stroke();
+      ctx2.globalAlpha = 1; resetGlow();
+
+    // SPARKLE — small 4-point star cluster
+    } else if (el.type === 'sparkle') {
+      const count = el.count || 8;
+      for (let i = 0; i < count; i++) {
+        const sx = ((i * 137 + frameIdx * 41) % sz);
+        const sy = ((i * 89  + frameIdx * 23) % sz);
+        const sr = ((i * 31  + frameIdx * 7)  % 6 + 2) * (sz / 480);
+        drawStar(sx, sy, sr * 2, sr * 0.5, 4, el.color || '#FFE500', 0.6 + Math.random() * 0.4);
+      }
+
+    // MOON — crescent shape
+    } else if (el.type === 'moon') {
+      const r = (el.r || 0.12) * sz;
+      if (el.glow !== false) glowStyle('#fffbe6', 32);
+      ctx2.fillStyle = el.color || '#fffbe6';
+      ctx2.globalAlpha = el.alpha || 1;
+      ctx2.beginPath(); ctx2.arc(x, y, r, 0, Math.PI * 2); ctx2.fill();
+      ctx2.fillStyle = frame.bgColor || '#080810';
+      ctx2.beginPath(); ctx2.arc(x + r * 0.35, y - r * 0.1, r * 0.78, 0, Math.PI * 2); ctx2.fill();
+      ctx2.globalAlpha = 1; resetGlow();
+
+    // ROCKET — drawn shape
+    } else if (el.type === 'rocket') {
+      const rs = (el.size || 0.18) * sz;
+      const angle = el.angle !== undefined ? el.angle : -Math.PI / 4;
+      ctx2.save();
+      ctx2.translate(x, y);
+      ctx2.rotate(angle);
+      if (el.glow !== false) glowStyle('#ff6b35', 20);
+      // body
+      ctx2.fillStyle = el.color || '#ffffff';
+      ctx2.beginPath();
+      ctx2.moveTo(0, -rs * 0.6);
+      ctx2.quadraticCurveTo(rs * 0.3, -rs * 0.1, rs * 0.25, rs * 0.4);
+      ctx2.lineTo(-rs * 0.25, rs * 0.4);
+      ctx2.quadraticCurveTo(-rs * 0.3, -rs * 0.1, 0, -rs * 0.6);
+      ctx2.fill();
+      // flame
+      ctx2.fillStyle = '#FF6B35';
+      ctx2.globalAlpha = 0.9;
+      ctx2.beginPath();
+      ctx2.moveTo(-rs*0.2, rs*0.4);
+      ctx2.quadraticCurveTo(0, rs*0.9, rs*0.2, rs*0.4);
+      ctx2.fill();
+      ctx2.fillStyle = '#FFE500';
+      ctx2.globalAlpha = 0.7;
+      ctx2.beginPath();
+      ctx2.moveTo(-rs*0.1, rs*0.4);
+      ctx2.quadraticCurveTo(0, rs*0.7, rs*0.1, rs*0.4);
+      ctx2.fill();
+      ctx2.globalAlpha = 1;
+      ctx2.restore(); resetGlow();
     }
   });
 
-  // Vignette always
-  const vig = ctx2.createRadialGradient(sz/2,sz/2,sz*0.3,sz/2,sz/2,sz*0.75);
-  vig.addColorStop(0,'rgba(0,0,0,0)');
-  vig.addColorStop(1,'rgba(0,0,0,0.45)');
-  ctx2.fillStyle=vig; ctx2.fillRect(0,0,sz,sz);
+  // ── VIGNETTE ────────────────────────────────────────────────────────
+  const vig = ctx2.createRadialGradient(sz/2, sz/2, sz*0.25, sz/2, sz/2, sz*0.78);
+  vig.addColorStop(0, 'rgba(0,0,0,0)');
+  vig.addColorStop(1, 'rgba(0,0,0,0.55)');
+  ctx2.fillStyle = vig; ctx2.fillRect(0, 0, sz, sz);
 }
 
 // ════════════════════════════════
