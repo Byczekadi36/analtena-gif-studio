@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>ANAL AI GIF Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+<style>
+:root{
+  --bg:#080810;--surface:#0f0f1a;--card:#14141f;--card2:#1a1a28;
+  --border:#252538;--border2:#2e2e48;
+  --neon:#00ffcc;--neon2:#ff2d78;--neon3:#7b61ff;--amber:#ffb700;
+  --text:#e8e8f0;--muted:#5a5a7a;--muted2:#3a3a58;
+  --font-d:'Syne',sans-serif;--font-m:'Share Tech Mono',monospace;
+  --r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow-x:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-d);}
+
+/* grain */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.4;}
+
+/* ── GATE ── */
+#gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;}
+.gate-wordmark{font-size:13px;font-weight:700;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:24px;}
+.gate-title{font-size:clamp(36px,8vw,64px);font-weight:800;line-height:1;margin-bottom:8px;
+  background:linear-gradient(135deg,var(--neon) 0%,var(--neon3) 50%,var(--neon2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.gate-sub{font-size:14px;color:var(--muted);line-height:1.7;max-width:320px;margin:0 auto 40px;}
+
+.gate-box{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:28px 24px;width:100%;max-width:360px;margin-bottom:16px;}
+.gate-box-title{font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:16px;}
+
+.wbtn{width:100%;padding:14px 20px;border-radius:10px;border:none;cursor:pointer;
+  font-family:var(--font-d);font-weight:700;font-size:15px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-bottom:10px;transition:all .15s;}
+.wbtn-phantom{background:linear-gradient(135deg,#534bb1,#8b5cf6);color:#fff;}
+.wbtn-phantom:hover{filter:brightness(1.15);transform:translateY(-1px);}
+.wbtn-solflare{background:linear-gradient(135deg,#fc8c03,#f95c03);color:#fff;}
+.wbtn-solflare:hover{filter:brightness(1.15);transform:translateY(-1px);}
+.wbtn-honour{background:transparent;color:var(--muted);border:1px solid var(--border2);font-size:13px;padding:10px;}
+.wbtn-honour:hover{border-color:var(--neon3);color:var(--neon3);}
+.gate-note{font-size:11px;color:var(--muted2);line-height:1.7;max-width:300px;}
+
+/* ── APP SHELL ── */
+#app{display:none;height:100vh;flex-direction:column;}
+#app.visible{display:flex;}
+
+header{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.logo{font-size:18px;font-weight:800;letter-spacing:-.3px;
+  background:linear-gradient(90deg,var(--neon),var(--neon3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo em{-webkit-text-fill-color:var(--muted);font-style:normal;font-size:13px;font-weight:400;margin-left:6px;}
+.hdr-right{display:flex;align-items:center;gap:10px;}
+.verified-pill{display:flex;align-items:center;gap:6px;background:rgba(0,255,204,.06);
+  border:1px solid rgba(0,255,204,.2);border-radius:99px;padding:5px 12px;font-size:12px;font-weight:700;color:var(--neon);}
+.vpill-dot{width:6px;height:6px;border-radius:50%;background:var(--neon);box-shadow:0 0 6px var(--neon);animation:vblink 2s infinite;}
+@keyframes vblink{0%,100%{opacity:1}50%{opacity:.3}}
+.disc-btn{background:transparent;border:1px solid var(--border2);border-radius:8px;padding:5px 10px;
+  font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--font-d);}
+.disc-btn:hover{border-color:var(--neon2);color:var(--neon2);}
+
+/* ── MAIN LAYOUT ── */
+.app-body{display:flex;flex:1;overflow:hidden;}
+
+/* ── LEFT PANEL ── */
+.left-panel{width:300px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;}
+.panel-tabs{display:flex;border-bottom:1px solid var(--border);}
+.ptab{flex:1;padding:12px 8px;background:transparent;border:none;font-family:var(--font-d);
+  font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;}
+.ptab.active{color:var(--neon);border-bottom-color:var(--neon);}
+.panel-content{flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+
+/* ── AI PROMPT ── */
+.ai-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(123,97,255,.1);
+  border:1px solid rgba(123,97,255,.3);border-radius:99px;padding:4px 10px;
+  font-size:11px;font-weight:700;color:var(--neon3);margin-bottom:12px;}
+.ai-badge::before{content:'◆';font-size:8px;}
+
+.prompt-area{width:100%;background:var(--card);border:1px solid var(--border2);border-radius:var(--r);
+  padding:12px;color:var(--text);font-family:var(--font-d);font-size:14px;font-weight:400;
+  line-height:1.6;resize:none;min-height:100px;outline:none;transition:border-color .15s;}
+.prompt-area:focus{border-color:var(--neon3);}
+
+.prompt-chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;}
+.pchip{padding:5px 10px;border-radius:99px;border:1px solid var(--border2);background:transparent;
+  font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .12s;font-family:var(--font-d);}
+.pchip:hover{border-color:var(--neon3);color:var(--neon3);background:rgba(123,97,255,.06);}
+
+.gen-btn{width:100%;padding:14px;border-radius:var(--r);border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--neon3),var(--neon2));color:#fff;
+  font-family:var(--font-d);font-size:16px;font-weight:800;
+  transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;}
+.gen-btn:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 8px 24px rgba(123,97,255,.3);}
+.gen-btn:active{transform:translateY(0);filter:brightness(.95);}
+.gen-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+.section-label{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);
+  text-transform:uppercase;margin:16px 0 8px;}
+
+/* controls */
+.ctrl{margin-bottom:12px;}
+.ctrl label{display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;}
+.ctrl input[type=range]{width:100%;accent-color:var(--neon3);cursor:pointer;}
+.ctrl select,.ctrl input[type=text]{width:100%;background:var(--card);border:1px solid var(--border2);
+  border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font-d);font-size:13px;
+  outline:none;transition:border-color .15s;}
+.ctrl select:focus,.ctrl input[type=text]:focus{border-color:var(--neon3);}
+.ctrl-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ctrl input[type=color]{width:100%;height:36px;padding:2px 4px;background:var(--card);
+  border:1px solid var(--border2);border-radius:8px;cursor:pointer;}
+
+.range-val{font-family:var(--font-m);font-size:11px;color:var(--neon);float:right;}
+
+/* frame strip */
+.frame-strip{display:flex;gap:6px;overflow-x:auto;padding:8px 0 4px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.frame-thumb{flex-shrink:0;width:52px;height:52px;border-radius:6px;border:2px solid var(--border);
+  background:var(--card2);cursor:pointer;position:relative;overflow:hidden;transition:border-color .12s;}
+.frame-thumb.active{border-color:var(--neon);}
+.frame-thumb canvas{width:100%;height:100%;display:block;}
+.frame-thumb .fdel{position:absolute;top:1px;right:1px;width:14px;height:14px;border-radius:50%;
+  background:var(--neon2);border:none;color:#fff;font-size:9px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .1s;}
+.frame-thumb:hover .fdel{opacity:1;}
+.add-frame-btn{flex-shrink:0;width:52px;height:52px;border-radius:6px;border:1px dashed var(--border2);
+  background:transparent;color:var(--muted);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.add-frame-btn:hover{border-color:var(--neon);color:var(--neon);}
+
+/* ── CENTER CANVAS ── */
+.canvas-area{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+.canvas-toolbar{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:8px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;}
+.tool-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:6px 12px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;
+  transition:all .12s;display:flex;align-items:center;gap:5px;font-family:var(--font-d);}
+.tool-btn:hover,.tool-btn.active{border-color:var(--neon);color:var(--neon);background:rgba(0,255,204,.05);}
+.tool-sep{width:1px;height:24px;background:var(--border);flex-shrink:0;}
+
+.canvas-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto;}
+.canvas-wrap{position:relative;box-shadow:0 0 0 1px var(--border2),0 20px 60px rgba(0,0,0,.6);}
+#main-canvas{display:block;border-radius:4px;}
+.canvas-overlay{position:absolute;inset:0;pointer-events:none;border-radius:4px;}
+
+.canvas-footer{background:var(--surface);border-top:1px solid var(--border);padding:8px 16px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.playbar{display:flex;align-items:center;gap:8px;}
+.play-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:14px;transition:all .12s;color:var(--text);}
+.play-btn:hover{border-color:var(--neon);color:var(--neon);}
+.frame-counter{font-family:var(--font-m);font-size:12px;color:var(--muted);}
+
+.export-btn{padding:8px 20px;border-radius:8px;border:none;cursor:pointer;
+  background:var(--neon);color:#080810;font-family:var(--font-d);font-weight:800;font-size:14px;
+  display:flex;align-items:center;gap:6px;transition:all .15s;}
+.export-btn:hover{box-shadow:0 0 20px rgba(0,255,204,.3);transform:translateY(-1px);}
+.export-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* ── RIGHT PANEL ── */
+.right-panel{width:260px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;}
+.rp-title{padding:14px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;
+  letter-spacing:.08em;color:var(--muted);text-transform:uppercase;}
+.rp-content{flex:1;overflow-y:auto;padding:14px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+
+/* layers */
+.layer-row{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;
+  border:1px solid transparent;cursor:pointer;margin-bottom:4px;transition:all .12s;}
+.layer-row:hover{background:var(--card);}
+.layer-row.active{background:var(--card);border-color:var(--border2);}
+.layer-icon{width:28px;height:28px;border-radius:5px;background:var(--card2);
+  display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.layer-name{font-size:12px;font-weight:700;flex:1;}
+.layer-vis{background:transparent;border:none;font-size:12px;color:var(--muted);cursor:pointer;padding:2px;}
+
+.add-layer-btn{width:100%;padding:8px;border-radius:8px;border:1px dashed var(--border2);
+  background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;
+  transition:all .12s;font-family:var(--font-d);margin-top:6px;}
+.add-layer-btn:hover{border-color:var(--neon3);color:var(--neon3);}
+
+/* AI output log */
+.ai-log{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px;
+  font-family:var(--font-m);font-size:11px;color:var(--muted);line-height:1.7;
+  max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;margin-top:10px;}
+.ai-log .log-line{margin-bottom:2px;}
+.ai-log .log-ai{color:var(--neon3);}
+.ai-log .log-ok{color:var(--neon);}
+.ai-log .log-err{color:var(--neon2);}
+.ai-log .log-info{color:var(--amber);}
+
+/* ── PROGRESS OVERLAY ── */
+.progress-overlay{position:fixed;inset:0;z-index:200;background:rgba(8,8,16,.92);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.progress-overlay.show{display:flex;}
+.prog-title{font-size:18px;font-weight:800;color:var(--text);}
+.prog-sub{font-size:13px;color:var(--muted);}
+.prog-bar-wrap{width:320px;height:6px;background:var(--border);border-radius:99px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--neon3),var(--neon));border-radius:99px;width:0%;transition:width .2s;}
+.prog-pct{font-family:var(--font-m);font-size:13px;color:var(--neon);}
+
+/* ── RESULT MODAL ── */
+.result-modal{position:fixed;inset:0;z-index:300;background:rgba(8,8,16,.95);
+  display:none;align-items:center;justify-content:center;padding:24px;}
+.result-modal.show{display:flex;}
+.result-box{background:var(--card);border:1px solid var(--border2);border-radius:20px;
+  padding:28px 24px;max-width:400px;width:100%;text-align:center;}
+.result-box img{border-radius:10px;max-width:100%;max-height:300px;margin-bottom:16px;display:block;margin-inline:auto;}
+.result-title{font-size:22px;font-weight:800;color:var(--neon);margin-bottom:4px;}
+.result-meta{font-family:var(--font-m);font-size:12px;color:var(--muted);margin-bottom:20px;}
+.result-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.rbtn{padding:12px;border-radius:10px;border:none;cursor:pointer;font-family:var(--font-d);font-weight:700;font-size:14px;transition:all .12s;}
+.rbtn-dl{background:var(--neon);color:#080810;}
+.rbtn-dl:hover{box-shadow:0 0 16px rgba(0,255,204,.3);}
+.rbtn-tg{background:var(--card2);color:var(--text);border:1px solid var(--border2);}
+.rbtn-tg:hover{border-color:var(--neon3);color:var(--neon3);}
+.rbtn-close{grid-column:1/-1;background:transparent;color:var(--muted);border:1px solid var(--border);padding:8px;}
+.rbtn-close:hover{color:var(--text);}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .left-panel{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:300px;}
+  .app-body{flex-direction:column;}
+  .right-panel{display:none;}
+  .canvas-stage{padding:12px;}
+}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--card);border:1px solid var(--border2);border-radius:99px;padding:9px 18px;
+  font-size:13px;font-weight:700;color:var(--text);z-index:400;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
+</style>
+</head>
+<body>
+
+<!-- ══ GATE ══ -->
+<div id="gate">
+  <div class="gate-wordmark">Analtena · Token Holders Only</div>
+  <div class="gate-title">AI GIF<br>STUDIO</div>
+  <p class="gate-sub">Powered by Claude AI. Create high-quality animated GIFs from a single prompt. Exclusive to $ANAL holders.</p>
+  <div class="gate-box">
+    <div class="gate-box-title">Connect wallet to verify</div>
+    <button class="wbtn wbtn-phantom" onclick="connectPhantom()">👻 Connect Phantom</button>
+    <button class="wbtn wbtn-solflare" onclick="connectSolflare()">☀️ Connect Solflare</button>
+    <hr style="border:none;border-top:1px solid var(--border);margin:12px 0"/>
+    <button class="wbtn wbtn-honour" onclick="honourEntry()">🤞 I hold $ANAL (honour system)</button>
+  </div>
+  <p class="gate-note">Read-only verification. No transactions. Your keys, your crypto.</p>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <header>
+    <div class="logo">ANAL GIF STUDIO <em>AI-powered</em></div>
+    <div class="hdr-right">
+      <div class="verified-pill"><span class="vpill-dot"></span><span id="hdr-wallet">verified</span></div>
+      <button class="disc-btn" onclick="disconnect()">disconnect</button>
+    </div>
+  </header>
+
+  <div class="app-body">
+
+    <!-- LEFT: AI + Controls -->
+    <div class="left-panel">
+      <div class="panel-tabs">
+        <button class="ptab active" onclick="switchPanel('ai',this)">✦ AI Generate</button>
+        <button class="ptab" onclick="switchPanel('tools',this)">◈ Tools</button>
+        <button class="ptab" onclick="switchPanel('frames',this)">⊞ Frames</button>
+      </div>
+
+      <!-- AI PANEL -->
+      <div class="panel-content" id="panel-ai">
+        <div class="ai-badge">Claude AI</div>
+        <div class="section-label">Describe your GIF</div>
+        <textarea class="prompt-area" id="prompt-input" placeholder="e.g. A rocket blasting off to the moon with $ANALTENA text, crypto charts going up, confetti explosion, cartoon style" rows="4"></textarea>
+
+        <div class="section-label">Quick prompts</div>
+        <div class="prompt-chips">
+          <span class="pchip" onclick="setPrompt('Analtena rocket launching to the moon, stars exploding, neon glow')">🚀 Moon launch</span>
+          <span class="pchip" onclick="setPrompt('Diamond hands holding ANAL token, gold coins raining, triumphant')">💎 Diamond hands</span>
+          <span class="pchip" onclick="setPrompt('Crypto chart going parabolic with ANAL text, green candles, celebration')">📈 Charts pumping</span>
+          <span class="pchip" onclick="setPrompt('Degen ape in a suit counting ANAL tokens, money flying everywhere')">🦍 Degen ape</span>
+          <span class="pchip" onclick="setPrompt('NGMI sad doge selling at the bottom, red charts, crying emoji rain')">😭 NGMI moment</span>
+          <span class="pchip" onclick="setPrompt('Wen lambo? Sports car driving to moon, dollar bills, party vibes')">🏎️ Wen lambo</span>
+        </div>
+
+        <div class="ctrl-row">
+          <div class="ctrl">
+            <label>Frames <span class="range-val" id="frames-val">8</span></label>
+            <input type="range" id="frames-count" min="4" max="20" value="8" oninput="document.getElementById('frames-val').textContent=this.value"/>
+          </div>
+          <div class="ctrl">
+            <label>Style</label>
+            <select id="art-style">
+              <option value="cartoon">Cartoon</option>
+              <option value="pixel">Pixel art</option>
+              <option value="neon">Neon glow</option>
+              <option value="sketch">Sketch</option>
+              <option value="retro">Retro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="ctrl">
+          <label>Resolution</label>
+          <select id="resolution">
+            <option value="320">320×320 (fast)</option>
+            <option value="480" selected>480×480 (HD)</option>
+            <option value="600">600×600 (ultra)</option>
+          </select>
+        </div>
+
+        <button class="gen-btn" id="gen-btn" onclick="generateWithAI()">
+          ✦ Generate GIF with AI
+        </button>
+
+        <div class="ai-log" id="ai-log"><span class="log-info">Ready. Enter a prompt and hit Generate.</span></div>
+      </div>
+
+      <!-- TOOLS PANEL -->
+      <div class="panel-content" id="panel-tools" style="display:none">
+        <div class="section-label">Text overlay</div>
+        <div class="ctrl">
+          <label>Text</label>
+          <input type="text" id="overlay-text" placeholder="$ANALTENA 🚀" oninput="applyOverlay()"/>
+        </div>
+        <div class="ctrl-row">
+          <div class="ctrl">
+            <label>Size <span class="range-val" id="ots-val">36</span></label>
+            <input type="range" id="overlay-size" min="12" max="80" value="36" oninput="document.getElementById('ots-val').textContent=this.value;applyOverlay()"/>
+          </div>
+          <div class="ctrl">
+            <label>Colour</label>
+            <input type="color" id="overlay-color" value="#FFE500" oninput="applyOverlay()"/>
+          </div>
+        </div>
+        <div class="ctrl">
+          <label>Position</label>
+          <select id="overlay-pos" onchange="applyOverlay()">
+            <option value="top">Top</option>
+            <option value="middle">Middle</option>
+            <option value="bottom" selected>Bottom</option>
+          </select>
+        </div>
+
+        <div class="section-label" style="margin-top:16px">Frame settings</div>
+        <div class="ctrl">
+          <label>Frame delay (ms) <span class="range-val" id="delay-val">100</span></label>
+          <input type="range" id="frame-delay" min="40" max="500" value="100" oninput="document.getElementById('delay-val').textContent=this.value"/>
+        </div>
+
+        <div class="section-label" style="margin-top:16px">Effects</div>
+        <div class="prompt-chips" id="effect-chips">
+          <span class="pchip" onclick="toggleEffect(this,'vignette')">Vignette</span>
+          <span class="pchip" onclick="toggleEffect(this,'scanlines')">Scanlines</span>
+          <span class="pchip" onclick="toggleEffect(this,'glitch')">Glitch</span>
+          <span class="pchip" onclick="toggleEffect(this,'stars')">Stars</span>
+          <span class="pchip" onclick="toggleEffect(this,'confetti')">Confetti</span>
+        </div>
+
+        <div class="section-label" style="margin-top:16px">Background</div>
+        <div class="ctrl">
+          <label>Colour</label>
+          <input type="color" id="bg-color" value="#080810" oninput="rerenderCurrentFrame()"/>
+        </div>
+      </div>
+
+      <!-- FRAMES PANEL -->
+      <div class="panel-content" id="panel-frames" style="display:none">
+        <div class="section-label">Frame sequence</div>
+        <div class="frame-strip" id="frame-strip">
+          <button class="add-frame-btn" onclick="addBlankFrame()">+</button>
+        </div>
+        <div style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.7">
+          Click a frame to edit it. Drag to reorder (coming soon). AI generates all frames at once.
+        </div>
+        <div class="section-label" style="margin-top:16px">Import</div>
+        <button class="add-layer-btn" onclick="document.getElementById('img-upload').click()">+ Upload image as frame</button>
+        <input type="file" id="img-upload" accept="image/*" multiple style="display:none" onchange="importImages(event)"/>
+      </div>
+    </div>
+
+    <!-- CENTER: Canvas -->
+    <div class="canvas-area">
+      <div class="canvas-toolbar">
+        <button class="tool-btn active" id="tool-select" onclick="setTool('select',this)">↖ Select</button>
+        <button class="tool-btn" id="tool-text" onclick="setTool('text',this)">T Text</button>
+        <button class="tool-btn" id="tool-draw" onclick="setTool('draw',this)">✏ Draw</button>
+        <div class="tool-sep"></div>
+        <button class="tool-btn" onclick="clearFrame()">⌫ Clear</button>
+        <button class="tool-btn" onclick="duplicateFrame()">⧉ Duplicate</button>
+        <div class="tool-sep"></div>
+        <span style="font-size:11px;color:var(--muted);font-weight:700" id="res-label">480×480</span>
+      </div>
+
+      <div class="canvas-stage">
+        <div class="canvas-wrap" id="canvas-wrap">
+          <canvas id="main-canvas" width="480" height="480"></canvas>
+        </div>
+      </div>
+
+      <div class="canvas-footer">
+        <div class="playbar">
+          <button class="play-btn" onclick="prevFrame()">◀</button>
+          <button class="play-btn" id="play-pause-btn" onclick="togglePlay()">▶</button>
+          <button class="play-btn" onclick="nextFrame()">▶▶</button>
+          <span class="frame-counter" id="frame-counter">Frame 1 / 1</span>
+        </div>
+        <button class="export-btn" id="export-btn" onclick="exportGIF()">⬇ Export GIF</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Layers -->
+    <div class="right-panel">
+      <div class="rp-title">Layers</div>
+      <div class="rp-content">
+        <div id="layers-list">
+          <div class="layer-row active">
+            <div class="layer-icon">🖼</div>
+            <div class="layer-name">Background</div>
+            <button class="layer-vis" title="Toggle visibility">👁</button>
+          </div>
+        </div>
+        <button class="add-layer-btn" onclick="addTextLayer()">+ Add text layer</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Progress -->
+<div class="progress-overlay" id="progress-overlay">
+  <div class="prog-title" id="prog-title">Generating with AI…</div>
+  <div class="prog-sub" id="prog-sub">Asking Claude to imagine your GIF</div>
+  <div class="prog-bar-wrap"><div class="prog-fill" id="prog-fill"></div></div>
+  <div class="prog-pct" id="prog-pct">0%</div>
+</div>
+
+<!-- Result -->
+<div class="result-modal" id="result-modal">
+  <div class="result-box">
+    <img id="result-img" src="" alt="Generated GIF"/>
+    <div class="result-title">GIF Ready! 🎉</div>
+    <div class="result-meta" id="result-meta"></div>
+    <div class="result-btns">
+      <button class="rbtn rbtn-dl" id="result-dl-btn">⬇ Download</button>
+      <button class="rbtn rbtn-tg" onclick="shareTG()">✈ Telegram</button>
+      <button class="rbtn rbtn-close" onclick="closeResult()">← Back to editor</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════
+// STATE
+// ════════════════════════════════
+const state = {
+  walletAddr: null,
+  frames: [],          // Array of ImageData
+  currentFrame: 0,
+  playing: false,
+  playTimer: null,
+  tool: 'select',
+  effects: new Set(),
+  overlayText: '',
+  overlaySize: 36,
+  overlayColor: '#FFE500',
+  overlayPos: 'bottom',
+  resultUrl: null,
+  resultBlob: null,
+};
+
+// ════════════════════════════════
+// WALLET
+// ════════════════════════════════
+async function connectPhantom() {
+  try {
+    if (window.solana?.isPhantom) {
+      const r = await window.solana.connect();
+      enterApp(r.publicKey.toString(), true);
+    } else {
+      toast('Phantom not installed — redirecting…');
+      setTimeout(() => window.open('https://phantom.app','_blank'), 800);
+    }
+  } catch { toast('Connection cancelled'); }
+}
+async function connectSolflare() {
+  try {
+    if (window.solflare) {
+      await window.solflare.connect();
+      enterApp(window.solflare.publicKey.toString(), true);
+    } else {
+      toast('Solflare not installed — redirecting…');
+      setTimeout(() => window.open('https://solflare.com','_blank'), 800);
+    }
+  } catch { toast('Connection cancelled'); }
+}
+function honourEntry() {
+  const fake = 'HONOUR' + Math.random().toString(36).slice(2,8).toUpperCase();
+  enterApp(fake, false);
+}
+function enterApp(addr, verified) {
+  state.walletAddr = addr;
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  const short = addr.slice(0,4)+'…'+addr.slice(-4);
+  document.getElementById('hdr-wallet').textContent = verified ? short+' ✓ ANAL' : '🤞 honour';
+  toast(verified ? '✅ ANAL verified. Welcome in.' : '🤞 Honour accepted.');
+  initCanvas();
+  addBlankFrame();
+}
+function disconnect() {
+  state.frames = [];
+  document.getElementById('gate').style.display = 'flex';
+  document.getElementById('app').classList.remove('visible');
+}
+
+// ════════════════════════════════
+// CANVAS INIT
+// ════════════════════════════════
+let ctx;
+function initCanvas() {
+  const canvas = document.getElementById('main-canvas');
+  ctx = canvas.getContext('2d');
+  canvas.addEventListener('click', canvasClick);
+}
+
+function getCanvas() { return document.getElementById('main-canvas'); }
+function getSize() { return parseInt(document.getElementById('resolution').value) || 480; }
+
+function setCanvasSize(sz) {
+  const c = getCanvas();
+  c.width = sz; c.height = sz;
+  document.getElementById('res-label').textContent = sz+'×'+sz;
+}
+
+// ════════════════════════════════
+// FRAMES
+// ════════════════════════════════
+function addBlankFrame() {
+  const sz = getSize();
+  const oc = document.createElement('canvas');
+  oc.width = sz; oc.height = sz;
+  const oc2 = oc.getContext('2d');
+  oc2.fillStyle = document.getElementById('bg-color')?.value || '#080810';
+  oc2.fillRect(0,0,sz,sz);
+  state.frames.push(oc2.getImageData(0,0,sz,sz));
+  state.currentFrame = state.frames.length - 1;
+  updateFrameStrip();
+  renderCurrentFrame();
+}
+
+function addBlankFrameWithData(imageData) {
+  state.frames.push(imageData);
+  updateFrameStrip();
+}
+
+function duplicateFrame() {
+  if (!state.frames.length) return;
+  const copy = new ImageData(new Uint8ClampedArray(state.frames[state.currentFrame].data), state.frames[state.currentFrame].width, state.frames[state.currentFrame].height);
+  state.frames.splice(state.currentFrame+1, 0, copy);
+  state.currentFrame++;
+  updateFrameStrip();
+  renderCurrentFrame();
+  toast('Frame duplicated');
+}
+
+function clearFrame() {
+  if (!state.frames.length) return;
+  const sz = getSize();
+  const oc = document.createElement('canvas');
+  oc.width = sz; oc.height = sz;
+  const oc2 = oc.getContext('2d');
+  oc2.fillStyle = document.getElementById('bg-color')?.value || '#080810';
+  oc2.fillRect(0,0,sz,sz);
+  state.frames[state.currentFrame] = oc2.getImageData(0,0,sz,sz);
+  updateFrameStrip();
+  renderCurrentFrame();
+}
+
+function selectFrame(i) {
+  state.currentFrame = i;
+  updateFrameStrip();
+  renderCurrentFrame();
+}
+
+function deleteFrame(i) {
+  state.frames.splice(i,1);
+  if (state.frames.length === 0) addBlankFrame();
+  state.currentFrame = Math.min(state.currentFrame, state.frames.length-1);
+  updateFrameStrip();
+  renderCurrentFrame();
+}
+
+function updateFrameStrip() {
+  const strip = document.getElementById('frame-strip');
+  const sz = getSize();
+  let html = state.frames.map((f,i) => {
+    const tmp = document.createElement('canvas');
+    tmp.width = 52; tmp.height = 52;
+    const tc = tmp.getContext('2d');
+    // scale down
+    const big = document.createElement('canvas');
+    big.width = f.width; big.height = f.height;
+    big.getContext('2d').putImageData(f,0,0);
+    tc.drawImage(big,0,0,52,52);
+    return `<div class="frame-thumb ${i===state.currentFrame?'active':''}" onclick="selectFrame(${i})">
+      <img src="${tmp.toDataURL()}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;display:block"/>
+      <button class="fdel" onclick="event.stopPropagation();deleteFrame(${i})">×</button>
+    </div>`;
+  }).join('');
+  html += `<button class="add-frame-btn" onclick="addBlankFrame()">+</button>`;
+  strip.innerHTML = html;
+  document.getElementById('frame-counter').textContent = `Frame ${state.currentFrame+1} / ${state.frames.length}`;
+}
+
+function renderCurrentFrame() {
+  if (!state.frames.length) return;
+  const c = getCanvas();
+  const f = state.frames[state.currentFrame];
+  if (c.width !== f.width || c.height !== f.height) {
+    c.width = f.width; c.height = f.height;
+    document.getElementById('res-label').textContent = f.width+'×'+f.height;
+  }
+  ctx.putImageData(f, 0, 0);
+  applyEffectsToCanvas();
+  applyOverlayToCanvas();
+}
+
+function rerenderCurrentFrame() { renderCurrentFrame(); }
+
+// ════════════════════════════════
+// PLAYBACK
+// ════════════════════════════════
+function togglePlay() {
+  state.playing = !state.playing;
+  document.getElementById('play-pause-btn').textContent = state.playing ? '⏸' : '▶';
+  if (state.playing) {
+    const delay = parseInt(document.getElementById('frame-delay').value) || 100;
+    state.playTimer = setInterval(() => {
+      state.currentFrame = (state.currentFrame+1) % state.frames.length;
+      renderCurrentFrame();
+      document.getElementById('frame-counter').textContent = `Frame ${state.currentFrame+1} / ${state.frames.length}`;
+    }, delay);
+  } else {
+    clearInterval(state.playTimer);
+  }
+}
+function prevFrame() {
+  state.currentFrame = Math.max(0, state.currentFrame-1);
+  renderCurrentFrame();
+  document.getElementById('frame-counter').textContent = `Frame ${state.currentFrame+1} / ${state.frames.length}`;
+}
+function nextFrame() {
+  state.currentFrame = Math.min(state.frames.length-1, state.currentFrame+1);
+  renderCurrentFrame();
+  document.getElementById('frame-counter').textContent = `Frame ${state.currentFrame+1} / ${state.frames.length}`;
+}
+
+// ════════════════════════════════
+// TOOLS
+// ════════════════════════════════
+function setTool(name, el) {
+  state.tool = name;
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function canvasClick(e) {
+  if (state.tool === 'text') {
+    const txt = prompt('Enter text:');
+    if (txt) {
+      const c = getCanvas();
+      const rect = c.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (c.width / rect.width);
+      const y = (e.clientY - rect.top) * (c.height / rect.height);
+      ctx.font = `900 ${state.overlaySize}px Syne, sans-serif`;
+      ctx.fillStyle = state.overlayColor;
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 3;
+      ctx.strokeText(txt, x, y);
+      ctx.fillText(txt, x, y);
+      saveCurrentFrame();
+      toast('Text added');
+    }
+  }
+}
+
+function saveCurrentFrame() {
+  const c = getCanvas();
+  state.frames[state.currentFrame] = ctx.getImageData(0,0,c.width,c.height);
+  updateFrameStrip();
+}
+
+// ════════════════════════════════
+// OVERLAY & EFFECTS
+// ════════════════════════════════
+function applyOverlay() {
+  state.overlayText = document.getElementById('overlay-text').value;
+  state.overlaySize = parseInt(document.getElementById('overlay-size').value);
+  state.overlayColor = document.getElementById('overlay-color').value;
+  state.overlayPos = document.getElementById('overlay-pos').value;
+  renderCurrentFrame();
+}
+
+function applyOverlayToCanvas() {
+  const txt = state.overlayText;
+  if (!txt) return;
+  const c = getCanvas();
+  const sz = state.overlaySize;
+  ctx.font = `900 ${sz}px Syne, sans-serif`;
+  ctx.textAlign = 'center';
+  let y;
+  if (state.overlayPos === 'top') y = sz + 12;
+  else if (state.overlayPos === 'middle') y = c.height/2 + sz/3;
+  else y = c.height - 20;
+  ctx.strokeStyle = '#000'; ctx.lineWidth = sz*0.18;
+  ctx.strokeText(txt, c.width/2, y);
+  ctx.fillStyle = state.overlayColor;
+  ctx.fillText(txt, c.width/2, y);
+}
+
+function toggleEffect(el, name) {
+  el.classList.toggle('active');
+  if (state.effects.has(name)) state.effects.delete(name);
+  else state.effects.add(name);
+  renderCurrentFrame();
+}
+
+function applyEffectsToCanvas() {
+  const c = getCanvas(); const W = c.width; const H = c.height;
+  if (state.effects.has('vignette')) {
+    const grad = ctx.createRadialGradient(W/2,H/2,H*0.3,W/2,H/2,H*0.75);
+    grad.addColorStop(0,'rgba(0,0,0,0)');
+    grad.addColorStop(1,'rgba(0,0,0,0.7)');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+  }
+  if (state.effects.has('scanlines')) {
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    for (let y=0;y<H;y+=4) { ctx.fillRect(0,y,W,2); }
+  }
+  if (state.effects.has('stars')) {
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    for (let i=0;i<30;i++) {
+      const sx=Math.random()*W, sy=Math.random()*H;
+      ctx.beginPath(); ctx.arc(sx,sy,Math.random()*1.5+0.3,0,Math.PI*2); ctx.fill();
+    }
+  }
+  if (state.effects.has('glitch')) {
+    const slice = ctx.getImageData(0, Math.floor(Math.random()*H*0.8), W, Math.floor(H*0.05));
+    ctx.putImageData(slice, Math.random()*20-10, Math.floor(Math.random()*H*0.8));
+    ctx.fillStyle = 'rgba(255,0,120,0.05)'; ctx.fillRect(0,0,W,H);
+  }
+  if (state.effects.has('confetti')) {
+    const cols = ['#FFE500','#FF2D78','#00FFCC','#7B61FF'];
+    for (let i=0;i<20;i++) {
+      ctx.fillStyle = cols[i%cols.length];
+      ctx.fillRect(Math.random()*W, Math.random()*H, Math.random()*6+2, Math.random()*6+2);
+    }
+  }
+}
+
+// ════════════════════════════════
+// IMPORT IMAGES
+// ════════════════════════════════
+function importImages(e) {
+  const files = Array.from(e.target.files);
+  files.forEach(f => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const sz = getSize();
+        const oc = document.createElement('canvas'); oc.width=sz; oc.height=sz;
+        const oc2 = oc.getContext('2d');
+        oc2.drawImage(img,0,0,sz,sz);
+        addBlankFrameWithData(oc2.getImageData(0,0,sz,sz));
+        state.currentFrame = state.frames.length-1;
+        updateFrameStrip();
+        renderCurrentFrame();
+        toast('Frame imported');
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+// ════════════════════════════════
+// AI GENERATION (Claude API)
+// ════════════════════════════════
+function log(msg, cls='') {
+  const el = document.getElementById('ai-log');
+  el.innerHTML += `<div class="log-line ${cls?'log-'+cls:''}">${msg}</div>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+function setProgress(pct, title, sub) {
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = Math.round(pct)+'%';
+  if (title) document.getElementById('prog-title').textContent = title;
+  if (sub) document.getElementById('prog-sub').textContent = sub;
+}
+
+async function generateWithAI() {
+  const prompt = document.getElementById('prompt-input').value.trim();
+  if (!prompt) { toast('Enter a prompt first!'); return; }
+
+  const frameCount = parseInt(document.getElementById('frames-count').value);
+  const artStyle = document.getElementById('art-style').value;
+  const sz = parseInt(document.getElementById('resolution').value);
+
+  document.getElementById('gen-btn').disabled = true;
+  document.getElementById('ai-log').innerHTML = '';
+  document.getElementById('progress-overlay').classList.add('show');
+  setProgress(0, 'Asking Claude AI…', 'Generating frame descriptions');
+
+  log('► Prompt: '+prompt, 'info');
+  log('► Style: '+artStyle+' | Frames: '+frameCount+' | Size: '+sz+'px');
+
+  try {
+    log('► Calling secure proxy…', 'ai');
+    setProgress(5, 'Claude is thinking…', 'Designing your GIF frame by frame');
+
+    // Call our secure backend proxy — API key never touches the browser
+    const apiResp = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, frameCount, artStyle })
+    });
+
+    if (!apiResp.ok) {
+      const errData = await apiResp.json().catch(() => ({}));
+      throw new Error(errData.error || 'API error: ' + apiResp.status);
+    }
+    const { scene } = await apiResp.json();
+
+    log('► Claude responded ✓', 'ok');
+    setProgress(30, 'Parsing scene data…', 'Reading frame descriptions');
+    log(`► Scene: "${scene.title}" — ${scene.frames.length} frames`, 'ok');
+
+    // Step 2: Render each frame to canvas
+    state.frames = [];
+    setCanvasSize(sz);
+
+    for (let i = 0; i < scene.frames.length; i++) {
+      const f = scene.frames[i];
+      const pct = 30 + ((i / scene.frames.length) * 55);
+      setProgress(pct, `Rendering frame ${i+1} of ${scene.frames.length}`, f.description || '');
+      log(`► Rendering frame ${i+1}: ${f.description || ''}`, 'info');
+
+      const oc = document.createElement('canvas');
+      oc.width = sz; oc.height = sz;
+      const oc2 = oc.getContext('2d');
+
+      renderFrame(oc2, sz, f, i, scene.frames.length);
+
+      state.frames.push(oc2.getImageData(0,0,sz,sz));
+      await sleep(30);
+    }
+
+    state.currentFrame = 0;
+    updateFrameStrip();
+    renderCurrentFrame();
+
+    log('► All frames rendered ✓', 'ok');
+    setProgress(90, 'Finalising…', 'Almost done!');
+    await sleep(200);
+    setProgress(100, 'Done!', '');
+    await sleep(400);
+    document.getElementById('progress-overlay').classList.remove('show');
+    toast('🎉 ' + scene.title + ' — ' + scene.frames.length + ' frames generated!');
+
+  } catch(err) {
+    document.getElementById('progress-overlay').classList.remove('show');
+    log('✗ Error: '+err.message, 'err');
+    toast('Error: '+err.message);
+    console.error(err);
+  }
+
+  document.getElementById('gen-btn').disabled = false;
+}
+
+// ════════════════════════════════
+// FRAME RENDERER
+// ════════════════════════════════
+function renderFrame(ctx2, sz, frame, frameIdx, totalFrames) {
+  // Background
+  ctx2.fillStyle = frame.bgColor || '#080810';
+  ctx2.fillRect(0,0,sz,sz);
+
+  // Gradient overlay for depth
+  const grad = ctx2.createRadialGradient(sz/2,sz/2,0,sz/2,sz/2,sz*0.7);
+  grad.addColorStop(0,'rgba(255,255,255,0.03)');
+  grad.addColorStop(1,'rgba(0,0,0,0.3)');
+  ctx2.fillStyle = grad; ctx2.fillRect(0,0,sz,sz);
+
+  const elements = frame.elements || [];
+
+  elements.forEach(el => {
+    const x = (el.x || 0.5) * sz;
+    const y = (el.y || 0.5) * sz;
+
+    if (el.type === 'emoji') {
+      const esz = (el.size || 0.2) * sz;
+      ctx2.font = esz+'px serif';
+      ctx2.textAlign='center'; ctx2.textBaseline='middle';
+      ctx2.fillText(el.value || '🚀', x, y);
+
+    } else if (el.type === 'text') {
+      const tsz = Math.max(12, (el.size || 0.08) * sz);
+      ctx2.font = `900 ${tsz}px Syne, sans-serif`;
+      ctx2.textAlign='center'; ctx2.textBaseline='middle';
+      ctx2.strokeStyle='rgba(0,0,0,0.8)'; ctx2.lineWidth=tsz*0.15;
+      ctx2.strokeText(el.value||'', x, y);
+      ctx2.fillStyle = el.color||'#FFE500';
+      ctx2.fillText(el.value||'', x, y);
+
+    } else if (el.type === 'rect') {
+      ctx2.fillStyle = el.color||'#00ffcc';
+      ctx2.globalAlpha = el.alpha||0.8;
+      ctx2.fillRect((el.x||0)*sz, (el.y||0)*sz, (el.w||0.5)*sz, (el.h||0.1)*sz);
+      ctx2.globalAlpha=1;
+
+    } else if (el.type === 'circle') {
+      ctx2.fillStyle = el.color||'#ff2d78';
+      ctx2.globalAlpha = el.alpha||0.8;
+      ctx2.beginPath();
+      ctx2.arc(x, y, (el.r||0.1)*sz, 0, Math.PI*2);
+      ctx2.fill(); ctx2.globalAlpha=1;
+
+    } else if (el.type === 'stars') {
+      ctx2.fillStyle = el.color||'#ffffff';
+      for (let s=0;s<(el.count||15);s++) {
+        const sx=Math.random()*sz, sy=Math.random()*sz;
+        const r=(Math.random()*1.5+0.5)*(sz/200);
+        ctx2.globalAlpha=Math.random()*0.8+0.2;
+        ctx2.beginPath();ctx2.arc(sx,sy,r,0,Math.PI*2);ctx2.fill();
+      }
+      ctx2.globalAlpha=1;
+
+    } else if (el.type === 'bars') {
+      const vals = el.values||[0.3,0.6,0.9,0.5,0.7];
+      const bw = sz*0.12; const gap = sz*0.04;
+      const totalW = vals.length*(bw+gap);
+      const startX = (sz-totalW)/2;
+      const baseY = sz*0.85;
+      vals.forEach((v,i) => {
+        const bh = v*sz*0.5;
+        const alpha = 0.6 + v*0.4;
+        ctx2.globalAlpha=alpha;
+        ctx2.fillStyle=el.color||'#00ff88';
+        ctx2.fillRect(startX+i*(bw+gap), baseY-bh, bw, bh);
+      });
+      ctx2.globalAlpha=1;
+
+    } else if (el.type === 'rain') {
+      const emoji = el.emoji||'💰';
+      ctx2.font = (sz*0.08)+'px serif';
+      for (let r=0;r<(el.count||8);r++) {
+        const rx=Math.random()*sz, ry=Math.random()*sz;
+        ctx2.globalAlpha=Math.random()*0.7+0.3;
+        ctx2.fillText(emoji,rx,ry);
+      }
+      ctx2.globalAlpha=1;
+
+    } else if (el.type === 'line') {
+      ctx2.strokeStyle=el.color||'#00ffcc';
+      ctx2.lineWidth=(el.width||0.01)*sz;
+      ctx2.globalAlpha=el.alpha||0.8;
+      ctx2.beginPath();
+      ctx2.moveTo((el.x1||0)*sz,(el.y1||0.5)*sz);
+      ctx2.lineTo((el.x2||1)*sz,(el.y2||0.5)*sz);
+      ctx2.stroke(); ctx2.globalAlpha=1;
+    }
+  });
+
+  // Vignette always
+  const vig = ctx2.createRadialGradient(sz/2,sz/2,sz*0.3,sz/2,sz/2,sz*0.75);
+  vig.addColorStop(0,'rgba(0,0,0,0)');
+  vig.addColorStop(1,'rgba(0,0,0,0.45)');
+  ctx2.fillStyle=vig; ctx2.fillRect(0,0,sz,sz);
+}
+
+// ════════════════════════════════
+// EXPORT GIF
+// ════════════════════════════════
+async function exportGIF() {
+  if (!state.frames.length) { toast('No frames to export!'); return; }
+  clearInterval(state.playTimer); state.playing=false;
+  document.getElementById('play-pause-btn').textContent='▶';
+
+  document.getElementById('progress-overlay').classList.add('show');
+  setProgress(0,'Encoding GIF…','This may take a moment for HD sizes');
+
+  const sz = state.frames[0].width;
+  const delay = parseInt(document.getElementById('frame-delay').value)||100;
+
+  const gif = new GIF({
+    workers: 2, quality: 6,
+    width: sz, height: sz,
+    workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
+  });
+
+  // Build composite frames (base + overlay + effects)
+  for (let i=0;i<state.frames.length;i++) {
+    const oc = document.createElement('canvas'); oc.width=sz; oc.height=sz;
+    const oc2 = oc.getContext('2d');
+    oc2.putImageData(state.frames[i],0,0);
+    // apply effects
+    const prevEffects = new Set(state.effects);
+    if (state.effects.has('stars')) { applyStarsToCtx(oc2,sz); }
+    if (state.effects.has('confetti')) { applyConfettiToCtx(oc2,sz); }
+    if (state.effects.has('vignette')) { applyVignetteToCtx(oc2,sz); }
+    if (state.effects.has('scanlines')) { applyScanlinesCtx(oc2,sz); }
+    // overlay text
+    if (state.overlayText) {
+      const tsz = state.overlaySize*(sz/480);
+      oc2.font=`900 ${tsz}px Syne,sans-serif`;
+      oc2.textAlign='center';
+      let ty;
+      if (state.overlayPos==='top') ty=tsz+12;
+      else if (state.overlayPos==='middle') ty=sz/2+tsz/3;
+      else ty=sz-20*(sz/480);
+      oc2.strokeStyle='#000'; oc2.lineWidth=tsz*0.18;
+      oc2.strokeText(state.overlayText,sz/2,ty);
+      oc2.fillStyle=state.overlayColor;
+      oc2.fillText(state.overlayText,sz/2,ty);
+    }
+    gif.addFrame(oc, {delay, copy:true});
+    setProgress((i/state.frames.length)*40, 'Preparing frames…', `Frame ${i+1} of ${state.frames.length}`);
+    await sleep(5);
+  }
+
+  gif.on('progress', p => {
+    setProgress(40+p*55,'Encoding…',Math.round(p*100)+'% complete');
+  });
+
+  gif.on('finished', blob => {
+    setProgress(100,'Done!','');
+    setTimeout(()=>{
+      document.getElementById('progress-overlay').classList.remove('show');
+      const url = URL.createObjectURL(blob);
+      state.resultUrl = url;
+      state.resultBlob = blob;
+      document.getElementById('result-img').src = url;
+      document.getElementById('result-meta').textContent =
+        `${Math.round(blob.size/1024)}KB · ${sz}×${sz}px · ${state.frames.length} frames · ${delay}ms/frame`;
+      document.getElementById('result-dl-btn').onclick = () => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'analtena-'+Date.now()+'.gif';
+        a.click();
+      };
+      document.getElementById('result-modal').classList.add('show');
+    }, 400);
+  });
+
+  gif.render();
+}
+
+function applyStarsToCtx(c,sz){c.fillStyle='rgba(255,255,255,0.6)';for(let i=0;i<25;i++){c.beginPath();c.arc(Math.random()*sz,Math.random()*sz,Math.random()*1.2+0.3,0,Math.PI*2);c.fill();}}
+function applyConfettiToCtx(c,sz){const cols=['#FFE500','#FF2D78','#00FFCC','#7B61FF'];for(let i=0;i<18;i++){c.fillStyle=cols[i%4];c.fillRect(Math.random()*sz,Math.random()*sz,Math.random()*5+2,Math.random()*5+2);}}
+function applyVignetteToCtx(c,sz){const g=c.createRadialGradient(sz/2,sz/2,sz*0.3,sz/2,sz/2,sz*0.75);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,0.65)');c.fillStyle=g;c.fillRect(0,0,sz,sz);}
+function applyScanlinesCtx(c,sz){c.fillStyle='rgba(0,0,0,0.1)';for(let y=0;y<sz;y+=4)c.fillRect(0,y,sz,2);}
+
+function shareTG() {
+  toast('Download the GIF first, then send it in Telegram!');
+}
+function closeResult() {
+  document.getElementById('result-modal').classList.remove('show');
+}
+
+// ════════════════════════════════
+// PANEL / MISC
+// ════════════════════════════════
+function switchPanel(name, el) {
+  ['ai','tools','frames'].forEach(p=>{
+    document.getElementById('panel-'+p).style.display = p===name?'block':'none';
+  });
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function setPrompt(txt) {
+  document.getElementById('prompt-input').value = txt;
+  toast('Prompt set!');
+}
+
+function addTextLayer() {
+  const name = prompt('Layer name:', 'Text layer');
+  if (!name) return;
+  const list = document.getElementById('layers-list');
+  list.innerHTML += `<div class="layer-row"><div class="layer-icon">T</div><div class="layer-name">${name}</div><button class="layer-vis">👁</button></div>`;
+  toast('Layer added');
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
+}
+</script>
+</body>
+</html>
