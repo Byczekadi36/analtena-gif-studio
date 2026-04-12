@@ -88,14 +88,15 @@ JSON tylko, bez markdown:
 
   for (let i = 0; i < frames.length; i++) {
     const imagePrompt = frames[i].prompt;
+    console.log(`Generating frame ${i+1}/${frames.length}: ${imagePrompt.slice(0,60)}...`);
     try {
-      // Uruchom Flux Schnell (szybki i darmowy)
+      // Uruchom Flux Schnell — prefer:wait czeka aż skończy (do 60s)
       const startResp = await fetch('https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${REPLICATE_TOKEN}`,
-          'Prefer': 'wait=30',
+          'Prefer': 'wait=60',
         },
         body: JSON.stringify({
           input: {
@@ -116,15 +117,16 @@ JSON tylko, bez markdown:
 
       let prediction = await startResp.json();
 
-      // Czekaj aż obraz będzie gotowy (max 60 sekund)
+      // Czekaj aż obraz będzie gotowy (max 45 sekund)
       let attempts = 0;
-      while (prediction.status !== 'succeeded' && prediction.status !== 'failed' && attempts < 30) {
+      while (prediction.status !== 'succeeded' && prediction.status !== 'failed' && attempts < 22) {
         await new Promise(r => setTimeout(r, 2000));
         const pollResp = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
           headers: { 'Authorization': `Bearer ${REPLICATE_TOKEN}` },
         });
         prediction = await pollResp.json();
         attempts++;
+        console.log(`Frame ${i+1} status: ${prediction.status} (attempt ${attempts})`);
       }
 
       if (prediction.status === 'failed') throw new Error('Replicate generation failed');
