@@ -3,13 +3,11 @@
   "builds": [
     { "src": "api/generate.js", "use": "@vercel/node" },
     { "src": "api/status.js",   "use": "@vercel/node" },
-    { "src": "index.html",      "use": "@vercel/static" },
-    { "src": "images.js",       "use": "@vercel/static" }
+    { "src": "index.html",      "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/generate", "dest": "/api/generate.js" },
     { "src": "/api/status",   "dest": "/api/status.js" },
-    { "src": "/images.js",    "dest": "/images.js" },
     { "src": "/(.*)",         "dest": "/index.html" }
   ],
   "functions": {
