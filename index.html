@@ -44,6 +44,13 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
 .wbtn-honour{background:transparent;color:var(--muted);border:1px solid var(--border2);font-size:13px;padding:10px;}
 .wbtn-honour:hover{border-color:var(--neon3);color:var(--neon3);}
 .gate-note{font-size:11px;color:var(--muted2);line-height:1.7;max-width:300px;}
+.gate-network{display:flex;align-items:center;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);width:100%;max-width:320px;justify-content:center;}
+.x1-logo{font-size:15px;font-weight:800;letter-spacing:-1px;line-height:1;}
+.x1-x{color:#fff;}
+.x1-1{color:#3b82f6;}
+.gate-net-links{font-size:11px;color:var(--muted2);}
+.gate-net-links a{color:var(--muted);text-decoration:none;transition:color .15s;}
+.gate-net-links a:hover{color:var(--neon);}
 
 /* ── APP SHELL ── */
 #app{display:none;height:100vh;flex-direction:column;}
@@ -305,6 +312,14 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
     <button class="wbtn wbtn-honour" onclick="honourEntry()">🦉 Trzymam $ANAL (system honorowy)</button>
   </div>
   <p class="gate-note">Weryfikacja tylko do odczytu. Żadnych transakcji. Twoje klucze, Twoje krypto.</p>
+  <div class="gate-network">
+    <span class="x1-logo"><span class="x1-x">X</span><span class="x1-1">1</span></span>
+    <span class="gate-net-links">
+      Sieć <a href="https://x1.xyz" target="_blank">x1.xyz</a>
+      &nbsp;·&nbsp;
+      DEX <a href="https://xdex.xyz" target="_blank">xdex.xyz</a>
+    </span>
+  </div>
 </div>
 
 <!-- ══ APP ══ -->
