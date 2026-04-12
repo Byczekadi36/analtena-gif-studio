@@ -884,6 +884,37 @@ function setFrameDot(i, done) {
   else { dot.classList.add('active'); dot.textContent='⏳'; }
 }
 
+// ── POLLING ────────────────────────────────────────────────────────
+async function pollUntilDone(predictionId, maxAttempts=40) {
+  for (let i = 0; i < maxAttempts; i++) {
+    await sleep(2000);
+    try {
+      const resp = await fetch('/api/status?id=' + predictionId);
+      if (!resp.ok) continue;
+      const data = await resp.json();
+
+      if (data.status === 'succeeded' && data.imageUrl) {
+        return data.imageUrl;
+      }
+      if (data.status === 'failed') {
+        throw new Error('Replicate: generowanie nie powiodło się');
+      }
+
+      // Aktualizuj progress
+      const pct = 20 + Math.min(i * 2.5, 48);
+      const statusMsg = {
+        'starting':    'Uruchamiam model AI…',
+        'processing':  'Generuję obraz… (' + (i*2) + 's)',
+      }[data.status] || 'Przetwarzam…';
+      setProgress(pct, '🎨 Replicate pracuje…', statusMsg);
+
+    } catch(err) {
+      if (err.message.includes('nie powiodło')) throw err;
+    }
+  }
+  throw new Error('Timeout — generowanie trwało zbyt długo');
+}
+
 // ── X1 BLOCKCHAIN PAYMENT ──────────────────────────────────────────
 const ANAL_MINT    = 'EFPkbXTdr3c7aRbCEKoJDYdbbzgzVDBShYGybP3gQwmy';
 const X1_RPC       = 'https://rpc.mainnet.x1.xyz';
@@ -972,22 +1003,14 @@ async function generateWithAI() {
   log('► Styl: ' + artStyle + ' | Klatki: ' + frameCount + ' | Rozmiar: ' + sz + 'px');
 
   try {
-    // Step 1: X1 payment (if real wallet connected)
-    setProgress(5, 'Płatność ANAL…', 'Wysyłam ' + ANAL_FEE + ' ANAL na X1');
-    const txSig = await sendAnalPayment();
-
-    // Step 2: Call backend
-    setProgress(15, 'AI generuje…', 'Claude planuje sceny → Replicate rysuje obrazy');
-    log('► Wywołuję API…', 'ai');
+    // Step 1: Wyślij zadanie do backend (zwraca natychmiast)
+    setProgress(5, 'Claude planuje…', 'Tworzę optymalny prompt dla AI');
+    log('► Wysyłam zadanie…', 'ai');
 
     const apiResp = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        prompt, frameCount, artStyle,
-        walletAddress: state.walletAddr,
-        txSignature: txSig,
-      }),
+      body: JSON.stringify({ prompt, frameCount, artStyle }),
     });
 
     if (!apiResp.ok) {
@@ -995,11 +1018,25 @@ async function generateWithAI() {
       throw new Error(e.error || 'Błąd API: ' + apiResp.status);
     }
 
-    const result = await apiResp.json();
-    log('► Odpowiedź AI ✓ tryb: ' + result.mode, 'ok');
+    const job = await apiResp.json();
+    log('► Zadanie wysłane ✓ ID: ' + job.predictionId, 'ok');
+    log('► Prompt AI: ' + job.imagePrompt?.slice(0,80) + '…', 'info');
+
+    // Step 2: Odpytuj status co 2 sekundy
+    setProgress(20, '🎨 Replicate generuje…', 'Tworzę obraz AI — ~5 sekund');
+    const imageUrl = await pollUntilDone(job.predictionId);
+
+    // Step 3: Załaduj obraz i animuj klatki
+    setProgress(70, '🖼 Ładuję obraz…', 'Wczytuję wynik');
+    log('► Obraz wygenerowany ✓', 'ok');
+
+    const baseImg = new Image();
+    baseImg.crossOrigin = 'anonymous';
+    await new Promise(res => { baseImg.onload = res; baseImg.onerror = res; baseImg.src = imageUrl; });
 
     state.frames = [];
     setCanvasSize(sz);
+    const result = { mode: 'single-image', baseImage: imageUrl, frameCount: job.frameCount, animation: job.artStyle };
 
     if (result.mode === 'single-image') {
       // ── SINGLE IMAGE + CANVAS ANIMATION ──
