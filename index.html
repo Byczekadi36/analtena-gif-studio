@@ -235,6 +235,19 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 .rbtn-tg:hover{border-color:var(--neon3);color:var(--neon3);}
 .rbtn-close{grid-column:1/-1;background:transparent;color:var(--muted);border:1px solid var(--border);padding:8px;}
 .rbtn-close:hover{color:var(--text);}
+.rbtn-x{background:#000;color:#fff;border:1px solid #333;}
+.rbtn-x:hover{background:#111;}
+.result-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.gif-history{margin-top:20px;}
+.gif-history-title{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.gif-history-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.gif-history-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.gif-history-item{border-radius:8px;overflow:hidden;border:1px solid var(--border);cursor:pointer;position:relative;aspect-ratio:1;background:var(--card2);}
+.gif-history-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.gif-history-item:hover .gif-history-overlay{opacity:1;}
+.gif-history-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;gap:8px;opacity:0;transition:opacity .2s;}
+.gif-history-overlay button{background:var(--neon);color:#080810;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;}
+.gif-history-empty{font-size:12px;color:var(--muted2);text-align:center;padding:16px 0;}
 
 /* ── MOBILE ── */
 @media(max-width:768px){
@@ -500,6 +513,12 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
         </div>
         <button class="add-layer-btn" onclick="addTextLayer()">+ Add text layer</button>
       </div>
+      <div style="padding:14px 16px;border-top:1px solid var(--border);">
+        <div class="gif-history-title">My GIFs</div>
+        <div class="gif-history-grid" id="gif-history-grid">
+          <div class="gif-history-empty" id="gif-history-empty">No GIFs yet.<br/>Generate your first!</div>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -523,6 +542,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
     <div class="result-meta" id="result-meta"></div>
     <div class="result-btns">
       <button class="rbtn rbtn-dl" id="result-dl-btn">⬇ Download</button>
+      <button class="rbtn rbtn-x" onclick="shareX()">𝕏 Share on X</button>
       <button class="rbtn rbtn-tg" onclick="shareTG()">✈ Telegram</button>
       <button class="rbtn rbtn-close" onclick="closeResult()">← Back to editor</button>
     </div>
@@ -590,6 +610,7 @@ function enterApp(addr, verified) {
   toast(verified ? '✅ ANAL verified. Welcome in.' : '🤞 Honour accepted.');
   initCanvas();
   addBlankFrame();
+  renderHistory();
 }
 function disconnect() {
   state.frames = [];
@@ -1002,6 +1023,7 @@ async function sendAnalPayment() {
 async function generateWithAI() {
   const prompt = document.getElementById('prompt-input').value.trim();
   if (!prompt) { toast('Wpisz prompt!'); return; }
+  state.lastPrompt = prompt;
 
   const frameCount = parseInt(document.getElementById('frames-count').value);
   const artStyle   = document.getElementById('art-style').value;
@@ -1560,6 +1582,7 @@ async function exportGIF() {
         a.click();
       };
       document.getElementById('result-modal').classList.add('show');
+      saveToHistory(url, blob, state.lastPrompt || '');
     }, 400);
   });
 
@@ -1571,11 +1594,53 @@ function applyConfettiToCtx(c,sz){const cols=['#FFE500','#FF2D78','#00FFCC','#7B
 function applyVignetteToCtx(c,sz){const g=c.createRadialGradient(sz/2,sz/2,sz*0.3,sz/2,sz/2,sz*0.75);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,0.65)');c.fillStyle=g;c.fillRect(0,0,sz,sz);}
 function applyScanlinesCtx(c,sz){c.fillStyle='rgba(0,0,0,0.1)';for(let y=0;y<sz;y+=4)c.fillRect(0,y,sz,2);}
 
+function shareX() {
+  const prompt = state.lastPrompt || 'AI GIF';
+  const text = encodeURIComponent(`Just generated this AI GIF with @Analtena GIF Studio on X1! 🦉\n\n"${prompt}"\n\n#ANAL #Analtena #X1Network #Web3`);
+  window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+}
 function shareTG() {
-  toast('Download the GIF first, then send it in Telegram!');
+  toast('Download the GIF first, then share it in Telegram! 🦉');
 }
 function closeResult() {
   document.getElementById('result-modal').classList.remove('show');
+}
+function saveToHistory(url, blob, prompt) {
+  const history = JSON.parse(localStorage.getItem('anal_gif_history') || '[]');
+  history.unshift({ url, size: blob.size, prompt, date: Date.now() });
+  if (history.length > 10) history.pop();
+  localStorage.setItem('anal_gif_history', JSON.stringify(history));
+  renderHistory();
+}
+function renderHistory() {
+  const grid = document.getElementById('gif-history-grid');
+  const empty = document.getElementById('gif-history-empty');
+  if (!grid) return;
+  const history = JSON.parse(localStorage.getItem('anal_gif_history') || '[]');
+  if (!history.length) { if(empty) empty.style.display='block'; return; }
+  if(empty) empty.style.display='none';
+  grid.innerHTML = history.map((item, i) => `
+    <div class="gif-history-item">
+      <img src="${item.url}" alt="GIF ${i+1}" loading="lazy"/>
+      <div class="gif-history-overlay">
+        <button onclick="downloadHistoryGif(${i})">⬇</button>
+        <button onclick="shareHistoryX(${i})">𝕏</button>
+      </div>
+    </div>`).join('');
+}
+function downloadHistoryGif(i) {
+  const history = JSON.parse(localStorage.getItem('anal_gif_history') || '[]');
+  if (!history[i]) return;
+  const a = document.createElement('a');
+  a.href = history[i].url;
+  a.download = 'analtena-' + history[i].date + '.gif';
+  a.click();
+}
+function shareHistoryX(i) {
+  const history = JSON.parse(localStorage.getItem('anal_gif_history') || '[]');
+  if (!history[i]) return;
+  const text = encodeURIComponent(`Check this AI GIF made with @Analtena GIF Studio! 🦉\n\n"${history[i].prompt || 'AI GIF'}"\n\n#ANAL #Analtena #X1Network`);
+  window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
 }
 
 // ════════════════════════════════
