@@ -817,99 +817,209 @@ function setProgress(pct, title, sub) {
   if (sub) document.getElementById('prog-sub').textContent = sub;
 }
 
+// ── X1 BLOCKCHAIN PAYMENT ──────────────────────────────────────────
+const ANAL_MINT    = 'EFPkbXTdr3c7aRbCEKoJDYdbbzgzVDBShYGybP3gQwmy';
+const X1_RPC       = 'https://rpc.mainnet.x1.xyz';
+const ANAL_FEE     = 100; // ANAL tokens per GIF
+const FEE_DECIMALS = 9;
+
+async function sendAnalPayment() {
+  // Uses Phantom/Solflare to send ANAL SPL token transfer on X1
+  const provider = window.solana || window.solflare;
+  if (!provider || !state.walletAddr || state.walletAddr.startsWith('HONOUR')) {
+    return null; // honour system — skip payment
+  }
+  try {
+    log('► Preparing ANAL payment on X1…', 'ai');
+    // Load Solana web3 for token transfer
+    if (!window.solanaWeb3) {
+      await new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/solana-web3.js/1.95.3/solana-web3.min.js';
+        s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+      });
+    }
+    const { Connection, PublicKey, Transaction } = window.solanaWeb3;
+    const conn = new Connection(X1_RPC, 'confirmed');
+
+    // Find user's ANAL token account
+    const userPk = new PublicKey(state.walletAddr);
+    const mintPk = new PublicKey(ANAL_MINT);
+    const TOKEN_PROGRAM = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+    const SPL_ASSOCIATED = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJe1kVg');
+
+    // Derive ATAs
+    function findATA(owner, mint) {
+      return PublicKey.findProgramAddressSync(
+        [owner.toBytes(), TOKEN_PROGRAM.toBytes(), mint.toBytes()],
+        SPL_ASSOCIATED
+      )[0];
+    }
+
+    const FEE_WALLET = new PublicKey(state.feeWallet || 'EFPkbXTdr3c7aRbCEKoJDYdbbzgzVDBShYGybP3gQwmy');
+    const fromATA = findATA(userPk, mintPk);
+    const toATA   = findATA(FEE_WALLET, mintPk);
+    const amount  = BigInt(ANAL_FEE) * BigInt(10 ** FEE_DECIMALS);
+
+    // Build transfer instruction
+    const transferIx = {
+      programId: TOKEN_PROGRAM,
+      keys: [
+        { pubkey: fromATA,    isSigner: false, isWritable: true },
+        { pubkey: toATA,      isSigner: false, isWritable: true },
+        { pubkey: userPk,     isSigner: true,  isWritable: false },
+      ],
+      data: Buffer.from([3, ...Array.from(new Uint8Array(new BigInt64Array([amount]).buffer))]),
+    };
+
+    const tx = new Transaction().add(transferIx);
+    tx.feePayer = userPk;
+    tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
+
+    const signed = await provider.signTransaction(tx);
+    const sig = await conn.sendRawTransaction(signed.serialize());
+    await conn.confirmTransaction(sig, 'confirmed');
+    log(`► Payment confirmed ✓ ${ANAL_FEE} ANAL sent`, 'ok');
+    return sig;
+  } catch (err) {
+    log('► Payment skipped: ' + err.message, 'info');
+    return null; // don't block generation if payment fails
+  }
+}
+
 async function generateWithAI() {
   const prompt = document.getElementById('prompt-input').value.trim();
-  if (!prompt) { toast('Enter a prompt first!'); return; }
+  if (!prompt) { toast('Wpisz prompt!'); return; }
 
   const frameCount = parseInt(document.getElementById('frames-count').value);
-  const artStyle = document.getElementById('art-style').value;
-  const sz = parseInt(document.getElementById('resolution').value);
+  const artStyle   = document.getElementById('art-style').value;
+  const sz         = parseInt(document.getElementById('resolution').value);
 
   document.getElementById('gen-btn').disabled = true;
   document.getElementById('ai-log').innerHTML = '';
   document.getElementById('progress-overlay').classList.add('show');
-  setProgress(0, 'Asking Claude AI…', 'Generating frame descriptions');
+  setProgress(0, 'Przygotowuję…', 'Inicjalizacja');
 
-  log('► Prompt: '+prompt, 'info');
-  log('► Style: '+artStyle+' | Frames: '+frameCount+' | Size: '+sz+'px');
+  log('► Prompt: ' + prompt, 'info');
+  log('► Styl: ' + artStyle + ' | Klatki: ' + frameCount + ' | Rozmiar: ' + sz + 'px');
 
   try {
-    log('► Calling secure proxy…', 'ai');
-    setProgress(5, 'Claude is thinking…', 'Designing your GIF frame by frame');
+    // Step 1: X1 payment (if real wallet connected)
+    setProgress(5, 'Płatność ANAL…', 'Wysyłam ' + ANAL_FEE + ' ANAL na X1');
+    const txSig = await sendAnalPayment();
 
-    // Call our secure backend proxy — API key never touches the browser
+    // Step 2: Call backend
+    setProgress(15, 'AI generuje…', 'Tworzę obrazy dla każdej klatki');
+    log('► Wywołuję API…', 'ai');
+
     const apiResp = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, frameCount, artStyle })
+      body: JSON.stringify({
+        prompt, frameCount, artStyle,
+        walletAddress: state.walletAddr,
+        txSignature: txSig,
+      }),
     });
 
     if (!apiResp.ok) {
-      const errData = await apiResp.json().catch(() => ({}));
-      throw new Error(errData.error || 'API error: ' + apiResp.status);
+      const e = await apiResp.json().catch(() => ({}));
+      throw new Error(e.error || 'Błąd API: ' + apiResp.status);
     }
-    const { scene } = await apiResp.json();
 
-    log('► Claude responded ✓', 'ok');
-    setProgress(30, 'Parsing scene data…', 'Reading frame descriptions');
-    log(`► Scene: "${scene.title}" — ${scene.frames.length} frames`, 'ok');
+    const result = await apiResp.json();
+    log('► Odpowiedź AI ✓ tryb: ' + result.mode, 'ok');
 
-    // Step 2: Render each frame to canvas
     state.frames = [];
     setCanvasSize(sz);
 
-    for (let i = 0; i < scene.frames.length; i++) {
-      const f = scene.frames[i];
-      const pct = 30 + ((i / scene.frames.length) * 55);
-      setProgress(pct, `Rendering frame ${i+1} of ${scene.frames.length}`, f.description || '');
-      log(`► Rendering frame ${i+1}: ${f.description || ''}`, 'info');
+    if (result.mode === 'dalle') {
+      // ── DALL-E: load real images onto canvas ──
+      log('► Wczytuję obrazy DALL-E 3 HD…', 'ai');
+      const images = result.images || [];
+      for (let i = 0; i < images.length; i++) {
+        setProgress(30 + (i / images.length) * 60,
+          `Ładuję obraz ${i+1} z ${images.length}`,
+          'Obrazy HD 1024×1024');
+        const img = new Image();
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = images[i]; });
+        const oc = document.createElement('canvas'); oc.width = sz; oc.height = sz;
+        const oc2 = oc.getContext('2d');
+        oc2.drawImage(img, 0, 0, sz, sz);
+        // Apply overlay text if set
+        if (state.overlayText) applyOverlayToCtxDirect(oc2, sz);
+        state.frames.push(oc2.getImageData(0, 0, sz, sz));
+        log(`► Obraz ${i+1} wczytany ✓`, 'ok');
+        await sleep(50);
+      }
 
-      const oc = document.createElement('canvas');
-      oc.width = sz; oc.height = sz;
-      const oc2 = oc.getContext('2d');
-
-      renderFrame(oc2, sz, f, i, scene.frames.length);
-
-      state.frames.push(oc2.getImageData(0,0,sz,sz));
-      await sleep(30);
+    } else {
+      // ── Canvas mode: render scene ──
+      const scene = result.scene;
+      log(`► Scena: "${scene.title}" — ${scene.frames.length} klatek`, 'ok');
+      for (let i = 0; i < scene.frames.length; i++) {
+        const f = scene.frames[i];
+        setProgress(30 + (i / scene.frames.length) * 60,
+          `Renderuję klatkę ${i+1} z ${scene.frames.length}`,
+          f.description || '');
+        log(`► Klatka ${i+1}: ${f.description || ''}`, 'info');
+        const oc = document.createElement('canvas'); oc.width = sz; oc.height = sz;
+        const oc2 = oc.getContext('2d');
+        renderFrame(oc2, sz, f, i, scene.frames.length);
+        state.frames.push(oc2.getImageData(0, 0, sz, sz));
+        await sleep(30);
+      }
     }
 
     state.currentFrame = 0;
     updateFrameStrip();
     renderCurrentFrame();
 
-    log('► All frames rendered ✓', 'ok');
-    setProgress(90, 'Finalising…', 'Almost done!');
-    await sleep(200);
-    setProgress(100, 'Done!', '');
+    setProgress(100, 'Gotowe!', '');
     await sleep(400);
     document.getElementById('progress-overlay').classList.remove('show');
-    toast('🎉 ' + scene.title + ' — ' + scene.frames.length + ' frames generated!');
+    toast('🎉 GIF wygenerowany — ' + state.frames.length + ' klatek!');
 
-  } catch(err) {
+  } catch (err) {
     document.getElementById('progress-overlay').classList.remove('show');
-    log('✗ Error: '+err.message, 'err');
-    toast('Error: '+err.message);
+    log('✗ Błąd: ' + err.message, 'err');
+    toast('Błąd: ' + err.message);
     console.error(err);
   }
 
   document.getElementById('gen-btn').disabled = false;
 }
 
+function applyOverlayToCtxDirect(c, sz) {
+  if (!state.overlayText) return;
+  const tsz = state.overlaySize * (sz / 480);
+  c.font = `900 ${tsz}px Syne, sans-serif`;
+  c.textAlign = 'center';
+  const y = state.overlayPos === 'top' ? tsz + 12 : state.overlayPos === 'middle' ? sz/2 + tsz/3 : sz - 20*(sz/480);
+  c.strokeStyle = '#000'; c.lineWidth = tsz * 0.18;
+  c.strokeText(state.overlayText, sz/2, y);
+  c.fillStyle = state.overlayColor;
+  c.fillText(state.overlayText, sz/2, y);
+}
+
 // ════════════════════════════════
 // FRAME RENDERER
 // ════════════════════════════════
 function renderFrame(ctx2, sz, frame, frameIdx, totalFrames) {
-  // Background
-  ctx2.fillStyle = frame.bgColor || '#080810';
+  if (frame.bgGradient) {
+    const lg = ctx2.createLinearGradient(0,0,sz,sz);
+    lg.addColorStop(0, frame.bgGradient.from || '#080810');
+    lg.addColorStop(1, frame.bgGradient.to   || '#1a0a2e');
+    ctx2.fillStyle = lg;
+  } else {
+    ctx2.fillStyle = frame.bgColor || '#080810';
+  }
   ctx2.fillRect(0,0,sz,sz);
-
-  // Gradient overlay for depth
   const grad = ctx2.createRadialGradient(sz/2,sz/2,0,sz/2,sz/2,sz*0.7);
-  grad.addColorStop(0,'rgba(255,255,255,0.03)');
-  grad.addColorStop(1,'rgba(0,0,0,0.3)');
+  grad.addColorStop(0,'rgba(255,255,255,0.04)');
+  grad.addColorStop(1,'rgba(0,0,0,0.35)');
   ctx2.fillStyle = grad; ctx2.fillRect(0,0,sz,sz);
-
   const elements = frame.elements || [];
 
   elements.forEach(el => {
