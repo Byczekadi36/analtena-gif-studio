@@ -82,71 +82,65 @@ JSON tylko, bez markdown:
     return res.status(500).json({ error: 'Claude error: ' + err.message });
   }
 
-  // ── KROK 2: Replicate (Flux) generuje obrazy ───────────────────────
-  const images = [];
-  const frames = frameImagePrompts.frames || [];
+  // ── KROK 2: Replicate generuje 1 obraz bazowy ────────────────────
+  // Strategia: 1 obraz AI + animacja na canvasie = szybko + wysoka jakość
+  const bestPrompt = frames[0]?.prompt || prompt;
+  console.log(`Generating single base image: ${bestPrompt.slice(0,80)}...`);
 
-  for (let i = 0; i < frames.length; i++) {
-    const imagePrompt = frames[i].prompt;
-    console.log(`Generating frame ${i+1}/${frames.length}: ${imagePrompt.slice(0,60)}...`);
-    try {
-      // Uruchom Flux Schnell — prefer:wait czeka aż skończy (do 60s)
-      const startResp = await fetch('https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${REPLICATE_TOKEN}`,
-          'Prefer': 'wait=60',
+  try {
+    const startResp = await fetch('https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${REPLICATE_TOKEN}`,
+        'Prefer': 'wait=60',
+      },
+      body: JSON.stringify({
+        input: {
+          prompt: bestPrompt,
+          num_outputs: 1,
+          aspect_ratio: '1:1',
+          output_format: 'webp',
+          output_quality: 95,
+          num_inference_steps: 4,
         },
-        body: JSON.stringify({
-          input: {
-            prompt: imagePrompt,
-            num_outputs: 1,
-            aspect_ratio: '1:1',
-            output_format: 'webp',
-            output_quality: 90,
-            num_inference_steps: 4,
-          },
-        }),
-      });
+      }),
+    });
 
-      if (!startResp.ok) {
-        const err = await startResp.json();
-        throw new Error(err.detail || 'Replicate start error: ' + startResp.status);
-      }
-
-      let prediction = await startResp.json();
-
-      // Czekaj aż obraz będzie gotowy (max 45 sekund)
-      let attempts = 0;
-      while (prediction.status !== 'succeeded' && prediction.status !== 'failed' && attempts < 22) {
-        await new Promise(r => setTimeout(r, 2000));
-        const pollResp = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
-          headers: { 'Authorization': `Bearer ${REPLICATE_TOKEN}` },
-        });
-        prediction = await pollResp.json();
-        attempts++;
-        console.log(`Frame ${i+1} status: ${prediction.status} (attempt ${attempts})`);
-      }
-
-      if (prediction.status === 'failed') throw new Error('Replicate generation failed');
-      if (!prediction.output?.[0]) throw new Error('Brak obrazu w odpowiedzi');
-
-      images.push({
-        url: prediction.output[0],
-        description: frames[i].description || '',
-      });
-
-    } catch (err) {
-      console.error(`Frame ${i+1} error:`, err.message);
-      // Dodaj placeholder jeśli klatka się nie wygenerowała
-      images.push({ url: null, description: frames[i].description || '', error: err.message });
+    if (!startResp.ok) {
+      const err = await startResp.json();
+      throw new Error(err.detail || 'Replicate error: ' + startResp.status);
     }
-  }
 
-  return res.status(200).json({
-    mode: 'replicate',
-    title: frameImagePrompts.title || prompt.slice(0, 30),
-    images,
-  });
+    let prediction = await startResp.json();
+    let attempts = 0;
+    while (prediction.status !== 'succeeded' && prediction.status !== 'failed' && attempts < 25) {
+      await new Promise(r => setTimeout(r, 2000));
+      const pollResp = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
+        headers: { 'Authorization': `Bearer ${REPLICATE_TOKEN}` },
+      });
+      prediction = await pollResp.json();
+      attempts++;
+    }
+
+    if (prediction.status !== 'succeeded' || !prediction.output?.[0]) {
+      throw new Error('Generowanie obrazu nie powiodło się');
+    }
+
+    const baseImageUrl = prediction.output[0];
+
+    // Zwróć 1 obraz + instrukcje animacji dla każdej klatki
+    return res.status(200).json({
+      mode: 'single-image',
+      title: frameImagePrompts.title || prompt.slice(0, 30),
+      baseImage: baseImageUrl,
+      frameCount: count,
+      animation: artStyle,
+      frameDescriptions: frames.map(f => f.description),
+    });
+
+  } catch (err) {
+    console.error('Replicate error:', err.message);
+    return res.status(500).json({ error: 'Błąd generowania obrazu: ' + err.message });
+  }
 }
