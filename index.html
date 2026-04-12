@@ -39,10 +39,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
   font-family:var(--font-d);font-weight:700;font-size:15px;
   display:flex;align-items:center;justify-content:center;gap:10px;
   margin-bottom:10px;transition:all .15s;}
-.wbtn-phantom{background:linear-gradient(135deg,#534bb1,#8b5cf6);color:#fff;}
-.wbtn-phantom:hover{filter:brightness(1.15);transform:translateY(-1px);}
-.wbtn-solflare{background:linear-gradient(135deg,#fc8c03,#f95c03);color:#fff;}
-.wbtn-solflare:hover{filter:brightness(1.15);transform:translateY(-1px);}
+.wbtn-x1{background:linear-gradient(135deg,#0a0f3e,#1a2580);color:#FFE500;border:1px solid rgba(255,229,0,0.4);font-size:17px;letter-spacing:1px;}
+.wbtn-x1:hover{filter:brightness(1.2);transform:translateY(-1px);box-shadow:0 0 20px rgba(255,229,0,0.3);}
 .wbtn-honour{background:transparent;color:var(--muted);border:1px solid var(--border2);font-size:13px;padding:10px;}
 .wbtn-honour:hover{border-color:var(--neon3);color:var(--neon3);}
 .gate-note{font-size:11px;color:var(--muted2);line-height:1.7;max-width:300px;}
@@ -302,8 +300,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
   <p class="gate-sub">Twórz wysokiej jakości animowane GIFy za pomocą AI.<br>Ekskluzywnie dla posiadaczy $ANAL. 🦉</p>
   <div class="gate-box">
     <div class="gate-box-title">🔐 Połącz portfel aby wejść</div>
-    <button class="wbtn wbtn-phantom" onclick="connectPhantom()">👻 Connect Phantom</button>
-    <button class="wbtn wbtn-solflare" onclick="connectSolflare()">☀️ Connect Solflare</button>
+    <button class="wbtn wbtn-x1" onclick="connectX1Wallet()">🔷 Connect X1 Wallet</button>
     <hr style="border:none;border-top:1px solid var(--border);margin:12px 0"/>
     <button class="wbtn wbtn-honour" onclick="honourEntry()">🦉 Trzymam $ANAL (system honorowy)</button>
   </div>
@@ -542,27 +539,28 @@ const state = {
 // ════════════════════════════════
 // WALLET
 // ════════════════════════════════
-async function connectPhantom() {
+async function connectX1Wallet() {
   try {
-    if (window.solana?.isPhantom) {
-      const r = await window.solana.connect();
-      enterApp(r.publicKey.toString(), true);
-    } else {
-      toast('Phantom not installed — redirecting…');
-      setTimeout(() => window.open('https://phantom.app','_blank'), 800);
+    const provider = window.x1Wallet || window.x1;
+    if (provider) {
+      if (!provider._initialized) {
+        await new Promise(res => {
+          window.addEventListener('x1Wallet#initialized', res, {once:true});
+          setTimeout(res, 2000);
+        });
+      }
+      const resp = await provider.connect();
+      const pubkey = resp?.publicKey?.toString() || provider.publicKey?.toString();
+      if (pubkey) {
+        enterApp(pubkey, true);
+        return;
+      }
     }
-  } catch { toast('Connection cancelled'); }
-}
-async function connectSolflare() {
-  try {
-    if (window.solflare) {
-      await window.solflare.connect();
-      enterApp(window.solflare.publicKey.toString(), true);
-    } else {
-      toast('Solflare not installed — redirecting…');
-      setTimeout(() => window.open('https://solflare.com','_blank'), 800);
-    }
-  } catch { toast('Connection cancelled'); }
+    toast('X1 Wallet nie znaleziony — zainstaluj na x1.xyz');
+    setTimeout(() => window.open('https://x1.xyz','_blank'), 1000);
+  } catch(e) {
+    toast('Błąd połączenia: ' + (e.message || 'Anulowano'));
+  }
 }
 function honourEntry() {
   const fake = 'HONOUR' + Math.random().toString(36).slice(2,8).toUpperCase();
