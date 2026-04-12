@@ -167,8 +167,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-d);}
   <div class="g-url">ANALTENA.COM</div>
   <div class="g-tag">AI GIF STUDIO &bull; TOKEN HOLDERS ONLY</div>
   <div class="g-box">
-    <button class="g-btn g-b1" onclick="connectPhantom()">👻 Connect Phantom</button>
-    <button class="g-btn g-b2" onclick="connectSolflare()">☀️ Connect Solflare</button>
+    <button class="g-btn g-b1" onclick="connectX1Wallet()" style="background:linear-gradient(135deg,#1a1a3e,#2a2a6e);">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" style="display:none"/>
+      🔷 Connect X1 Wallet
+    </button>
     <button class="g-btn g-b3" onclick="honourEntry()">🦉 Trzymam $ANAL (system honorowy)</button>
   </div>
   <p class="g-note">Weryfikacja tylko do odczytu. Żadnych transakcji. Twoje klucze, Twoje krypto.</p>
@@ -430,39 +432,58 @@ const state = {
 // ════════════════════════════════
 // WALLET
 // ════════════════════════════════
-async function connectPhantom() {
+async function connectX1Wallet() {
   try {
-    if (window.solana?.isPhantom) {
-      const r = await window.solana.connect();
-      enterApp(r.publicKey.toString(), true);
+    // X1 Wallet uses window.x1Wallet as primary object
+    const provider = window.x1Wallet || window.x1;
+    if (provider) {
+      // Wait for initialization if needed
+      if (!provider._initialized) {
+        await new Promise(res => {
+          window.addEventListener('x1Wallet#initialized', res, {once:true});
+          setTimeout(res, 2000); // fallback timeout
+        });
+      }
+      const resp = await provider.connect();
+      const pubkey = resp?.publicKey?.toString() || provider.publicKey?.toString();
+      if (pubkey) {
+        enterApp(pubkey, true);
+      } else {
+        throw new Error('No public key returned');
+      }
     } else {
-      toast('Phantom not installed — redirecting…');
-      setTimeout(() => window.open('https://phantom.app','_blank'), 800);
+      toast('X1 Wallet nie znaleziony — instaluję…');
+      setTimeout(() => window.open('https://x1.xyz','_blank'), 800);
     }
-  } catch { toast('Connection cancelled'); }
-}
-async function connectSolflare() {
-  try {
-    if (window.solflare) {
-      await window.solflare.connect();
-      enterApp(window.solflare.publicKey.toString(), true);
-    } else {
-      toast('Solflare not installed — redirecting…');
-      setTimeout(() => window.open('https://solflare.com','_blank'), 800);
-    }
-  } catch { toast('Connection cancelled'); }
+  } catch(e) {
+    console.error('X1 connect error:', e);
+    toast('Błąd połączenia: ' + (e.message || 'Anulowano'));
+  }
 }
 function honourEntry() {
   const fake = 'HONOUR' + Math.random().toString(36).slice(2,8).toUpperCase();
   enterApp(fake, false);
 }
+// Keep old names as aliases for backward compat
+async function connectPhantom() { await connectX1Wallet(); }
+async function connectSolflare() { await connectX1Wallet(); }
 function enterApp(addr, verified) {
   state.walletAddr = addr;
-  document.getElementById('gate').style.display = 'none';
-  document.getElementById('app').classList.add('visible');
+  // Hide gate
+  const gate = document.getElementById('gate');
+  if (gate) { gate.style.display = 'none'; gate.style.visibility = 'hidden'; }
+  // Hide comic bg and floating texts
+  const comicBg = document.getElementById('comic-bg');
+  if (comicBg) comicBg.style.display = 'none';
+  document.querySelectorAll('.af').forEach(el => el.style.display = 'none');
+  // Show app
+  const app = document.getElementById('app');
+  if (app) { app.style.display = 'flex'; app.classList.add('visible'); }
+  // Update wallet display
   const short = addr.slice(0,4)+'…'+addr.slice(-4);
-  document.getElementById('hdr-wallet').textContent = verified ? short+' ✓ ANAL' : '🤞 honour';
-  toast(verified ? '✅ ANAL verified. Welcome in.' : '🤞 Honour accepted.');
+  const hdrWallet = document.getElementById('hdr-wallet');
+  if (hdrWallet) hdrWallet.textContent = verified ? short+' ✓ ANAL' : '🤞 honour';
+  toast(verified ? '✅ X1 Wallet verified. Welcome in!' : '🤞 Honour accepted. Enjoy!');
   initCanvas();
   addBlankFrame();
 }
