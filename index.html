@@ -364,26 +364,31 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
         <div class="section-label">Describe your GIF</div>
         <textarea class="prompt-area" id="prompt-input" placeholder="e.g. A rocket blasting off to the moon with $ANALTENA text, crypto charts going up, confetti explosion, cartoon style" rows="4"></textarea>
 
-        <div class="section-label">Quick prompts</div>
+        <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;">
+          Quick prompts
+          <button id="random-prompt-btn" onclick="generateRandomPrompt()" style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:99px;border:1px solid var(--neon3);background:rgba(123,97,255,.1);color:var(--neon3);cursor:pointer;letter-spacing:.04em;font-family:var(--font-d);">✨ Random</button>
+        </div>
         <div class="prompt-chips">
           <span class="pchip" onclick="setPrompt('Analtena rocket launching to the moon, stars exploding, neon glow, epic cinematic')">🚀 Moon launch</span>
-          <span class="pchip" onclick="setPrompt('Diamond hands holding ANAL token, gold coins raining down, triumphant pose, glowing')">💎 Diamond hands</span>
-          <span class="pchip" onclick="setPrompt('Crypto chart going parabolic with ANAL text, green candles, confetti celebration')">📈 Charts pumping</span>
-          <span class="pchip" onclick="setPrompt('Degen ape in a suit counting ANAL tokens, money flying everywhere, sunglasses')">🦍 Degen ape</span>
-          <span class="pchip" onclick="setPrompt('NGMI sad doge selling at the bottom, red charts, crying emoji rain, regret')">😭 NGMI moment</span>
-          <span class="pchip" onclick="setPrompt('Wen lambo? Luxury sports car driving to moon, dollar bills, party vibes, neon lights')">🏎️ Wen lambo</span>
+          <span class="pchip" onclick="setPrompt('Diamond hands holding ANAL token, gold coins raining down, triumphant glowing pose')">💎 Diamond hands</span>
+          <span class="pchip" onclick="setPrompt('Crypto chart going parabolic with $ANAL text, green candles, confetti celebration')">📈 Charts pumping</span>
+          <span class="pchip" onclick="setPrompt('Degen ape in designer suit counting ANAL tokens, money raining, gold sunglasses')">🦍 Degen ape</span>
+          <span class="pchip" onclick="setPrompt('NGMI crying doge selling at the bottom, red charts everywhere, regret tears')">😭 NGMI moment</span>
+          <span class="pchip" onclick="setPrompt('Luxury lambo driving to the moon, dollar bills flying, neon lights, epic party')">🏎️ Wen lambo</span>
           <span class="pchip" onclick="setPrompt('Analtena owl mascot dancing on X1 blockchain, glowing purple energy, futuristic city')">🦉 Owl dance</span>
-          <span class="pchip" onclick="setPrompt('WAGMI celebration party, ANAL holders cheering, fireworks, gold confetti, euphoria')">🎉 WAGMI party</span>
-          <span class="pchip" onclick="setPrompt('Whale buying massive ANAL bags, ocean waves of coins, blue glow, power aura')">🐋 Whale alert</span>
-          <span class="pchip" onclick="setPrompt('Pepe the frog holding ANAL token proudly, rare edition, golden glow, crown')">🐸 Rare Pepe</span>
-          <span class="pchip" onclick="setPrompt('X1 blockchain network nodes connecting, purple neon, data flowing, futuristic')">🔮 X1 network</span>
-          <span class="pchip" onclick="setPrompt('All time high moment, ATH text glowing, champagne popping, green explosion, victory')">🏆 ATH moment</span>
-          <span class="pchip" onclick="setPrompt('Hodl warrior never selling, iron hands, castle fortress, $ANAL flag waving')">🛡️ Hodl warrior</span>
-          <span class="pchip" onclick="setPrompt('Crypto winter survivor warming by fire, ANAL token glowing warmth, cozy cabin')">❄️ Winter survivor</span>
-          <span class="pchip" onclick="setPrompt('Analtena community together, diverse avatars, united, colorful crowd, sunrise')">🌅 Community rise</span>
-          <span class="pchip" onclick="setPrompt('Based and redpilled degen, matrix code rain, ANAL pills, awakening moment')">💊 Based moment</span>
-          <span class="pchip" onclick="setPrompt('xDEX trading interface glowing, charts, swap animation, X1 network, sleek UI')">💱 xDEX trade</span>
-          <span class="pchip" onclick="setPrompt('Analtena GIF studio logo animation, creative explosion of colors, AI generating art')">🎨 Studio logo</span>
+          <span class="pchip" onclick="setPrompt('WAGMI epic party, ANAL holders celebrating, golden fireworks, euphoric crowd')">🎉 WAGMI party</span>
+          <span class="pchip" onclick="setPrompt('Giant whale buying massive $ANAL bags, ocean of gold coins, blue power aura')">🐋 Whale alert</span>
+          <span class="pchip" onclick="setPrompt('Rare Pepe holding ANAL token proudly, golden crown, glowing rare edition aura')">🐸 Rare Pepe</span>
+          <span class="pchip" onclick="setPrompt('X1 blockchain nodes connecting globally, purple neon data streams, futuristic')">🔮 X1 network</span>
+          <span class="pchip" onclick="setPrompt('All time high ATH moment, champagne explosion, green light beams, victory dance')">🏆 ATH moment</span>
+          <span class="pchip" onclick="setPrompt('Iron hands hodl warrior, fortress of $ANAL tokens, never selling, epic stance')">🛡️ Hodl warrior</span>
+          <span class="pchip" onclick="setPrompt('Crypto winter survivor by glowing fire, ANAL token as warmth source, cozy vibes')">❄️ Winter survivor</span>
+          <span class="pchip" onclick="setPrompt('Analtena community united at sunrise, diverse crowd, colorful energy, hope')">🌅 Community</span>
+          <span class="pchip" onclick="setPrompt('xDEX swap interface glowing purple, live charts, X1 network energy, sleek')">💱 xDEX trade</span>
+          <span class="pchip" onclick="setPrompt('Analtena owl wizard casting crypto spells, magic GIF creation, sparks flying')">🧙 Owl wizard</span>
+          <span class="pchip" onclick="setPrompt('Bull market stampede, green candles towering, $ANAL flag, roaring crowd')">🐂 Bull run</span>
+          <span class="pchip" onclick="setPrompt('Moon landing ceremony, ANAL astronaut plants flag, Earth below, stars, epic')">🌕 Moon flag</span>
+          <span class="pchip" onclick="setPrompt('Golden $ANAL coin spinning in space, glowing aura, universe reflection, majestic')">🪙 Golden coin</span>
         </div>
 
         <div class="ctrl-row">
@@ -586,6 +591,44 @@ const state = {
 // ════════════════════════════════
 // WALLET
 // ════════════════════════════════
+async function generateRandomPrompt() {
+  const btn = document.getElementById('random-prompt-btn');
+  btn.textContent = '⏳ Thinking...';
+  btn.disabled = true;
+  try {
+    const themes = ['moon', 'community', 'trading', 'X1 blockchain', 'owl mascot', 'defi', 'meme', 'celebration', 'hodl', 'bull run'];
+    const theme = themes[Math.floor(Math.random() * themes.length)];
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        promptOnly: true,
+        userPrompt: `Generate a creative, vivid GIF prompt about $ANAL Analtena crypto token and ${theme}. Theme: ${theme}. Make it exciting, visual, animation-friendly, max 20 words.`
+      })
+    });
+    const data = await res.json();
+    if (data.randomPrompt) {
+      setPrompt(data.randomPrompt);
+      toast('✨ Fresh prompt generated!');
+    } else {
+      throw new Error('no prompt');
+    }
+  } catch(e) {
+    const fallbacks = [
+      'Analtena owl surfing green candles to the moon, neon explosion, epic victory',
+      '$ANAL token transforming into golden rocket, X1 network energy, light beams',
+      'Crypto degen waking up to 100x gains, shocked face, confetti, green charts',
+      'Analtena community moon party, owls dancing, $ANAL raining, purple sky',
+      'X1 blockchain powering up, $ANAL token at center, energy waves, futuristic glow',
+    ];
+    const p = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+    setPrompt(p);
+    toast('✨ Random prompt loaded!');
+  } finally {
+    btn.textContent = '✨ Random';
+    btn.disabled = false;
+  }
+}
 async function connectX1Wallet() {
   try {
     const provider = window.x1Wallet || window.x1;
