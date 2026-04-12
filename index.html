@@ -48,7 +48,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
 .gate-note{font-size:11px;color:var(--muted2);line-height:1.7;max-width:300px;}
 
 /* ── APP SHELL ── */
-#app{display:none;height:100vh;flex-direction:column;}
+#app{display:none;height:100vh;flex-direction:column;}#app.visible{display:flex!important;}
 #app.visible{display:flex;}
 
 header{background:var(--surface);border-bottom:1px solid var(--border);
@@ -703,7 +703,7 @@ function honourEntry() {
 function enterApp(addr, verified) {
   state.walletAddr = addr;
   document.getElementById('gate').style.display = 'none';
-  document.getElementById('app').classList.add('visible');
+  const appEl=document.getElementById('app');appEl.classList.add('visible');appEl.style.display='flex';
   const short = addr.slice(0,4)+'…'+addr.slice(-4);
   document.getElementById('hdr-wallet').textContent = verified ? short+' ✓ ANAL' : '🤞 honour';
   toast(verified ? '✅ ANAL verified. Welcome in.' : '🤞 Honour accepted.');
