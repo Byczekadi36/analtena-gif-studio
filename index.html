@@ -1001,8 +1001,65 @@ async function generateWithAI() {
     state.frames = [];
     setCanvasSize(sz);
 
-    if (result.mode === 'replicate') {
-      // ── REPLICATE: prawdziwe obrazy AI ──
+    if (result.mode === 'single-image') {
+      // ── SINGLE IMAGE + CANVAS ANIMATION ──
+      log('► Wczytuję obraz bazowy…', 'ai');
+      setProgress(40, '🎨 Obraz wygenerowany!', 'Tworzę animację…');
+      const baseImg = new Image();
+      baseImg.crossOrigin = 'anonymous';
+      await new Promise(res => { baseImg.onload = res; baseImg.onerror = res; baseImg.src = result.baseImage; });
+      const fc = result.frameCount || 6;
+      const anim = result.animation || 'cartoon';
+      initFrameDots(fc);
+      log('► Animuję ' + fc + ' klatek…', 'ai');
+      const animDefs = [
+        {scale:1.0, offX:0,     offY:0,     bright:1.0,  hue:0  },
+        {scale:1.07,offX:0,     offY:-0.03, bright:1.12, hue:20 },
+        {scale:1.13,offX:0.03, offY:-0.05, bright:1.2,  hue:35 },
+        {scale:1.09,offX:0,    offY:-0.02, bright:1.15, hue:15 },
+        {scale:1.04,offX:-0.02,offY:0,     bright:1.05, hue:-10},
+        {scale:1.0, offX:0,    offY:0,     bright:1.0,  hue:0  },
+        {scale:1.05,offX:0.02, offY:0.01,  bright:1.08, hue:25 },
+        {scale:1.1, offX:-0.01,offY:-0.03, bright:1.14, hue:-5 },
+      ];
+      for (let i = 0; i < fc; i++) {
+        setFrameDot(i, false);
+        setProgress(45 + (i/fc)*45, '🎬 Klatka '+(i+1)+' z '+fc, result.frameDescriptions?.[i] || '');
+        const def = animDefs[i % animDefs.length];
+        const t = i / fc;
+        const oc = document.createElement('canvas'); oc.width=sz; oc.height=sz;
+        const oc2 = oc.getContext('2d');
+        oc2.fillStyle='#080810'; oc2.fillRect(0,0,sz,sz);
+        oc2.save();
+        oc2.translate(sz/2 + def.offX*sz, sz/2 + def.offY*sz);
+        oc2.scale(def.scale, def.scale);
+        oc2.filter = 'brightness('+def.bright+') hue-rotate('+def.hue+'deg)';
+        try { oc2.drawImage(baseImg,-sz/2,-sz/2,sz,sz); } catch(e){}
+        oc2.filter='none'; oc2.restore();
+        // neon overlay
+        if (anim==='neon') {
+          const g=oc2.createRadialGradient(sz/2,sz/2,0,sz/2,sz/2,sz*0.6);
+          g.addColorStop(0,'rgba(0,255,204,'+(0.04+t*0.07)+')');
+          g.addColorStop(1,'rgba(0,0,0,0)');
+          oc2.fillStyle=g; oc2.fillRect(0,0,sz,sz);
+        }
+        // stars
+        oc2.fillStyle='rgba(255,255,255,0.7)';
+        for(let s=0;s<12;s++){
+          const sx=(s*173+i*37)%sz,sy=(s*97+i*53)%sz,sr=((s*31+i*7)%6)/6*1.2+0.3;
+          oc2.globalAlpha=s%3===0?0.8:0.35;
+          oc2.beginPath();oc2.arc(sx,sy,sr,0,Math.PI*2);oc2.fill();
+        }
+        oc2.globalAlpha=1;
+        if (state.overlayText) applyOverlayToCtxDirect(oc2,sz);
+        state.frames.push(oc2.getImageData(0,0,sz,sz));
+        setFrameDot(i,true);
+        log('► Klatka '+(i+1)+' ✓','ok');
+        await sleep(20);
+      }
+
+    } else if (result.mode === 'replicate') {
+      // ── REPLICATE multi (fallback) ──
       log('► Wczytuję obrazy z Replicate (Flux AI)…', 'ai');
       const images = result.images || [];
       initFrameDots(images.length);
