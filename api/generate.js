@@ -55,7 +55,7 @@ Styl: ${styleDesc}
 Dodaj elementy crypto/meme: sowa Analtena, rakieta, księżyc, diamenty, wykresy.
 
 JSON bez markdown:
-{"title": "tytuł po polsku max 25 znaków", "prompt": "detailed English image prompt for Flux Pro image generator. ${styleDesc}. Analtena owl mascot (cute cartoon owl holding eggplants). Crypto meme art. Vibrant colors. Highly detailed. Professional quality. Cinematic lighting. Sharp focus. Square format. No text overlays."}`,
+{"title": "tytuł po polsku max 25 znaków", "prompt": "detailed English image prompt, ${styleDesc}, crypto meme art, Analtena owl mascot, vibrant, highly detailed, square format, no text overlays"}`,
         }],
       }),
     });
@@ -78,20 +78,21 @@ JSON bez markdown:
 
   // ── KROK 2: Wyślij zadanie do Replicate (fire and forget) ──────────
   try {
-    const replicateResp = await fetch('https://api.replicate.com/v1/models/black-forest-labs/flux-1.1-pro/predictions', {
+    const replicateResp = await fetch('https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${REPLICATE_TOKEN}`,
+        // NIE używamy Prefer: wait — chcemy natychmiast prediction_id
       },
       body: JSON.stringify({
         input: {
           prompt: imagePrompt,
+          num_outputs: 1,
           aspect_ratio: '1:1',
           output_format: 'webp',
-          output_quality: 100,
-          safety_tolerance: 6,
-          prompt_upsampling: true,
+          output_quality: 95,
+          num_inference_steps: 4,
         },
       }),
     });
