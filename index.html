@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
 <title>ANAL AI GIF Studio</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700;800&family=Bangers&display=swap" rel="stylesheet"/>
+<script src="/images.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
 <style>
 :root{
@@ -368,10 +369,10 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
   <div class="comic-halftone"></div>
   <div class="comic-speed"></div>
   <div class="comic-panels">
-    <div class="comic-panel"><img src="/images/img1.jpg" alt=""/></div>
-    <div class="comic-panel"><img src="/images/img3.jpg" alt=""/></div>
-    <div class="comic-panel"><img src="/images/img2.jpg" alt=""/></div>
-    <div class="comic-panel"><img src="/images/img4.jpg" alt=""/></div>
+    <div class="comic-panel"><img id="cp1" src="" alt=""/></div>
+    <div class="comic-panel"><img id="cp3" src="" alt=""/></div>
+    <div class="comic-panel"><img id="cp2" src="" alt=""/></div>
+    <div class="comic-panel"><img id="cp4" src="" alt=""/></div>
   </div>
 </div>
 
@@ -386,7 +387,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
   <div class="pow-badge">POW!</div>
   <div class="site-url-badge">ANALTENA.COM</div>
   <div class="gate-logo-wrap">
-    <img src="/images/logo.jpg" alt="Analtena Owl" class="gate-owl"/>
+    <img id="owl-logo" src="" alt="Analtena Owl" class="gate-owl"/>
     <div class="gate-owl-glow"></div>
   </div>
   <div class="gate-wordmark">Analtena · Token Holders Only</div>
@@ -406,7 +407,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 <div id="app">
   <header>
     <div class="logo">
-      <img src="/images/logo.jpg" alt="Analtena" class="hdr-logo"/>
+      <img id="owl-logo" src="" alt="Analtena" class="hdr-logo"/>
       <span class="logo-text">ANAL <em>GIF STUDIO</em></span>
     </div>
     <div class="hdr-right">
@@ -477,19 +478,19 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
           <div class="gallery-title">🦉 Community gallery</div>
           <div class="gallery-grid">
             <div class="gallery-item" onclick="useGalleryImage(0)">
-              <img src="/images/img1.jpg" alt="ANAL Roulette"/>
+              <img id="cp1" src="" alt="ANAL Roulette"/>
               <div class="gallery-overlay"></div>
             </div>
             <div class="gallery-item" onclick="useGalleryImage(1)">
-              <img src="/images/img2.jpg" alt="ANAL Rebellion"/>
+              <img id="cp2" src="" alt="ANAL Rebellion"/>
               <div class="gallery-overlay"></div>
             </div>
             <div class="gallery-item" onclick="useGalleryImage(2)">
-              <img src="/images/img3.jpg" alt="ANAL ATH"/>
+              <img id="cp3" src="" alt="ANAL ATH"/>
               <div class="gallery-overlay"></div>
             </div>
             <div class="gallery-item" onclick="useGalleryImage(3)">
-              <img src="/images/img4.jpg" alt="Spank the Owl"/>
+              <img id="cp4" src="" alt="Spank the Owl"/>
               <div class="gallery-overlay"></div>
             </div>
           </div>
@@ -1708,7 +1709,7 @@ function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 // ── BACKGROUND SLIDESHOW ───────────────────────────────────────────
 function initComicBg() {
   const panels = document.querySelectorAll('.comic-panel img');
-  const allImgs = ['/images/img1.jpg','/images/img2.jpg','/images/img3.jpg','/images/img4.jpg','/images/img5.jpg'];
+  const allImgs = [window.ANAL_IMGS.img1, window.ANAL_IMGS.img2, window.ANAL_IMGS.img3, window.ANAL_IMGS.img4, window.ANAL_IMGS.img5];
   let idx = 0;
   setInterval(() => {
     const panel = panels[Math.floor(Math.random() * panels.length)];
@@ -1771,6 +1772,24 @@ function initParticles() {
   }
 }
 initParticles();
+
+// Load images from window.ANAL_IMGS
+function initImages() {
+  const imgs = window.ANAL_IMGS;
+  if (!imgs) return;
+  const map = {cp1:'img1',cp2:'img2',cp3:'img3',cp4:'img4','owl-logo':'logo'};
+  Object.entries(map).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el && imgs[key]) el.src = imgs[key];
+  });
+  // Also fix gallery images
+  document.querySelectorAll('.gallery-item img').forEach((img, i) => {
+    const keys = ['img1','img2','img3','img4'];
+    if (imgs[keys[i]]) img.src = imgs[keys[i]];
+  });
+}
+if (window.ANAL_IMGS) initImages();
+else window.addEventListener('load', initImages);
 
 let toastTimer;
 function toast(msg){
