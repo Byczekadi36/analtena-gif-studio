@@ -2,16 +2,12 @@
   "version": 2,
   "builds": [
     { "src": "api/generate.js", "use": "@vercel/node" },
-    { "src": "api/status.js",   "use": "@vercel/node" },
-    { "src": "index.html",      "use": "@vercel/static" }
+    { "src": "api/status.js", "use": "@vercel/node" },
+    { "src": "index.html", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/generate", "dest": "/api/generate.js" },
-    { "src": "/api/status",   "dest": "/api/status.js" },
-    { "src": "/(.*)",         "dest": "/index.html" }
-  ],
-  "functions": {
-    "api/generate.js": { "maxDuration": 30 },
-    "api/status.js":   { "maxDuration": 10 }
-  }
+    { "src": "/api/status", "dest": "/api/status.js" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
 }
