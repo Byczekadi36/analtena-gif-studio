@@ -201,9 +201,17 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 .progress-overlay.show{display:flex;}
 .prog-title{font-size:18px;font-weight:800;color:var(--text);}
 .prog-sub{font-size:13px;color:var(--muted);}
-.prog-bar-wrap{width:320px;height:6px;background:var(--border);border-radius:99px;overflow:hidden;}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--neon3),var(--neon));border-radius:99px;width:0%;transition:width .2s;}
-.prog-pct{font-family:var(--font-m);font-size:13px;color:var(--neon);}
+.prog-bar-wrap{width:320px;height:8px;background:var(--border);border-radius:99px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--neon3),var(--neon2),var(--neon));border-radius:99px;width:0%;transition:width .4s ease;}
+.prog-pct{font-family:var(--font-m);font-size:15px;color:var(--neon);font-weight:700;}
+.prog-frames{display:flex;gap:6px;margin-top:12px;}
+.prog-frame-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .3s;}
+.prog-frame-dot.done{border-color:var(--neon);background:rgba(0,255,204,.1);box-shadow:0 0 8px rgba(0,255,204,.4);}
+.prog-frame-dot.active{border-color:var(--neon3);animation:frame-pulse .8s ease-in-out infinite;}
+@keyframes frame-pulse{0%,100%{box-shadow:0 0 0 rgba(123,97,255,.5)}50%{box-shadow:0 0 12px rgba(123,97,255,.8)}}
+.prog-owl{font-size:32px;animation:owl-spin 2s linear infinite;}
+@keyframes owl-spin{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(10deg)}}
 
 /* ── RESULT MODAL ── */
 .result-modal{position:fixed;inset:0;z-index:300;background:rgba(8,8,16,.95);
@@ -343,8 +351,8 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 
         <div class="ctrl-row">
           <div class="ctrl">
-            <label>Frames <span class="range-val" id="frames-val">8</span></label>
-            <input type="range" id="frames-count" min="4" max="20" value="8" oninput="document.getElementById('frames-val').textContent=this.value"/>
+            <label>Frames <span class="range-val" id="frames-val">4</span></label>
+            <input type="range" id="frames-count" min="2" max="6" value="4" oninput="document.getElementById('frames-val').textContent=this.value"/>
           </div>
           <div class="ctrl">
             <label>Style</label>
@@ -487,10 +495,12 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 
 <!-- Progress -->
 <div class="progress-overlay" id="progress-overlay">
-  <div class="prog-title" id="prog-title">Generating with AI…</div>
-  <div class="prog-sub" id="prog-sub">Asking Claude to imagine your GIF</div>
+  <div class="prog-owl">🦉</div>
+  <div class="prog-title" id="prog-title">Generuję z AI…</div>
+  <div class="prog-sub" id="prog-sub">Claude planuje sceny…</div>
   <div class="prog-bar-wrap"><div class="prog-fill" id="prog-fill"></div></div>
   <div class="prog-pct" id="prog-pct">0%</div>
+  <div class="prog-frames" id="prog-frames"></div>
 </div>
 
 <!-- Result -->
@@ -860,6 +870,19 @@ function setProgress(pct, title, sub) {
   if (title) document.getElementById('prog-title').textContent = title;
   if (sub) document.getElementById('prog-sub').textContent = sub;
 }
+function initFrameDots(count) {
+  const wrap = document.getElementById('prog-frames');
+  if (!wrap) return;
+  wrap.innerHTML = Array.from({length: count}, (_,i) =>
+    `<div class="prog-frame-dot" id="fdot-${i}">🎨</div>`
+  ).join('');
+}
+function setFrameDot(i, done) {
+  const dot = document.getElementById(`fdot-${i}`);
+  if (!dot) return;
+  if (done) { dot.classList.remove('active'); dot.classList.add('done'); dot.textContent='✓'; }
+  else { dot.classList.add('active'); dot.textContent='⏳'; }
+}
 
 // ── X1 BLOCKCHAIN PAYMENT ──────────────────────────────────────────
 const ANAL_MINT    = 'EFPkbXTdr3c7aRbCEKoJDYdbbzgzVDBShYGybP3gQwmy';
@@ -982,10 +1005,13 @@ async function generateWithAI() {
       // ── REPLICATE: prawdziwe obrazy AI ──
       log('► Wczytuję obrazy z Replicate (Flux AI)…', 'ai');
       const images = result.images || [];
+      initFrameDots(images.length);
       for (let i = 0; i < images.length; i++) {
-        setProgress(30 + (i / images.length) * 60,
-          `Klatka ${i+1} z ${images.length}`,
-          images[i].description || '');
+        setFrameDot(i, false);
+        const pct = 30 + (i / images.length) * 60;
+        setProgress(pct,
+          `🎨 Klatka ${i+1} z ${images.length}`,
+          images[i].description || 'Ładuję obraz…');
         if (images[i].error || !images[i].url) {
           log(`► Klatka ${i+1} pominięta: ${images[i].error || 'brak obrazu'}`, 'err');
           continue;
@@ -1002,6 +1028,7 @@ async function generateWithAI() {
         try { oc2.drawImage(img, 0, 0, sz, sz); } catch(e) {}
         if (state.overlayText) applyOverlayToCtxDirect(oc2, sz);
         state.frames.push(oc2.getImageData(0, 0, sz, sz));
+        setFrameDot(i, true);
         log(`► Obraz ${i+1} wczytany ✓ — ${images[i].description}`, 'ok');
         await sleep(30);
       }
