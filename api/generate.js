@@ -16,7 +16,27 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  const { prompt, artStyle = 'cartoon', frameCount = 4 } = req.body;
+  const { prompt, artStyle = 'cartoon', frameCount = 4, promptOnly = false, userPrompt = '' } = req.body;
+
+  // Handle promptOnly mode — generate a random prompt idea
+  if (promptOnly) {
+    const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
+    if (!ANTHROPIC_KEY) return res.status(500).json({ error: 'Brak klucza Anthropic' });
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 80,
+        messages: [{ role: 'user', content: userPrompt || 'Generate a creative GIF prompt about $ANAL Analtena crypto token. Max 20 words, vivid, animation-friendly.' }],
+        system: 'You are a creative prompt generator for AI image/GIF generation. Reply ONLY with the prompt text, nothing else, no quotes, no explanation.'
+      })
+    });
+    const d = await r.json();
+    const randomPrompt = d?.content?.[0]?.text?.trim() || '';
+    return res.status(200).json({ randomPrompt });
+  }
+
   if (!prompt?.trim()) return res.status(400).json({ error: 'Prompt jest wymagany' });
 
   const ANTHROPIC_KEY   = process.env.ANTHROPIC_API_KEY;
