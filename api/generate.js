@@ -1,6 +1,9 @@
 // api/generate.js
-// Claude (Anthropic) — wymyśla scenę i prompty dla każdej klatki
-// Replicate (Flux) — generuje prawdziwe obrazy AI dla każdej klatki
+// Architektura: fire-and-forget
+// 1. Claude generuje prompt obrazu
+// 2. Replicate startuje generowanie (bez czekania)
+// 3. Zwracamy prediction_id do frontendu
+// 4. Frontend odpytuje /api/status co 2 sekundy
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
@@ -13,7 +16,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  const { prompt, frameCount = 6, artStyle = 'cartoon' } = req.body;
+  const { prompt, artStyle = 'cartoon', frameCount = 4 } = req.body;
   if (!prompt?.trim()) return res.status(400).json({ error: 'Prompt jest wymagany' });
 
   const ANTHROPIC_KEY   = process.env.ANTHROPIC_API_KEY;
@@ -22,18 +25,17 @@ export default async function handler(req, res) {
   if (!ANTHROPIC_KEY)   return res.status(500).json({ error: 'Brak klucza Anthropic' });
   if (!REPLICATE_TOKEN) return res.status(500).json({ error: 'Brak klucza Replicate' });
 
-  const stylePrompts = {
-    cartoon:  'cartoon illustration, vibrant colors, bold outlines, comic book style, fun and energetic',
-    pixel:    '16-bit pixel art, retro game style, chunky pixels, nostalgic',
-    neon:     'cyberpunk neon art, dark background, glowing neon lights, futuristic',
-    sketch:   'pencil sketch, hand-drawn illustration, expressive lines, artistic',
-    retro:    '80s retro synthwave poster art, vintage colors, sunset gradient',
+  const styleMap = {
+    cartoon: 'cartoon illustration, vibrant colors, bold outlines, comic book style',
+    pixel:   '16-bit pixel art, retro game style, chunky pixels',
+    neon:    'cyberpunk neon art, dark background, glowing neon colors',
+    sketch:  'pencil sketch, hand-drawn, expressive lines',
+    retro:   '80s retro synthwave poster art, vintage colors',
   };
-  const styleDesc = stylePrompts[artStyle] || stylePrompts.cartoon;
-  const count = Math.min(parseInt(frameCount) || 6, 6);
+  const styleDesc = styleMap[artStyle] || styleMap.cartoon;
 
-  // ── KROK 1: Claude generuje prompty dla każdej klatki ──────────────
-  let frameImagePrompts;
+  // ── KROK 1: Claude tworzy optymalny prompt obrazu ─────────────────
+  let imagePrompt, title;
   try {
     const claudeResp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -44,60 +46,48 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        system: `Jesteś ekspertem od animacji i crypto meme art dla społeczności Analtena ($ANAL token).
-Tworzysz sekwencje obrazów które razem tworzą płynną animację GIF.
-Odpowiadaj TYLKO w JSON — bez markdown, bez wyjaśnień.`,
+        max_tokens: 500,
+        system: 'Jesteś ekspertem od tworzenia promptów dla modeli generowania obrazów AI. Odpowiadaj TYLKO w JSON bez markdown.',
         messages: [{
           role: 'user',
-          content: `Stwórz ${count} promptów do obrazów AI dla animacji GIF na temat: "${prompt.trim()}"
-Styl artystyczny: ${styleDesc}
+          content: `Stwórz jeden doskonały prompt po angielsku dla modelu Flux do wygenerowania obrazu GIF na temat: "${prompt.trim()}"
+Styl: ${styleDesc}
+Dodaj elementy crypto/meme: sowa Analtena, rakieta, księżyc, diamenty, wykresy.
 
-Każdy prompt musi:
-- Być po angielsku (dla modelu AI)
-- Opisywać JEDEN kadr animacji
-- Tworzyć razem płynną historię/animację
-- Zawierać crypto/meme elementy ($ANAL token, rakiety, księżyc, diamenty, wykresy)
-- Kończyć się: "${styleDesc}, high quality, detailed, square format, no text"
-
-JSON tylko, bez markdown:
-{
-  "title": "Tytuł GIF po polsku max 30 znaków",
-  "frames": [
-    {"prompt": "detailed image prompt in English...", "description": "co dzieje się w tej klatce po polsku"}
-  ]
-}`,
+JSON bez markdown:
+{"title": "tytuł po polsku max 25 znaków", "prompt": "detailed English image prompt, ${styleDesc}, crypto meme art, Analtena owl mascot, vibrant, highly detailed, square format, no text overlays"}`,
         }],
       }),
     });
 
-    if (!claudeResp.ok) throw new Error('Claude API error: ' + claudeResp.status);
+    if (!claudeResp.ok) throw new Error('Claude error: ' + claudeResp.status);
     const claudeData = await claudeResp.json();
     const raw = claudeData.content?.find(b => b.type === 'text')?.text || '';
     let parsed;
     try { parsed = JSON.parse(raw.replace(/```json|```/g, '').trim()); }
-    catch { const m = raw.match(/\{[\s\S]*\}/); if (m) parsed = JSON.parse(m[0]); else throw new Error('Błąd parsowania odpowiedzi Claude'); }
-    frameImagePrompts = parsed;
+    catch { const m = raw.match(/\{[\s\S]*\}/); parsed = m ? JSON.parse(m[0]) : null; }
+
+    imagePrompt = parsed?.prompt || `${prompt}, ${styleDesc}, crypto meme art, owl mascot, vibrant colors`;
+    title = parsed?.title || prompt.slice(0, 25);
+
   } catch (err) {
-    return res.status(500).json({ error: 'Claude error: ' + err.message });
+    // Fallback prompt jeśli Claude zawiedzie
+    imagePrompt = `${prompt}, ${styleDesc}, crypto meme art, Analtena owl mascot, vibrant colors, highly detailed`;
+    title = prompt.slice(0, 25);
   }
 
-  // ── KROK 2: Replicate generuje 1 obraz bazowy ────────────────────
-  // Strategia: 1 obraz AI + animacja na canvasie = szybko + wysoka jakość
-  const bestPrompt = frames[0]?.prompt || prompt;
-  console.log(`Generating single base image: ${bestPrompt.slice(0,80)}...`);
-
+  // ── KROK 2: Wyślij zadanie do Replicate (fire and forget) ──────────
   try {
-    const startResp = await fetch('https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions', {
+    const replicateResp = await fetch('https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${REPLICATE_TOKEN}`,
-        'Prefer': 'wait=60',
+        // NIE używamy Prefer: wait — chcemy natychmiast prediction_id
       },
       body: JSON.stringify({
         input: {
-          prompt: bestPrompt,
+          prompt: imagePrompt,
           num_outputs: 1,
           aspect_ratio: '1:1',
           output_format: 'webp',
@@ -107,40 +97,25 @@ JSON tylko, bez markdown:
       }),
     });
 
-    if (!startResp.ok) {
-      const err = await startResp.json();
-      throw new Error(err.detail || 'Replicate error: ' + startResp.status);
+    if (!replicateResp.ok) {
+      const err = await replicateResp.json();
+      throw new Error(err.detail || 'Replicate error: ' + replicateResp.status);
     }
 
-    let prediction = await startResp.json();
-    let attempts = 0;
-    while (prediction.status !== 'succeeded' && prediction.status !== 'failed' && attempts < 25) {
-      await new Promise(r => setTimeout(r, 2000));
-      const pollResp = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
-        headers: { 'Authorization': `Bearer ${REPLICATE_TOKEN}` },
-      });
-      prediction = await pollResp.json();
-      attempts++;
-    }
+    const prediction = await replicateResp.json();
 
-    if (prediction.status !== 'succeeded' || !prediction.output?.[0]) {
-      throw new Error('Generowanie obrazu nie powiodło się');
-    }
-
-    const baseImageUrl = prediction.output[0];
-
-    // Zwróć 1 obraz + instrukcje animacji dla każdej klatki
+    // Zwróć natychmiast prediction_id — frontend będzie odpytywać status
     return res.status(200).json({
-      mode: 'single-image',
-      title: frameImagePrompts.title || prompt.slice(0, 30),
-      baseImage: baseImageUrl,
-      frameCount: count,
-      animation: artStyle,
-      frameDescriptions: frames.map(f => f.description),
+      predictionId: prediction.id,
+      title,
+      imagePrompt,
+      frameCount: parseInt(frameCount) || 4,
+      artStyle,
+      status: prediction.status,
     });
 
   } catch (err) {
-    console.error('Replicate error:', err.message);
-    return res.status(500).json({ error: 'Błąd generowania obrazu: ' + err.message });
+    console.error('Replicate error:', err);
+    return res.status(500).json({ error: err.message });
   }
 }
