@@ -391,6 +391,13 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
           <span class="pchip" onclick="setPrompt('Golden $ANAL coin spinning in space, glowing aura, universe reflection, majestic')">🪙 Golden coin</span>
         </div>
 
+        <div class="ctrl">
+            <label style="display:flex;align-items:center;justify-content:space-between;">Quality<span id="quality-label" style="font-size:10px;color:var(--neon3);font-weight:700;">⚡ Fast</span></label>
+            <div style="display:flex;gap:6px;margin-top:6px;">
+              <button id="q-fast" onclick="setQuality('fast')" style="flex:1;padding:7px;border-radius:8px;border:1px solid var(--neon3);background:rgba(123,97,255,.15);color:var(--neon3);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-d);">⚡ Fast (~5s)</button>
+              <button id="q-high" onclick="setQuality('high')" style="flex:1;padding:7px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-d);">✨ Quality (~20s)</button>
+            </div>
+          </div>
         <div class="ctrl-row">
           <div class="ctrl">
             <label>Frames <span class="range-val" id="frames-val">4</span></label>
@@ -399,8 +406,14 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
           <div class="ctrl">
             <label>Style</label>
             <select id="art-style">
-              <option value="cartoon">Cartoon</option>
-              <option value="pixel">Pixel art</option>
+              <option value="cartoon">🎨 Cartoon</option>
+              <option value="anime">🌸 Anime</option>
+              <option value="neon">⚡ Neon Cyber</option>
+              <option value="render3d">🔮 3D Render</option>
+              <option value="comic">💥 Comic Book</option>
+              <option value="oil">🖼️ Oil Painting</option>
+              <option value="watercolor">🌊 Watercolor</option>
+              <option value="pixel">👾 Pixel Art</option>
               <option value="neon">Neon glow</option>
               <option value="sketch">Sketch</option>
               <option value="retro">Retro</option>
@@ -628,6 +641,19 @@ async function generateRandomPrompt() {
     btn.textContent = '✨ Random';
     btn.disabled = false;
   }
+}
+// Quality mode
+state.qualityMode = 'fast';
+function setQuality(mode, btn) {
+  state.qualityMode = mode;
+  document.getElementById('q-fast').style.borderColor = mode==='fast' ? 'var(--neon3)' : 'var(--border2)';
+  document.getElementById('q-fast').style.color = mode==='fast' ? 'var(--neon3)' : 'var(--muted)';
+  document.getElementById('q-fast').style.background = mode==='fast' ? 'rgba(123,97,255,.15)' : 'transparent';
+  document.getElementById('q-high').style.borderColor = mode==='high' ? 'var(--amber)' : 'var(--border2)';
+  document.getElementById('q-high').style.color = mode==='high' ? 'var(--amber)' : 'var(--muted)';
+  document.getElementById('q-high').style.background = mode==='high' ? 'rgba(255,183,0,.1)' : 'transparent';
+  document.getElementById('quality-label').textContent = mode==='high' ? '✨ Quality' : '⚡ Fast';
+  document.getElementById('quality-label').style.color = mode==='high' ? 'var(--amber)' : 'var(--neon3)';
 }
 async function connectX1Wallet() {
   try {
@@ -1100,7 +1126,7 @@ async function generateWithAI() {
     const apiResp = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, frameCount, artStyle }),
+      body: JSON.stringify({ prompt, frameCount, artStyle, quality: state.qualityMode || 'fast' }),
     });
 
     if (!apiResp.ok) {
