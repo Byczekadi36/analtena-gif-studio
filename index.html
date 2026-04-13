@@ -1611,6 +1611,21 @@ async function exportGIF() {
       oc2.fillStyle=state.overlayColor;
       oc2.fillText(state.overlayText,sz/2,ty);
     }
+    // Watermark Analtena.com
+    const wFontSize = Math.max(10, Math.round(sz * 0.042));
+    oc2.save();
+    oc2.font = `700 ${wFontSize}px -apple-system,sans-serif`;
+    oc2.textAlign = 'right';
+    const wText = 'Analtena.com';
+    const wPad = Math.round(sz * 0.025);
+    const wX = sz - wPad;
+    const wY = sz - wPad;
+    oc2.strokeStyle = 'rgba(0,0,0,0.7)';
+    oc2.lineWidth = wFontSize * 0.25;
+    oc2.strokeText(wText, wX, wY);
+    oc2.fillStyle = 'rgba(255,255,255,0.75)';
+    oc2.fillText(wText, wX, wY);
+    oc2.restore();
     gif.addFrame(oc, {delay, copy:true});
     setProgress((i/state.frames.length)*40, 'Preparing frames…', `Frame ${i+1} of ${state.frames.length}`);
     await sleep(5);
