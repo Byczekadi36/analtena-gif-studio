@@ -46,9 +46,14 @@ export default async function handler(req, res) {
   if (!REPLICATE_TOKEN) return res.status(500).json({ error: 'Brak klucza Replicate' });
 
   const styleMap = {
-    cartoon: 'cartoon illustration, vibrant colors, bold outlines, comic book style',
-    pixel:   '16-bit pixel art, retro game style, chunky pixels',
-    neon:    'cyberpunk neon art, dark background, glowing neon colors',
+    cartoon:   'cartoon illustration, vibrant colors, bold outlines, comic book style, Disney Pixar quality',
+    pixel:     '16-bit pixel art, retro game style, chunky pixels, sharp edges, limited palette',
+    neon:      'cyberpunk neon art, dark background, glowing neon colors, synthwave aesthetic',
+    anime:     'anime illustration style, clean lines, vivid colors, Studio Ghibli inspired, cel shading',
+    oil:       'oil painting masterpiece, rich textures, impressionist brushstrokes, gallery quality, dramatic lighting',
+    watercolor:'watercolor painting, soft washes, organic edges, artistic, pastel tones, paper texture',
+    render3d:  'hyper-realistic 3D render, octane render, photorealistic, ray tracing, 8K quality, cinematic',
+    comic:     'Marvel comic book style, bold ink lines, halftone dots, dynamic action pose, dramatic',
     sketch:  'pencil sketch, hand-drawn, expressive lines',
     retro:   '80s retro synthwave poster art, vintage colors',
   };
@@ -67,15 +72,21 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 500,
-        system: 'Jesteś ekspertem od tworzenia promptów dla modeli generowania obrazów AI. Odpowiadaj TYLKO w JSON bez markdown.',
+        system: 'You are an expert AI image prompt engineer for Flux image generation. Reply ONLY with valid JSON, no markdown, no explanation.',
         messages: [{
           role: 'user',
-          content: `Stwórz jeden doskonały prompt po angielsku dla modelu Flux do wygenerowania obrazu GIF na temat: "${prompt.trim()}"
-Styl: ${styleDesc}
-Dodaj elementy crypto/meme: sowa Analtena, rakieta, księżyc, diamenty, wykresy.
+          content: `Create a perfect Flux image generation prompt for this concept: "${prompt.trim()}"
+Style: ${styleDesc}
 
-JSON bez markdown:
-{"title": "tytuł po polsku max 25 znaków", "prompt": "detailed English image prompt, ${styleDesc}, crypto meme art, Analtena owl mascot, vibrant, highly detailed, square format, no text overlays"}`,
+Rules:
+- Stay TRUE to the user's concept — do NOT add owls or Analtena unless the user mentioned them
+- Make it vivid, cinematic, highly detailed
+- Optimize for animated GIF: dynamic composition, motion-friendly
+- Square format, no text overlays
+- Max 60 words for the prompt
+
+Reply with JSON only:
+{"title": "short title max 25 chars", "prompt": "detailed English Flux prompt, ${styleDesc}, vibrant, highly detailed, dynamic composition, cinematic lighting, square format, no text"}`,
         }],
       }),
     });
@@ -87,23 +98,28 @@ JSON bez markdown:
     try { parsed = JSON.parse(raw.replace(/```json|```/g, '').trim()); }
     catch { const m = raw.match(/\{[\s\S]*\}/); parsed = m ? JSON.parse(m[0]) : null; }
 
-    imagePrompt = parsed?.prompt || `${prompt}, ${styleDesc}, crypto meme art, owl mascot, vibrant colors`;
+    imagePrompt = parsed?.prompt || `${prompt}, ${styleDesc}, vibrant colors, cinematic lighting, highly detailed, dynamic composition`;
     title = parsed?.title || prompt.slice(0, 25);
 
   } catch (err) {
     // Fallback prompt jeśli Claude zawiedzie
-    imagePrompt = `${prompt}, ${styleDesc}, crypto meme art, Analtena owl mascot, vibrant colors, highly detailed`;
+    imagePrompt = `${prompt}, ${styleDesc}, vibrant colors, cinematic lighting, highly detailed, dynamic composition, square format`;
     title = prompt.slice(0, 25);
   }
 
   // ── KROK 2: Wyślij zadanie do Replicate (fire and forget) ──────────
   try {
-    const replicateResp = await fetch('https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions', {
+    // Quality mode: flux-dev (better quality, ~15s), Speed mode: flux-schnell (~5s)
+    const qualityMode = req.body.quality === 'high';
+    const modelUrl = qualityMode
+      ? 'https://api.replicate.com/v1/models/black-forest-labs/flux-dev/predictions'
+      : 'https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions';
+
+    const replicateResp = await fetch(modelUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${REPLICATE_TOKEN}`,
-        // NIE używamy Prefer: wait — chcemy natychmiast prediction_id
       },
       body: JSON.stringify({
         input: {
@@ -112,7 +128,8 @@ JSON bez markdown:
           aspect_ratio: '1:1',
           output_format: 'webp',
           output_quality: 95,
-          num_inference_steps: 4,
+          num_inference_steps: qualityMode ? 28 : 4,
+          guidance: qualityMode ? 3.5 : undefined,
         },
       }),
     });
