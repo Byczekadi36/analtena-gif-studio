@@ -3,8 +3,6 @@
 // encodes GIF server-side, returns download URL as blob
 // No native deps — uses pure-JS gifenc via CDN import
 
-export const config = { maxDuration: 60 };
-
 // Simple GIF encoder — pure JS implementation
 // LZW compression + GIF89a format
 function encodeGIF(frames, width, height, delay) {
