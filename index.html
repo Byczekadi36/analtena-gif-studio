@@ -148,7 +148,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 .tool-btn:hover,.tool-btn.active{border-color:var(--neon);color:var(--neon);background:rgba(0,255,204,.05);}
 .tool-sep{width:1px;height:24px;background:var(--border);flex-shrink:0;}
 
-.canvas-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto;}
+.canvas-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden;}
 .canvas-wrap{position:relative;box-shadow:0 0 0 1px var(--border2),0 20px 60px rgba(0,0,0,.6);}
 #main-canvas{display:block;border-radius:4px;}
 .canvas-overlay{position:absolute;inset:0;pointer-events:none;border-radius:4px;}
@@ -254,7 +254,19 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
   .left-panel{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:300px;}
   .app-body{flex-direction:column;}
   .right-panel{display:none;}
-  .canvas-stage{padding:12px;}
+  .canvas-stage{padding:6px;overflow:hidden;align-items:center;justify-content:center;}
+  .canvas-wrap{
+    max-width:calc(100vw - 12px) !important;
+    max-height:calc(100vw - 12px) !important;
+    width:calc(100vw - 12px) !important;
+    height:calc(100vw - 12px) !important;
+    overflow:hidden;
+  }
+  #main-canvas{
+    width:100% !important;
+    height:100% !important;
+    object-fit:contain;
+  }
 }
 
 /* ── TOAST ── */
@@ -1555,7 +1567,7 @@ async function generateWithAI() {
     setProgress(100, 'Done!', '');
     await sleep(400);
     document.getElementById('progress-overlay').classList.remove('show');
-    toast('🎉 GIF ready — ' + state.frames.length + ' frames!');
+    toast('🎉 GIF ready — ' + state.frames.length + ' frames!'); setTimeout(fitCanvasToScreen, 100);
 
   } catch (err) {
     document.getElementById('progress-overlay').classList.remove('show');
@@ -2072,6 +2084,40 @@ function toast(msg){
   clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
 }
+
+// ── MOBILE CANVAS SCALING ──────────────────────────────────────────
+// Scales the canvas display to fit screen without changing pixel data
+function fitCanvasToScreen() {
+  const canvas = document.getElementById('main-canvas');
+  const wrap = canvas.parentElement;
+  if (!canvas || !wrap) return;
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile) {
+    const available = Math.min(window.innerWidth - 12, window.innerHeight * 0.45);
+    const canvasSize = canvas.width || 480;
+    const scale = available / canvasSize;
+    // Use CSS transform scale — preserves full resolution internally
+    canvas.style.transform = 'scale(' + scale + ')';
+    canvas.style.transformOrigin = 'top left';
+    canvas.style.position = 'relative';
+    wrap.style.width  = Math.round(canvasSize * scale) + 'px';
+    wrap.style.height = Math.round(canvasSize * scale) + 'px';
+    wrap.style.overflow = 'hidden';
+    wrap.style.flexShrink = '0';
+  } else {
+    canvas.style.transform = '';
+    canvas.style.position = '';
+    wrap.style.width  = '';
+    wrap.style.height = '';
+    wrap.style.overflow = '';
+  }
+}
+
+window.addEventListener('resize', fitCanvasToScreen);
+// Also call after every render
+const _origRender = renderCurrentFrame;
+renderCurrentFrame = function() { _origRender(); fitCanvasToScreen(); };
+
 </script>
 </body>
 </html>
