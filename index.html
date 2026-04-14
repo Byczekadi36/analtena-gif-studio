@@ -1249,11 +1249,22 @@ function setFrameDot(i, done) {
 }
 
 // ── POLLING ────────────────────────────────────────────────────────
-async function pollUntilDone(predictionId, maxAttempts=40) {
+// Mobile fix: use Page Visibility API to detect screen sleep
+async function pollUntilDone(predictionId, maxAttempts=60) {
+  let pausedWhileHidden = 0;
   for (let i = 0; i < maxAttempts; i++) {
-    await sleep(2000);
+    // If page is hidden (screen off / tab switched on mobile), wait longer without counting
+    if (document.hidden) {
+      await sleep(3000);
+      pausedWhileHidden++;
+      if (pausedWhileHidden < 30) { i--; continue; } // don't count hidden waits
+    }
+    await sleep(2500);
     try {
-      const resp = await fetch('/api/status?id=' + predictionId);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000); // 8s timeout per request
+      const resp = await fetch('/api/status?id=' + predictionId, { signal: controller.signal });
+      clearTimeout(timeout);
       if (!resp.ok) continue;
       const data = await resp.json();
 
@@ -1264,15 +1275,19 @@ async function pollUntilDone(predictionId, maxAttempts=40) {
         throw new Error('Replicate: generation failed');
       }
 
-      // Update progress
-      const pct = 20 + Math.min(i * 2.5, 48);
+      // Update progress (capped at 68% — leaves room for frame building)
+      const pct = 20 + Math.min(i * 1.8, 22);
       const statusMsg = {
         'starting':    'Starting AI model…',
-        'processing':  'Generating image… (' + (i*2) + 's)',
+        'processing':  'Generating image… (' + Math.round(i*2.5) + 's)',
       }[data.status] || 'Processing…';
       setProgress(pct, '🎨 Replicate working…', statusMsg);
 
     } catch(err) {
+      if (err.name === 'AbortError') {
+        // Network timeout on mobile — retry silently
+        continue;
+      }
       if (err.message.includes('failed')) throw err;
     }
   }
@@ -1391,25 +1406,33 @@ async function generateWithAI() {
     setProgress(20, '🎨 Replicate generating…', 'Creating AI image — ~5 seconds');
     const imageUrl = await pollUntilDone(job.predictionId);
 
-    // Step 3: Load image and animate frames
-    setProgress(70, '🖼 Loading image…', 'Fetching result');
+    // Step 3: Load image ONCE and animate frames
+    setProgress(42, '🖼 Loading image…', 'Fetching result');
     log('► Image generated ✓', 'ok');
 
+    // Load image only ONCE — reuse for all frames (critical for mobile!)
     const baseImg = new Image();
     baseImg.crossOrigin = 'anonymous';
-    await new Promise(res => { baseImg.onload = res; baseImg.onerror = res; baseImg.src = imageUrl; });
+    await new Promise((res, rej) => {
+      baseImg.onload = res;
+      baseImg.onerror = () => rej(new Error('Image failed to load — check CORS or network'));
+      // Keep-alive: use a blob URL on mobile to avoid re-fetch
+      fetch(imageUrl).then(r => r.blob()).then(blob => {
+        baseImg.src = URL.createObjectURL(blob);
+      }).catch(() => {
+        baseImg.src = imageUrl; // fallback to direct URL
+      });
+    });
 
     state.frames = [];
     setCanvasSize(sz);
-    const result = { mode: 'single-image', baseImage: imageUrl, frameCount: job.frameCount, animation: job.artStyle };
+    const result = { mode: 'single-image', baseImage: null, frameCount: job.frameCount, animation: job.artStyle };
 
     if (result.mode === 'single-image') {
       // ── SINGLE IMAGE + CANVAS ANIMATION ──
-      log('► Loading base image…', 'ai');
-      setProgress(40, '🎨 Image generated!', 'Creating animation…');
-      const baseImg = new Image();
-      baseImg.crossOrigin = 'anonymous';
-      await new Promise(res => { baseImg.onload = res; baseImg.onerror = res; baseImg.src = result.baseImage; });
+      // Image already loaded above — no second fetch!
+      setProgress(48, '🎨 Image ready!', 'Building animation frames…');
+      log('► Building frames from loaded image…', 'ai');
       const fc = result.frameCount || 6;
       const anim = result.animation || 'cartoon';
       initFrameDots(fc);
@@ -1426,7 +1449,7 @@ async function generateWithAI() {
       ];
       for (let i = 0; i < fc; i++) {
         setFrameDot(i, false);
-        setProgress(45 + (i/fc)*45, '🎬 Frame '+(i+1)+' of '+fc, result.frameDescriptions?.[i] || '');
+        setProgress(50 + (i/fc)*40, '🎬 Frame '+(i+1)+' of '+fc, '');
         const def = animDefs[i % animDefs.length];
         const t = i / fc;
         const oc = document.createElement('canvas'); oc.width=sz; oc.height=sz;
@@ -1457,7 +1480,8 @@ async function generateWithAI() {
         state.frames.push(oc2.getImageData(0,0,sz,sz));
         setFrameDot(i,true);
         log('► Frame '+(i+1)+' ✓','ok');
-        await sleep(20);
+        // Longer yield on mobile to prevent CPU throttling / sleep
+        await sleep(50);
       }
 
     } else if (result.mode === 'replicate') {
