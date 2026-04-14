@@ -1895,20 +1895,72 @@ function renderFrame(ctx2, sz, frame, frameIdx, totalFrames) {
 }
 
 // ════════════════════════════════
-// EXPORT GIF
+// EXPORT GIF — mobile-safe, no workers
 // ════════════════════════════════
+
+// Encode GIF entirely on main thread using omggif library (no workers = no iOS crash)
+function loadOmggif(cb) {
+  if (window.GifWriter) { cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/omggif@1.0.10/omggif.js';
+  s.onload = cb;
+  s.onerror = () => { toast('GIF encoder failed to load'); };
+  document.head.appendChild(s);
+}
+
+// Quantize canvas to 256 colors (simple median cut approximation)
+function quantizeCanvas(canvas, numColors) {
+  const ctx2 = canvas.getContext('2d');
+  const data = ctx2.getImageData(0, 0, canvas.width, canvas.height).data;
+  // Build simple palette by sampling
+  const palette = [];
+  const seen = new Set();
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i] & 0xF8;
+    const g = data[i+1] & 0xF8;
+    const b = data[i+2] & 0xF8;
+    const key = (r << 16) | (g << 8) | b;
+    if (!seen.has(key)) {
+      seen.add(key);
+      palette.push([r, g, b]);
+      if (palette.length >= numColors) break;
+    }
+  }
+  // Pad palette to exactly numColors
+  while (palette.length < numColors) palette.push([0, 0, 0]);
+
+  // Map each pixel to nearest palette index
+  const indices = new Uint8Array(canvas.width * canvas.height);
+  for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+    const r = data[i], g = data[i+1], b = data[i+2];
+    let best = 0, bestDist = Infinity;
+    for (let j = 0; j < palette.length; j++) {
+      const dr = r - palette[j][0];
+      const dg = g - palette[j][1];
+      const db = b - palette[j][2];
+      const d = dr*dr + dg*dg + db*db;
+      if (d < bestDist) { bestDist = d; best = j; }
+    }
+    indices[p] = best;
+  }
+  return { palette, indices };
+}
 
 // Mobile-safe download
 function mobileDownload(blob, filename) {
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   const url = URL.createObjectURL(blob);
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   if (isMobile) {
-    // Open in new tab — user long-presses to Save to Photos / Files
     const w = window.open('', '_blank');
     if (w) {
-      w.document.write('<html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="' + url + '" style="max-width:100%;max-height:100vh"/><br><p style="color:#fff;text-align:center;font-family:sans-serif">Long-press image → Save to Photos</p></body></html>');
+      w.document.write(
+        '<html><head><title>Save GIF</title></head><body style="margin:0;background:#000;text-align:center;padding:20px;font-family:sans-serif;color:#fff">' +
+        '<p style="font-size:18px">🎉 Your GIF is ready!</p>' +
+        '<img src="' + url + '" style="max-width:100%;border-radius:8px"/>' +
+        '<p style="font-size:15px;margin-top:16px">👆 Long-press image → <b>Save to Photos</b></p>' +
+        '</body></html>'
+      );
     } else {
-      // Fallback if popup blocked
       const a = document.createElement('a');
       a.href = url; a.download = filename; a.click();
     }
@@ -1921,59 +1973,57 @@ function mobileDownload(blob, filename) {
 
 async function exportGIF() {
   if (!state.frames.length) { toast('No frames to export!'); return; }
-  clearInterval(state.playTimer); state.playing=false;
-  document.getElementById('play-pause-btn').textContent='▶';
-
+  clearInterval(state.playTimer); state.playing = false;
+  document.getElementById('play-pause-btn').textContent = '▶';
   document.getElementById('progress-overlay').classList.add('show');
-  setProgress(0,'Preparing export…','');
+  setProgress(0, 'Preparing…', '');
 
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   const sz = state.frames[0].width;
-  // Scale down on mobile to prevent crash
-  const exportSz = isMobile ? Math.min(sz, 320) : sz;
-  const delay = parseInt(document.getElementById('frame-delay').value)||100;
+  // Mobile: cap at 240px to stay well within memory limits
+  const exportSz = isMobile ? Math.min(sz, 240) : sz;
+  const delay = parseInt(document.getElementById('frame-delay').value) || 100;
+  const delayCs = Math.round(delay / 10); // centiseconds for GIF spec
 
+  // Build scaled canvases
   const canvases = [];
-  for (let i=0; i<state.frames.length; i++) {
+  for (let i = 0; i < state.frames.length; i++) {
     const oc = document.createElement('canvas');
     oc.width = sz; oc.height = sz;
     const oc2 = oc.getContext('2d');
     oc2.putImageData(state.frames[i], 0, 0);
 
-    // Apply effects
-    const savedCtx = ctx;
-    const savedFrame = state.currentFrame;
-    ctx = oc2;
-    state.currentFrame = i;
+    // Effects
+    const savedCtx = ctx; const savedFrame = state.currentFrame;
+    ctx = oc2; state.currentFrame = i;
     applyEffectsToCanvas();
-    ctx = savedCtx;
-    state.currentFrame = savedFrame;
+    ctx = savedCtx; state.currentFrame = savedFrame;
 
-    // Overlay text
+    // Overlay
     if (state.overlayText) {
-      const tsz = state.overlaySize*(sz/480);
-      oc2.font = '900 '+tsz+'px Syne,sans-serif';
+      const tsz = state.overlaySize * (sz/480);
+      oc2.font = '900 ' + tsz + 'px Syne,sans-serif';
       oc2.textAlign = 'center';
-      let ty = state.overlayPos==='top' ? tsz+12 : state.overlayPos==='middle' ? sz/2+tsz/3 : sz-20*(sz/480);
+      const ty = state.overlayPos==='top' ? tsz+12 : state.overlayPos==='middle' ? sz/2+tsz/3 : sz-20*(sz/480);
       oc2.strokeStyle='#000'; oc2.lineWidth=tsz*0.18;
       oc2.strokeText(state.overlayText, sz/2, ty);
-      oc2.fillStyle=state.overlayColor;
+      oc2.fillStyle = state.overlayColor;
       oc2.fillText(state.overlayText, sz/2, ty);
     }
 
     // Watermark
-    const wFs = Math.max(10, Math.round(sz*0.042));
+    const wFs = Math.max(8, Math.round(sz * 0.042));
     oc2.save();
-    oc2.font = '700 '+wFs+'px -apple-system,sans-serif';
+    oc2.font = '700 ' + wFs + 'px sans-serif';
     oc2.textAlign = 'right';
-    oc2.strokeStyle = 'rgba(0,0,0,0.7)';
-    oc2.lineWidth = wFs*0.25;
-    oc2.strokeText('Analtena.com', sz-Math.round(sz*0.025), sz-Math.round(sz*0.025));
+    oc2.strokeStyle = 'rgba(0,0,0,0.7)'; oc2.lineWidth = wFs * 0.25;
+    const wP = Math.round(sz * 0.025);
+    oc2.strokeText('Analtena.com', sz-wP, sz-wP);
     oc2.fillStyle = 'rgba(255,255,255,0.75)';
-    oc2.fillText('Analtena.com', sz-Math.round(sz*0.025), sz-Math.round(sz*0.025));
+    oc2.fillText('Analtena.com', sz-wP, sz-wP);
     oc2.restore();
 
-    // Scale down for mobile
+    // Scale
     if (exportSz < sz) {
       const sc = document.createElement('canvas');
       sc.width = exportSz; sc.height = exportSz;
@@ -1983,54 +2033,63 @@ async function exportGIF() {
       canvases.push(oc);
     }
 
-    setProgress((i/state.frames.length)*35, 'Preparing frames…', 'Frame '+(i+1)+' of '+state.frames.length);
-    await sleep(isMobile ? 100 : 10);
+    setProgress((i / state.frames.length) * 40, 'Processing frames…', 'Frame ' + (i+1) + ' of ' + state.frames.length);
+    await sleep(isMobile ? 80 : 5);
   }
 
-  setProgress(35, 'Encoding GIF…', isMobile ? 'Optimized for mobile…' : 'Full quality…');
+  // Encode using omggif (main thread, no workers — works on iOS)
+  setProgress(40, 'Encoding GIF…', 'Please wait…');
+  await sleep(50);
 
-  const gif = new GIF({
-    workers: isMobile ? 1 : 2,
-    quality: isMobile ? 15 : 6,
-    width: exportSz,
-    height: exportSz,
-    workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
-  });
+  try {
+    await new Promise((resolve, reject) => {
+      loadOmggif(async () => {
+        try {
+          const buf = new Uint8Array(exportSz * exportSz * state.frames.length * 4 + 1024);
+          const gw = new GifWriter(buf, exportSz, exportSz, { loop: 0 });
 
-  canvases.forEach(c => gif.addFrame(c, {delay, copy:true}));
+          for (let i = 0; i < canvases.length; i++) {
+            setProgress(40 + (i / canvases.length) * 55, 'Encoding…', 'Frame ' + (i+1) + ' of ' + canvases.length);
+            await sleep(isMobile ? 30 : 0);
 
-  gif.on('progress', p => {
-    setProgress(35+p*60, 'Encoding…', Math.round(p*100)+'% done');
-  });
+            const { palette, indices } = quantizeCanvas(canvases[i], 256);
+            const flatPalette = palette.flat();
+            // Pad to 256*3
+            while (flatPalette.length < 256*3) flatPalette.push(0);
 
-  gif.on('finished', blob => {
-    setProgress(100, 'Done! 🎉', '');
-    setTimeout(() => {
-      document.getElementById('progress-overlay').classList.remove('show');
-      const url = URL.createObjectURL(blob);
-      state.resultUrl = url;
-      state.resultBlob = blob;
-      document.getElementById('result-img').src = url;
-      document.getElementById('result-meta').textContent =
-        Math.round(blob.size/1024)+'KB · '+exportSz+'×'+exportSz+'px · '+state.frames.length+' frames';
-      document.getElementById('result-dl-btn').onclick = () => {
-        mobileDownload(blob, 'analtena-'+Date.now()+'.gif');
-      };
-      document.getElementById('result-modal').classList.add('show');
-      saveToHistory(url, blob, state.lastPrompt || '');
-    }, 400);
-  });
+            gw.addFrame(0, 0, exportSz, exportSz, indices, {
+              palette: flatPalette,
+              delay: delayCs
+            });
+          }
 
-  gif.on('error', err => {
+          const blob = new Blob([buf.slice(0, gw.end())], { type: 'image/gif' });
+          setProgress(100, 'Done! 🎉', '');
+          await sleep(300);
+          document.getElementById('progress-overlay').classList.remove('show');
+
+          const url = URL.createObjectURL(blob);
+          state.resultUrl = url;
+          state.resultBlob = blob;
+          document.getElementById('result-img').src = url;
+          document.getElementById('result-meta').textContent =
+            Math.round(blob.size/1024) + 'KB · ' + exportSz + 'px · ' + state.frames.length + ' frames';
+          document.getElementById('result-dl-btn').onclick = () => {
+            mobileDownload(blob, 'analtena-' + Date.now() + '.gif');
+          };
+          document.getElementById('result-modal').classList.add('show');
+          saveToHistory(url, blob, state.lastPrompt || '');
+          resolve();
+        } catch(e) { reject(e); }
+      });
+    });
+  } catch(err) {
     document.getElementById('progress-overlay').classList.remove('show');
-    toast('Export error: ' + err);
+    log('Export error: ' + err.message, 'err');
+    toast('Export failed — try lower resolution');
     document.getElementById('export-btn').disabled = false;
-  });
-
-  gif.render();
+  }
 }
-
-
 function shareX() {
   const prompt = state.lastPrompt || 'AI GIF';
   const text = encodeURIComponent(`Just generated this AI GIF with @Analtena GIF Studio on X1! 🦉\n\n"${prompt}"\n\n#ANAL #Analtena #X1Network #Web3`);
