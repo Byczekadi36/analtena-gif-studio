@@ -504,6 +504,13 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 
         <div class="section-label" style="margin-top:16px">Frame settings</div>
         <div class="ctrl">
+          <label>Export duration</label>
+          <select id="export-duration" style="width:100%;padding:8px;background:var(--card);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--font-d);font-size:13px;">
+            <option value="5">⚡ 5 seconds</option>
+            <option value="10">🎬 10 seconds</option>
+          </select>
+        </div>
+        <div class="ctrl">
           <label>Frame delay (ms) <span class="range-val" id="delay-val">100</span></label>
           <input type="range" id="frame-delay" min="40" max="500" value="100" oninput="document.getElementById('delay-val').textContent=this.value"/>
         </div>
@@ -572,7 +579,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
           <button class="play-btn" onclick="nextFrame()">▶▶</button>
           <span class="frame-counter" id="frame-counter">Frame 1 / 1</span>
         </div>
-        <button class="export-btn" id="export-btn" onclick="exportGIF()">⬇ Export GIF</button>
+        <button class="export-btn" id="export-btn" onclick="exportGIF()">⬇ Export MP4</button>
       </div>
     </div>
 
@@ -1960,7 +1967,7 @@ function renderFrame(ctx2, sz, frame, frameIdx, totalFrames) {
 }
 
 // ════════════════════════════════
-// EXPORT GIF — via backend (works on all devices)
+// EXPORT MP4 — backend encoding, full quality, works on all devices
 // ════════════════════════════════
 
 async function exportGIF() {
@@ -1968,31 +1975,28 @@ async function exportGIF() {
   clearInterval(state.playTimer); state.playing = false;
   document.getElementById('play-pause-btn').textContent = '▶';
   document.getElementById('progress-overlay').classList.add('show');
-  setProgress(0, 'Preparing export…', '');
+  setProgress(0, 'Preparing MP4 export…', '');
 
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   const sz = state.frames[0].width;
-  // Export at 320px max to keep file small — still looks great
-  const exportSz = Math.min(sz, 320);
-  const delay = parseInt(document.getElementById('frame-delay').value) || 120;
+  const duration = parseInt(document.getElementById('export-duration')?.value) || 5;
 
   try {
-    // Build frames as base64 RGBA
+    // Build PNG frames as base64 data URLs
     const b64frames = [];
     for (let i = 0; i < state.frames.length; i++) {
-      setProgress((i / state.frames.length) * 40, 'Preparing frame ' + (i+1) + '…', '');
-      await sleep(isMobile ? 50 : 5);
+      setProgress((i / state.frames.length) * 40, 'Preparing frame ' + (i+1) + ' of ' + state.frames.length + '…', '');
+      await sleep(isMobile ? 40 : 5);
 
-      // Draw frame with effects + watermark onto scaled canvas
+      // Draw frame with effects + text onto canvas
       const src = document.createElement('canvas');
       src.width = sz; src.height = sz;
-      const sc = src.getContext('2d');
-      sc.putImageData(state.frames[i], 0, 0);
+      src.getContext('2d').putImageData(state.frames[i], 0, 0);
 
       const oc = document.createElement('canvas');
-      oc.width = exportSz; oc.height = exportSz;
+      oc.width = sz; oc.height = sz;
       const oc2 = oc.getContext('2d');
-      oc2.drawImage(src, 0, 0, exportSz, exportSz);
+      oc2.drawImage(src, 0, 0);
 
       // Effects
       const savedCtx = ctx; const savedFrame = state.currentFrame;
@@ -2002,48 +2006,42 @@ async function exportGIF() {
 
       // Overlay text
       if (state.overlayText) {
-        const tsz = Math.max(10, state.overlaySize * (exportSz/480));
+        const tsz = Math.max(10, state.overlaySize * (sz/480));
         oc2.font = '900 ' + tsz + 'px Syne,sans-serif';
         oc2.textAlign = 'center';
-        const ty = state.overlayPos==='top' ? tsz+8 : state.overlayPos==='middle' ? exportSz/2+tsz/3 : exportSz-12;
-        oc2.strokeStyle='#000'; oc2.lineWidth=tsz*0.15;
-        oc2.strokeText(state.overlayText, exportSz/2, ty);
+        const ty = state.overlayPos==='top' ? tsz+12 : state.overlayPos==='middle' ? sz/2+tsz/3 : sz-20*(sz/480);
+        oc2.strokeStyle='#000'; oc2.lineWidth=tsz*0.18;
+        oc2.strokeText(state.overlayText, sz/2, ty);
         oc2.fillStyle = state.overlayColor;
-        oc2.fillText(state.overlayText, exportSz/2, ty);
+        oc2.fillText(state.overlayText, sz/2, ty);
       }
 
       // Watermark
-      const wFs = Math.max(7, Math.round(exportSz * 0.045));
+      const wFs = Math.max(8, Math.round(sz * 0.042));
       oc2.save();
       oc2.font = '700 ' + wFs + 'px sans-serif';
       oc2.textAlign = 'right';
-      oc2.strokeStyle = 'rgba(0,0,0,0.8)'; oc2.lineWidth = 2;
-      const wP = Math.round(exportSz * 0.025);
-      oc2.strokeText('Analtena.com', exportSz-wP, exportSz-wP);
+      oc2.strokeStyle = 'rgba(0,0,0,0.7)'; oc2.lineWidth = 2;
+      const wP = Math.round(sz * 0.025);
+      oc2.strokeText('Analtena.com', sz-wP, sz-wP);
       oc2.fillStyle = 'rgba(255,255,255,0.8)';
-      oc2.fillText('Analtena.com', exportSz-wP, exportSz-wP);
+      oc2.fillText('Analtena.com', sz-wP, sz-wP);
       oc2.restore();
 
-      // Get raw RGBA as base64
-      const imgData = oc2.getImageData(0, 0, exportSz, exportSz);
-      // Convert Uint8ClampedArray to base64
-      const raw = imgData.data;
-      let binary = '';
-      for (let j = 0; j < raw.length; j++) binary += String.fromCharCode(raw[j]);
-      b64frames.push(btoa(binary));
+      // Export as PNG base64 — full quality, no color loss
+      b64frames.push(oc.toDataURL('image/png'));
     }
 
-    setProgress(42, 'Sending to server…', 'Encoding GIF on backend');
+    setProgress(42, 'Sending to server…', 'Encoding ' + duration + 's MP4 video');
 
-    // Send to backend
     const resp = await fetch('/api/export', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         frames: b64frames,
-        width: exportSz,
-        height: exportSz,
-        delay: delay
+        width: sz,
+        height: sz,
+        duration: duration
       })
     });
 
@@ -2052,29 +2050,29 @@ async function exportGIF() {
       throw new Error(err.error || 'Server error ' + resp.status);
     }
 
-    setProgress(90, 'Almost done…', '');
+    setProgress(90, 'Downloading…', '');
     const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
     setProgress(100, 'Done! 🎉', '');
-
     await sleep(300);
+
     document.getElementById('progress-overlay').classList.remove('show');
 
-    const url = URL.createObjectURL(blob);
     state.resultUrl = url;
     state.resultBlob = blob;
     document.getElementById('result-img').src = url;
     document.getElementById('result-meta').textContent =
-      Math.round(blob.size/1024) + 'KB · ' + exportSz + 'px · ' + state.frames.length + ' frames';
+      Math.round(blob.size/1024) + 'KB · ' + sz + 'px · ' + duration + 's · MP4';
 
-    // Download — works on all devices including iOS
+    document.getElementById('result-dl-btn').textContent = '⬇ Download MP4';
     document.getElementById('result-dl-btn').onclick = () => {
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'analtena-' + Date.now() + '.gif';
+      a.download = 'analtena-' + Date.now() + '.mp4';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      if (isMobile) toast('If download did not start — long-press the GIF → Save to Photos 📸');
+      if (isMobile) setTimeout(() => toast('📱 Saved! Check your Downloads or Photos folder'), 1000);
     };
 
     document.getElementById('result-modal').classList.add('show');
@@ -2083,7 +2081,7 @@ async function exportGIF() {
   } catch(err) {
     document.getElementById('progress-overlay').classList.remove('show');
     log('Export error: ' + err.message, 'err');
-    toast('Export failed: ' + err.message);
+    toast('❌ Export failed: ' + err.message);
     document.getElementById('export-btn').disabled = false;
   }
 }
