@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>ANAL AI GIF Studio</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js" crossorigin="anonymous"></script>
 <style>
 :root{
   --bg:#080810;--surface:#0f0f1a;--card:#14141f;--card2:#1a1a28;
@@ -442,11 +442,22 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
               <option value="oil">🖼️ Oil Painting</option>
               <option value="watercolor">🌊 Watercolor</option>
               <option value="pixel">👾 Pixel Art</option>
-              <option value="neon">Neon glow</option>
-              <option value="sketch">Sketch</option>
-              <option value="retro">Retro</option>
+              <option value="sketch">✏️ Sketch</option>
+              <option value="retro">📼 Retro 80s</option>
             </select>
           </div>
+        </div>
+
+        <div class="ctrl">
+          <label>Animation Style</label>
+          <select id="anim-style">
+            <option value="zoom">🔍 Zoom Pulse</option>
+            <option value="float">🌊 Float Wave</option>
+            <option value="glitch">⚡ Glitch Flash</option>
+            <option value="shake">💥 Shake Impact</option>
+            <option value="rotate">🌀 Spin Zoom</option>
+            <option value="breathe">🫧 Breathe</option>
+          </select>
         </div>
 
         <div class="ctrl">
@@ -1466,50 +1477,104 @@ async function generateWithAI() {
       const anim = result.animation || 'cartoon';
       initFrameDots(fc);
       log('► Animating ' + fc + ' frames…', 'ai');
-      const animDefs = [
-        {scale:1.0, offX:0,     offY:0,     bright:1.0,  hue:0  },
-        {scale:1.07,offX:0,     offY:-0.03, bright:1.12, hue:20 },
-        {scale:1.13,offX:0.03, offY:-0.05, bright:1.2,  hue:35 },
-        {scale:1.09,offX:0,    offY:-0.02, bright:1.15, hue:15 },
-        {scale:1.04,offX:-0.02,offY:0,     bright:1.05, hue:-10},
-        {scale:1.0, offX:0,    offY:0,     bright:1.0,  hue:0  },
-        {scale:1.05,offX:0.02, offY:0.01,  bright:1.08, hue:25 },
-        {scale:1.1, offX:-0.01,offY:-0.03, bright:1.14, hue:-5 },
-      ];
+      // Get selected animation style
+      const animStyle = document.getElementById('anim-style')?.value || 'zoom';
+
+      // Animation definitions per style
+      function getAnimDef(style, frameIdx, totalFrames) {
+        const t = frameIdx / Math.max(totalFrames - 1, 1); // 0..1
+        const sin = Math.sin;
+        const PI = Math.PI;
+        switch(style) {
+          case 'zoom': {
+            // Smooth zoom pulse — breathes in and out
+            const s = 1.0 + 0.12 * sin(t * PI * 2);
+            return { scale: s, offX: 0, offY: 0, bright: 1.0 + 0.08*sin(t*PI*2), hue: 0, rot: 0, alpha: 1 };
+          }
+          case 'float': {
+            // Gentle floating wave — moves up/down
+            const dy = sin(t * PI * 2) * 0.04;
+            const s = 1.0 + 0.05 * sin(t * PI * 2 + PI/2);
+            return { scale: s, offX: 0, offY: dy, bright: 1.0, hue: sin(t*PI*2)*10, rot: 0, alpha: 1 };
+          }
+          case 'glitch': {
+            // Glitch flash — sharp jumps, color shifts
+            const isGlitch = frameIdx % 3 === 0;
+            const offX = isGlitch ? (Math.sin(frameIdx*7.3)*0.03) : 0;
+            const hue = isGlitch ? (frameIdx % 2 === 0 ? 180 : -90) : 0;
+            const bright = isGlitch ? 1.4 : 1.0;
+            return { scale: 1.0, offX, offY: 0, bright, hue, rot: 0, alpha: 1 };
+          }
+          case 'shake': {
+            // Shake impact — quick vibration that settles
+            const decay = 1 - t;
+            const offX = sin(frameIdx * 11.7) * 0.03 * decay;
+            const offY = sin(frameIdx * 8.3) * 0.02 * decay;
+            const s = 1.0 + 0.06 * (1-t);
+            return { scale: s, offX, offY, bright: 1.0 + 0.1*(1-t), hue: 0, rot: 0, alpha: 1 };
+          }
+          case 'rotate': {
+            // Spin zoom — rotates while zooming in
+            const rot = t * PI * 0.25; // up to 45 degrees total
+            const s = 1.0 + t * 0.15;
+            return { scale: s, offX: 0, offY: 0, bright: 1.0 + t*0.1, hue: t*30, rot, alpha: 1 };
+          }
+          case 'breathe':
+          default: {
+            // Slow deep breathe — very subtle
+            const s = 1.0 + 0.07 * sin(t * PI * 2);
+            const bright = 0.92 + 0.16 * sin(t * PI * 2 + PI/4);
+            return { scale: s, offX: 0, offY: 0, bright, hue: 0, rot: 0, alpha: 1 };
+          }
+        }
+      }
+
       for (let i = 0; i < fc; i++) {
         setFrameDot(i, false);
-        setProgress(50 + (i/fc)*40, '🎬 Frame '+(i+1)+' of '+fc, '');
-        const def = animDefs[i % animDefs.length];
-        const t = i / fc;
+        setProgress(50 + (i/fc)*40, '🎬 Frame '+(i+1)+' of '+fc, animStyle);
+        const def = getAnimDef(animStyle, i, fc);
         const oc = document.createElement('canvas'); oc.width=sz; oc.height=sz;
         const oc2 = oc.getContext('2d');
         oc2.fillStyle='#080810'; oc2.fillRect(0,0,sz,sz);
         oc2.save();
+        // Apply rotation if any
+        if (def.rot) {
+          oc2.translate(sz/2, sz/2);
+          oc2.rotate(def.rot);
+          oc2.translate(-sz/2, -sz/2);
+        }
         oc2.translate(sz/2 + def.offX*sz, sz/2 + def.offY*sz);
         oc2.scale(def.scale, def.scale);
-        oc2.filter = 'brightness('+def.bright+') hue-rotate('+def.hue+'deg)';
+        oc2.filter = 'brightness('+def.bright+') hue-rotate('+(def.hue||0)+'deg)';
+        oc2.globalAlpha = def.alpha || 1;
         try { oc2.drawImage(baseImg,-sz/2,-sz/2,sz,sz); } catch(e){}
-        oc2.filter='none'; oc2.restore();
-        // neon overlay
-        if (anim==='neon') {
-          const g=oc2.createRadialGradient(sz/2,sz/2,0,sz/2,sz/2,sz*0.6);
-          g.addColorStop(0,'rgba(0,255,204,'+(0.04+t*0.07)+')');
-          g.addColorStop(1,'rgba(0,0,0,0)');
-          oc2.fillStyle=g; oc2.fillRect(0,0,sz,sz);
+        oc2.filter='none'; oc2.globalAlpha=1; oc2.restore();
+
+        // Glitch: add RGB split on glitch frames
+        if (animStyle === 'glitch' && i % 3 === 0) {
+          oc2.save();
+          oc2.globalCompositeOperation = 'screen';
+          oc2.globalAlpha = 0.15;
+          oc2.drawImage(oc, 4, 0);
+          oc2.globalAlpha = 1;
+          oc2.globalCompositeOperation = 'source-over';
+          oc2.restore();
         }
-        // stars
-        oc2.fillStyle='rgba(255,255,255,0.7)';
-        for(let s=0;s<12;s++){
-          const sx=(s*173+i*37)%sz,sy=(s*97+i*53)%sz,sr=((s*31+i*7)%6)/6*1.2+0.3;
-          oc2.globalAlpha=s%3===0?0.8:0.35;
+
+        // Stars overlay (subtle)
+        for(let s=0;s<8;s++){
+          const sx=(s*173+i*37)%sz, sy=(s*97+i*53)%sz;
+          const sr=((s*31+i*7)%4)/4*0.8+0.2;
+          oc2.globalAlpha=s%3===0?0.5:0.2;
+          oc2.fillStyle='#fff';
           oc2.beginPath();oc2.arc(sx,sy,sr,0,Math.PI*2);oc2.fill();
         }
         oc2.globalAlpha=1;
+
         if (state.overlayText) applyOverlayToCtxDirect(oc2,sz);
         state.frames.push(oc2.getImageData(0,0,sz,sz));
         setFrameDot(i,true);
         log('► Frame '+(i+1)+' ✓','ok');
-        // Longer yield on mobile to prevent CPU throttling / sleep
         await sleep(50);
       }
 
@@ -1895,198 +1960,130 @@ function renderFrame(ctx2, sz, frame, frameIdx, totalFrames) {
 }
 
 // ════════════════════════════════
-// EXPORT GIF — mobile-safe, no workers
+// EXPORT GIF — via backend (works on all devices)
 // ════════════════════════════════
-
-// Encode GIF entirely on main thread using omggif library (no workers = no iOS crash)
-function loadOmggif(cb) {
-  if (window.GifWriter) { cb(); return; }
-  const s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/omggif@1.0.10/omggif.js';
-  s.onload = cb;
-  s.onerror = () => { toast('GIF encoder failed to load'); };
-  document.head.appendChild(s);
-}
-
-// Quantize canvas to 256 colors (simple median cut approximation)
-function quantizeCanvas(canvas, numColors) {
-  const ctx2 = canvas.getContext('2d');
-  const data = ctx2.getImageData(0, 0, canvas.width, canvas.height).data;
-  // Build simple palette by sampling
-  const palette = [];
-  const seen = new Set();
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i] & 0xF8;
-    const g = data[i+1] & 0xF8;
-    const b = data[i+2] & 0xF8;
-    const key = (r << 16) | (g << 8) | b;
-    if (!seen.has(key)) {
-      seen.add(key);
-      palette.push([r, g, b]);
-      if (palette.length >= numColors) break;
-    }
-  }
-  // Pad palette to exactly numColors
-  while (palette.length < numColors) palette.push([0, 0, 0]);
-
-  // Map each pixel to nearest palette index
-  const indices = new Uint8Array(canvas.width * canvas.height);
-  for (let i = 0, p = 0; i < data.length; i += 4, p++) {
-    const r = data[i], g = data[i+1], b = data[i+2];
-    let best = 0, bestDist = Infinity;
-    for (let j = 0; j < palette.length; j++) {
-      const dr = r - palette[j][0];
-      const dg = g - palette[j][1];
-      const db = b - palette[j][2];
-      const d = dr*dr + dg*dg + db*db;
-      if (d < bestDist) { bestDist = d; best = j; }
-    }
-    indices[p] = best;
-  }
-  return { palette, indices };
-}
-
-// Mobile-safe download
-function mobileDownload(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  if (isMobile) {
-    const w = window.open('', '_blank');
-    if (w) {
-      w.document.write(
-        '<html><head><title>Save GIF</title></head><body style="margin:0;background:#000;text-align:center;padding:20px;font-family:sans-serif;color:#fff">' +
-        '<p style="font-size:18px">🎉 Your GIF is ready!</p>' +
-        '<img src="' + url + '" style="max-width:100%;border-radius:8px"/>' +
-        '<p style="font-size:15px;margin-top:16px">👆 Long-press image → <b>Save to Photos</b></p>' +
-        '</body></html>'
-      );
-    } else {
-      const a = document.createElement('a');
-      a.href = url; a.download = filename; a.click();
-    }
-  } else {
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  }
-}
 
 async function exportGIF() {
   if (!state.frames.length) { toast('No frames to export!'); return; }
   clearInterval(state.playTimer); state.playing = false;
   document.getElementById('play-pause-btn').textContent = '▶';
   document.getElementById('progress-overlay').classList.add('show');
-  setProgress(0, 'Preparing…', '');
+  setProgress(0, 'Preparing export…', '');
 
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   const sz = state.frames[0].width;
-  // Mobile: cap at 240px to stay well within memory limits
-  const exportSz = isMobile ? Math.min(sz, 240) : sz;
-  const delay = parseInt(document.getElementById('frame-delay').value) || 100;
-  const delayCs = Math.round(delay / 10); // centiseconds for GIF spec
-
-  // Build scaled canvases
-  const canvases = [];
-  for (let i = 0; i < state.frames.length; i++) {
-    const oc = document.createElement('canvas');
-    oc.width = sz; oc.height = sz;
-    const oc2 = oc.getContext('2d');
-    oc2.putImageData(state.frames[i], 0, 0);
-
-    // Effects
-    const savedCtx = ctx; const savedFrame = state.currentFrame;
-    ctx = oc2; state.currentFrame = i;
-    applyEffectsToCanvas();
-    ctx = savedCtx; state.currentFrame = savedFrame;
-
-    // Overlay
-    if (state.overlayText) {
-      const tsz = state.overlaySize * (sz/480);
-      oc2.font = '900 ' + tsz + 'px Syne,sans-serif';
-      oc2.textAlign = 'center';
-      const ty = state.overlayPos==='top' ? tsz+12 : state.overlayPos==='middle' ? sz/2+tsz/3 : sz-20*(sz/480);
-      oc2.strokeStyle='#000'; oc2.lineWidth=tsz*0.18;
-      oc2.strokeText(state.overlayText, sz/2, ty);
-      oc2.fillStyle = state.overlayColor;
-      oc2.fillText(state.overlayText, sz/2, ty);
-    }
-
-    // Watermark
-    const wFs = Math.max(8, Math.round(sz * 0.042));
-    oc2.save();
-    oc2.font = '700 ' + wFs + 'px sans-serif';
-    oc2.textAlign = 'right';
-    oc2.strokeStyle = 'rgba(0,0,0,0.7)'; oc2.lineWidth = wFs * 0.25;
-    const wP = Math.round(sz * 0.025);
-    oc2.strokeText('Analtena.com', sz-wP, sz-wP);
-    oc2.fillStyle = 'rgba(255,255,255,0.75)';
-    oc2.fillText('Analtena.com', sz-wP, sz-wP);
-    oc2.restore();
-
-    // Scale
-    if (exportSz < sz) {
-      const sc = document.createElement('canvas');
-      sc.width = exportSz; sc.height = exportSz;
-      sc.getContext('2d').drawImage(oc, 0, 0, exportSz, exportSz);
-      canvases.push(sc);
-    } else {
-      canvases.push(oc);
-    }
-
-    setProgress((i / state.frames.length) * 40, 'Processing frames…', 'Frame ' + (i+1) + ' of ' + state.frames.length);
-    await sleep(isMobile ? 80 : 5);
-  }
-
-  // Encode using omggif (main thread, no workers — works on iOS)
-  setProgress(40, 'Encoding GIF…', 'Please wait…');
-  await sleep(50);
+  // Export at 320px max to keep file small — still looks great
+  const exportSz = Math.min(sz, 320);
+  const delay = parseInt(document.getElementById('frame-delay').value) || 120;
 
   try {
-    await new Promise((resolve, reject) => {
-      loadOmggif(async () => {
-        try {
-          const buf = new Uint8Array(exportSz * exportSz * state.frames.length * 4 + 1024);
-          const gw = new GifWriter(buf, exportSz, exportSz, { loop: 0 });
+    // Build frames as base64 RGBA
+    const b64frames = [];
+    for (let i = 0; i < state.frames.length; i++) {
+      setProgress((i / state.frames.length) * 40, 'Preparing frame ' + (i+1) + '…', '');
+      await sleep(isMobile ? 50 : 5);
 
-          for (let i = 0; i < canvases.length; i++) {
-            setProgress(40 + (i / canvases.length) * 55, 'Encoding…', 'Frame ' + (i+1) + ' of ' + canvases.length);
-            await sleep(isMobile ? 30 : 0);
+      // Draw frame with effects + watermark onto scaled canvas
+      const src = document.createElement('canvas');
+      src.width = sz; src.height = sz;
+      const sc = src.getContext('2d');
+      sc.putImageData(state.frames[i], 0, 0);
 
-            const { palette, indices } = quantizeCanvas(canvases[i], 256);
-            const flatPalette = palette.flat();
-            // Pad to 256*3
-            while (flatPalette.length < 256*3) flatPalette.push(0);
+      const oc = document.createElement('canvas');
+      oc.width = exportSz; oc.height = exportSz;
+      const oc2 = oc.getContext('2d');
+      oc2.drawImage(src, 0, 0, exportSz, exportSz);
 
-            gw.addFrame(0, 0, exportSz, exportSz, indices, {
-              palette: flatPalette,
-              delay: delayCs
-            });
-          }
+      // Effects
+      const savedCtx = ctx; const savedFrame = state.currentFrame;
+      ctx = oc2; state.currentFrame = i;
+      applyEffectsToCanvas();
+      ctx = savedCtx; state.currentFrame = savedFrame;
 
-          const blob = new Blob([buf.slice(0, gw.end())], { type: 'image/gif' });
-          setProgress(100, 'Done! 🎉', '');
-          await sleep(300);
-          document.getElementById('progress-overlay').classList.remove('show');
+      // Overlay text
+      if (state.overlayText) {
+        const tsz = Math.max(10, state.overlaySize * (exportSz/480));
+        oc2.font = '900 ' + tsz + 'px Syne,sans-serif';
+        oc2.textAlign = 'center';
+        const ty = state.overlayPos==='top' ? tsz+8 : state.overlayPos==='middle' ? exportSz/2+tsz/3 : exportSz-12;
+        oc2.strokeStyle='#000'; oc2.lineWidth=tsz*0.15;
+        oc2.strokeText(state.overlayText, exportSz/2, ty);
+        oc2.fillStyle = state.overlayColor;
+        oc2.fillText(state.overlayText, exportSz/2, ty);
+      }
 
-          const url = URL.createObjectURL(blob);
-          state.resultUrl = url;
-          state.resultBlob = blob;
-          document.getElementById('result-img').src = url;
-          document.getElementById('result-meta').textContent =
-            Math.round(blob.size/1024) + 'KB · ' + exportSz + 'px · ' + state.frames.length + ' frames';
-          document.getElementById('result-dl-btn').onclick = () => {
-            mobileDownload(blob, 'analtena-' + Date.now() + '.gif');
-          };
-          document.getElementById('result-modal').classList.add('show');
-          saveToHistory(url, blob, state.lastPrompt || '');
-          resolve();
-        } catch(e) { reject(e); }
-      });
+      // Watermark
+      const wFs = Math.max(7, Math.round(exportSz * 0.045));
+      oc2.save();
+      oc2.font = '700 ' + wFs + 'px sans-serif';
+      oc2.textAlign = 'right';
+      oc2.strokeStyle = 'rgba(0,0,0,0.8)'; oc2.lineWidth = 2;
+      const wP = Math.round(exportSz * 0.025);
+      oc2.strokeText('Analtena.com', exportSz-wP, exportSz-wP);
+      oc2.fillStyle = 'rgba(255,255,255,0.8)';
+      oc2.fillText('Analtena.com', exportSz-wP, exportSz-wP);
+      oc2.restore();
+
+      // Get raw RGBA as base64
+      const imgData = oc2.getImageData(0, 0, exportSz, exportSz);
+      // Convert Uint8ClampedArray to base64
+      const raw = imgData.data;
+      let binary = '';
+      for (let j = 0; j < raw.length; j++) binary += String.fromCharCode(raw[j]);
+      b64frames.push(btoa(binary));
+    }
+
+    setProgress(42, 'Sending to server…', 'Encoding GIF on backend');
+
+    // Send to backend
+    const resp = await fetch('/api/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        frames: b64frames,
+        width: exportSz,
+        height: exportSz,
+        delay: delay
+      })
     });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || 'Server error ' + resp.status);
+    }
+
+    setProgress(90, 'Almost done…', '');
+    const blob = await resp.blob();
+    setProgress(100, 'Done! 🎉', '');
+
+    await sleep(300);
+    document.getElementById('progress-overlay').classList.remove('show');
+
+    const url = URL.createObjectURL(blob);
+    state.resultUrl = url;
+    state.resultBlob = blob;
+    document.getElementById('result-img').src = url;
+    document.getElementById('result-meta').textContent =
+      Math.round(blob.size/1024) + 'KB · ' + exportSz + 'px · ' + state.frames.length + ' frames';
+
+    // Download — works on all devices including iOS
+    document.getElementById('result-dl-btn').onclick = () => {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'analtena-' + Date.now() + '.gif';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      if (isMobile) toast('If download did not start — long-press the GIF → Save to Photos 📸');
+    };
+
+    document.getElementById('result-modal').classList.add('show');
+    saveToHistory(url, blob, state.lastPrompt || '');
+
   } catch(err) {
     document.getElementById('progress-overlay').classList.remove('show');
     log('Export error: ' + err.message, 'err');
-    toast('Export failed — try lower resolution');
+    toast('Export failed: ' + err.message);
     document.getElementById('export-btn').disabled = false;
   }
 }
