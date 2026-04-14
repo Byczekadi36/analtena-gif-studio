@@ -1897,96 +1897,134 @@ function renderFrame(ctx2, sz, frame, frameIdx, totalFrames) {
 // ════════════════════════════════
 // EXPORT GIF
 // ════════════════════════════════
+
+// Mobile-safe download
+function mobileDownload(blob, filename) {
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const url = URL.createObjectURL(blob);
+  if (isMobile) {
+    // Open in new tab — user long-presses to Save to Photos / Files
+    const w = window.open('', '_blank');
+    if (w) {
+      w.document.write('<html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="' + url + '" style="max-width:100%;max-height:100vh"/><br><p style="color:#fff;text-align:center;font-family:sans-serif">Long-press image → Save to Photos</p></body></html>');
+    } else {
+      // Fallback if popup blocked
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+    }
+  } else {
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+}
+
 async function exportGIF() {
   if (!state.frames.length) { toast('No frames to export!'); return; }
   clearInterval(state.playTimer); state.playing=false;
   document.getElementById('play-pause-btn').textContent='▶';
 
   document.getElementById('progress-overlay').classList.add('show');
-  setProgress(0,'Encoding GIF…','This may take a moment for HD sizes');
+  setProgress(0,'Preparing export…','');
 
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   const sz = state.frames[0].width;
+  // Scale down on mobile to prevent crash
+  const exportSz = isMobile ? Math.min(sz, 320) : sz;
   const delay = parseInt(document.getElementById('frame-delay').value)||100;
 
-  const gif = new GIF({
-    workers: 2, quality: 6,
-    width: sz, height: sz,
-    workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
-  });
-
-  // Build composite frames (base + overlay + effects)
-  for (let i=0;i<state.frames.length;i++) {
-    const oc = document.createElement('canvas'); oc.width=sz; oc.height=sz;
+  const canvases = [];
+  for (let i=0; i<state.frames.length; i++) {
+    const oc = document.createElement('canvas');
+    oc.width = sz; oc.height = sz;
     const oc2 = oc.getContext('2d');
-    oc2.putImageData(state.frames[i],0,0);
+    oc2.putImageData(state.frames[i], 0, 0);
 
-    // Apply all active effects using the proper engine (temporarily swap ctx)
+    // Apply effects
     const savedCtx = ctx;
     const savedFrame = state.currentFrame;
-    // @ts-ignore — temporarily redirect ctx for effect rendering
     ctx = oc2;
     state.currentFrame = i;
     applyEffectsToCanvas();
     ctx = savedCtx;
     state.currentFrame = savedFrame;
 
-    // overlay text
+    // Overlay text
     if (state.overlayText) {
       const tsz = state.overlaySize*(sz/480);
-      oc2.font=`900 ${tsz}px Syne,sans-serif`;
-      oc2.textAlign='center';
-      let ty;
-      if (state.overlayPos==='top') ty=tsz+12;
-      else if (state.overlayPos==='middle') ty=sz/2+tsz/3;
-      else ty=sz-20*(sz/480);
+      oc2.font = '900 '+tsz+'px Syne,sans-serif';
+      oc2.textAlign = 'center';
+      let ty = state.overlayPos==='top' ? tsz+12 : state.overlayPos==='middle' ? sz/2+tsz/3 : sz-20*(sz/480);
       oc2.strokeStyle='#000'; oc2.lineWidth=tsz*0.18;
-      oc2.strokeText(state.overlayText,sz/2,ty);
+      oc2.strokeText(state.overlayText, sz/2, ty);
       oc2.fillStyle=state.overlayColor;
-      oc2.fillText(state.overlayText,sz/2,ty);
+      oc2.fillText(state.overlayText, sz/2, ty);
     }
-    // Watermark Analtena.com
-    const wFontSize = Math.max(10, Math.round(sz * 0.042));
+
+    // Watermark
+    const wFs = Math.max(10, Math.round(sz*0.042));
     oc2.save();
-    oc2.font = `700 ${wFontSize}px -apple-system,sans-serif`;
+    oc2.font = '700 '+wFs+'px -apple-system,sans-serif';
     oc2.textAlign = 'right';
-    const wText = 'Analtena.com';
-    const wPad = Math.round(sz * 0.025);
-    const wX = sz - wPad;
-    const wY = sz - wPad;
     oc2.strokeStyle = 'rgba(0,0,0,0.7)';
-    oc2.lineWidth = wFontSize * 0.25;
-    oc2.strokeText(wText, wX, wY);
+    oc2.lineWidth = wFs*0.25;
+    oc2.strokeText('Analtena.com', sz-Math.round(sz*0.025), sz-Math.round(sz*0.025));
     oc2.fillStyle = 'rgba(255,255,255,0.75)';
-    oc2.fillText(wText, wX, wY);
+    oc2.fillText('Analtena.com', sz-Math.round(sz*0.025), sz-Math.round(sz*0.025));
     oc2.restore();
-    gif.addFrame(oc, {delay, copy:true});
-    setProgress((i/state.frames.length)*40, 'Preparing frames…', `Frame ${i+1} of ${state.frames.length}`);
-    await sleep(5);
+
+    // Scale down for mobile
+    if (exportSz < sz) {
+      const sc = document.createElement('canvas');
+      sc.width = exportSz; sc.height = exportSz;
+      sc.getContext('2d').drawImage(oc, 0, 0, exportSz, exportSz);
+      canvases.push(sc);
+    } else {
+      canvases.push(oc);
+    }
+
+    setProgress((i/state.frames.length)*35, 'Preparing frames…', 'Frame '+(i+1)+' of '+state.frames.length);
+    await sleep(isMobile ? 100 : 10);
   }
 
+  setProgress(35, 'Encoding GIF…', isMobile ? 'Optimized for mobile…' : 'Full quality…');
+
+  const gif = new GIF({
+    workers: isMobile ? 1 : 2,
+    quality: isMobile ? 15 : 6,
+    width: exportSz,
+    height: exportSz,
+    workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
+  });
+
+  canvases.forEach(c => gif.addFrame(c, {delay, copy:true}));
+
   gif.on('progress', p => {
-    setProgress(40+p*55,'Encoding…',Math.round(p*100)+'% complete');
+    setProgress(35+p*60, 'Encoding…', Math.round(p*100)+'% done');
   });
 
   gif.on('finished', blob => {
-    setProgress(100,'Done!','');
-    setTimeout(()=>{
+    setProgress(100, 'Done! 🎉', '');
+    setTimeout(() => {
       document.getElementById('progress-overlay').classList.remove('show');
       const url = URL.createObjectURL(blob);
       state.resultUrl = url;
       state.resultBlob = blob;
       document.getElementById('result-img').src = url;
       document.getElementById('result-meta').textContent =
-        `${Math.round(blob.size/1024)}KB · ${sz}×${sz}px · ${state.frames.length} frames · ${delay}ms/frame`;
+        Math.round(blob.size/1024)+'KB · '+exportSz+'×'+exportSz+'px · '+state.frames.length+' frames';
       document.getElementById('result-dl-btn').onclick = () => {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'analtena-'+Date.now()+'.gif';
-        a.click();
+        mobileDownload(blob, 'analtena-'+Date.now()+'.gif');
       };
       document.getElementById('result-modal').classList.add('show');
       saveToHistory(url, blob, state.lastPrompt || '');
     }, 400);
+  });
+
+  gif.on('error', err => {
+    document.getElementById('progress-overlay').classList.remove('show');
+    toast('Export error: ' + err);
+    document.getElementById('export-btn').disabled = false;
   });
 
   gif.render();
