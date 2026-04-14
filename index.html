@@ -317,18 +317,18 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
   </div>
   <div class="gate-wordmark">Analtena · Token Holders Only</div>
   <div class="gate-title">AI GIF<br>STUDIO</div>
-  <p class="gate-sub">Twórz wysokiej jakości animowane GIFy za pomocą AI.<br>Ekskluzywnie dla posiadaczy $ANAL. 🦉</p>
+  <p class="gate-sub">Create high-quality AI-powered animated GIFs.<br>Exclusively for $ANAL token holders. 🦉</p>
   <div class="gate-box">
-    <div class="gate-box-title">🔐 Połącz portfel aby wejść</div>
+    <div class="gate-box-title">🔐 Connect wallet to enter</div>
     <button class="wbtn wbtn-x1" onclick="connectX1Wallet()">🔷 Connect X1 Wallet</button>
     <hr style="border:none;border-top:1px solid var(--border);margin:12px 0"/>
-    <button class="wbtn wbtn-honour" onclick="honourEntry()">🦉 Trzymam $ANAL (system honorowy)</button>
+    <button class="wbtn wbtn-honour" onclick="honourEntry()">🦉 I hold $ANAL (honour system)</button>
   </div>
-  <p class="gate-note">Weryfikacja tylko do odczytu. Żadnych transakcji. Twoje klucze, Twoje krypto.</p>
+  <p class="gate-note">Read-only verification. No transactions. Your keys, your crypto.</p>
   <div class="gate-network">
     <span class="x1-logo"><span class="x1-x">X</span><span class="x1-1">1</span></span>
     <span class="gate-net-links">
-      Sieć <a href="https://x1.xyz" target="_blank">x1.xyz</a>
+      Network <a href="https://x1.xyz" target="_blank">x1.xyz</a>
       &nbsp;·&nbsp;
       DEX <a href="https://xdex.xyz" target="_blank">xdex.xyz</a>
     </span>
@@ -354,8 +354,8 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
     <div class="left-panel">
       <div class="panel-tabs">
         <button class="ptab active" onclick="switchPanel('ai',this)">🦉 AI Generator</button>
-        <button class="ptab" onclick="switchPanel('tools',this)">🎨 Narzędzia</button>
-        <button class="ptab" onclick="switchPanel('frames',this)">🎬 Klatki</button>
+        <button class="ptab" onclick="switchPanel('tools',this)">🎨 Tools</button>
+        <button class="ptab" onclick="switchPanel('frames',this)">🎬 Frames</button>
       </div>
 
       <!-- AI PANEL -->
@@ -431,7 +431,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
         </div>
 
         <button class="gen-btn" id="gen-btn" onclick="generateWithAI()">
-          🦉 Generuj GIF z AI
+          🦉 Generate GIF with AI
         </button>
 
         <div class="ai-log" id="ai-log"><span class="log-info">Ready. Enter a prompt and hit Generate.</span></div>
@@ -471,11 +471,18 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 
         <div class="section-label" style="margin-top:16px">Effects</div>
         <div class="prompt-chips" id="effect-chips">
-          <span class="pchip" onclick="toggleEffect(this,'vignette')">Vignette</span>
-          <span class="pchip" onclick="toggleEffect(this,'scanlines')">Scanlines</span>
-          <span class="pchip" onclick="toggleEffect(this,'glitch')">Glitch</span>
-          <span class="pchip" onclick="toggleEffect(this,'stars')">Stars</span>
-          <span class="pchip" onclick="toggleEffect(this,'confetti')">Confetti</span>
+          <span class="pchip" onclick="toggleEffect(this,'vignette')">🔲 Vignette</span>
+          <span class="pchip" onclick="toggleEffect(this,'scanlines')">📺 Scanlines</span>
+          <span class="pchip" onclick="toggleEffect(this,'glitch')">⚡ Glitch</span>
+          <span class="pchip" onclick="toggleEffect(this,'stars')">✨ Stars</span>
+          <span class="pchip" onclick="toggleEffect(this,'confetti')">🎊 Confetti</span>
+          <span class="pchip" onclick="toggleEffect(this,'neonGlow')">💜 Neon Glow</span>
+          <span class="pchip" onclick="toggleEffect(this,'filmGrain')">🎞 Film Grain</span>
+          <span class="pchip" onclick="toggleEffect(this,'chromatic')">🌈 Chromatic</span>
+          <span class="pchip" onclick="toggleEffect(this,'duotone')">🎨 Duotone</span>
+          <span class="pchip" onclick="toggleEffect(this,'bloom')">☀️ Bloom</span>
+          <span class="pchip" onclick="toggleEffect(this,'halftone')">🔵 Halftone</span>
+          <span class="pchip" onclick="toggleEffect(this,'retroVHS')">📼 VHS Retro</span>
         </div>
 
         <div class="section-label" style="margin-top:16px">Background</div>
@@ -557,7 +564,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 <!-- Progress -->
 <div class="progress-overlay" id="progress-overlay">
   <div class="prog-owl">🦉</div>
-  <div class="prog-title" id="prog-title">Generuję z AI…</div>
+  <div class="prog-title" id="prog-title">Generating with AI…</div>
   <div class="prog-sub" id="prog-sub">Claude planuje sceny…</div>
   <div class="prog-bar-wrap"><div class="prog-fill" id="prog-fill"></div></div>
   <div class="prog-pct" id="prog-pct">0%</div>
@@ -675,7 +682,7 @@ async function connectX1Wallet() {
     toast('X1 Wallet nie znaleziony — zainstaluj na x1.xyz');
     setTimeout(() => window.open('https://x1.xyz','_blank'), 1000);
   } catch(e) {
-    toast('Błąd połączenia: ' + (e.message || 'Anulowano'));
+    toast('Connection error: ' + (e.message || 'Cancelled'));
   }
 }
 function honourEntry() {
@@ -913,34 +920,276 @@ function toggleEffect(el, name) {
 
 function applyEffectsToCanvas() {
   const c = getCanvas(); const W = c.width; const H = c.height;
+
+  // ── VIGNETTE ─────────────────────────────────────────────────────
   if (state.effects.has('vignette')) {
-    const grad = ctx.createRadialGradient(W/2,H/2,H*0.3,W/2,H/2,H*0.75);
+    const grad = ctx.createRadialGradient(W/2,H/2,H*0.28,W/2,H/2,H*0.78);
     grad.addColorStop(0,'rgba(0,0,0,0)');
-    grad.addColorStop(1,'rgba(0,0,0,0.7)');
+    grad.addColorStop(0.6,'rgba(0,0,0,0.15)');
+    grad.addColorStop(1,'rgba(0,0,0,0.72)');
     ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
   }
+
+  // ── SCANLINES ────────────────────────────────────────────────────
   if (state.effects.has('scanlines')) {
-    ctx.fillStyle = 'rgba(0,0,0,0.08)';
-    for (let y=0;y<H;y+=4) { ctx.fillRect(0,y,W,2); }
-  }
-  if (state.effects.has('stars')) {
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    for (let i=0;i<30;i++) {
-      const sx=Math.random()*W, sy=Math.random()*H;
-      ctx.beginPath(); ctx.arc(sx,sy,Math.random()*1.5+0.3,0,Math.PI*2); ctx.fill();
+    for (let y=0; y<H; y+=3) {
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      ctx.fillRect(0, y, W, 1);
+    }
+    // subtle horizontal phosphor glow between lines
+    for (let y=1; y<H; y+=3) {
+      ctx.fillStyle = 'rgba(255,255,255,0.015)';
+      ctx.fillRect(0, y, W, 1);
     }
   }
+
+  // ── GLITCH ───────────────────────────────────────────────────────
+  // Uses seeded offsets per frame index — no random() so no flickering streaks
   if (state.effects.has('glitch')) {
-    const slice = ctx.getImageData(0, Math.floor(Math.random()*H*0.8), W, Math.floor(H*0.05));
-    ctx.putImageData(slice, Math.random()*20-10, Math.floor(Math.random()*H*0.8));
-    ctx.fillStyle = 'rgba(255,0,120,0.05)'; ctx.fillRect(0,0,W,H);
-  }
-  if (state.effects.has('confetti')) {
-    const cols = ['#FFE500','#FF2D78','#00FFCC','#7B61FF'];
-    for (let i=0;i<20;i++) {
-      ctx.fillStyle = cols[i%cols.length];
-      ctx.fillRect(Math.random()*W, Math.random()*H, Math.random()*6+2, Math.random()*6+2);
+    const fi = state.currentFrame || 0;
+    // RGB channel shift — draw image offset in red and cyan
+    const imgData = ctx.getImageData(0, 0, W, H);
+    const tmp = document.createElement('canvas'); tmp.width=W; tmp.height=H;
+    const tc = tmp.getContext('2d');
+    tc.putImageData(imgData, 0, 0);
+
+    // Red channel shift right
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.globalAlpha = 0.18;
+    ctx.drawImage(tmp, (fi%3===0?3:-3), 0);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.restore();
+
+    // Horizontal slice displacement — deterministic
+    const sliceSeeds = [0.15, 0.42, 0.68, 0.31, 0.55, 0.79];
+    for (let s=0; s<3; s++) {
+      const sliceY = Math.floor(sliceSeeds[(fi+s*2)%sliceSeeds.length] * H);
+      const sliceH = 4 + ((fi*7+s*13)%8);
+      const shiftX = (((fi*3+s*11)%13) - 6);
+      if (sliceY+sliceH <= H) {
+        const slice = ctx.getImageData(0, sliceY, W, sliceH);
+        ctx.putImageData(slice, shiftX, sliceY);
+      }
     }
+
+    // Scanline color tint
+    ctx.fillStyle = fi%2===0 ? 'rgba(255,0,80,0.04)' : 'rgba(0,255,200,0.04)';
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // ── STARS ─────────────────────────────────────────────────────────
+  // Deterministic per frame — no random() flicker
+  if (state.effects.has('stars')) {
+    const fi = state.currentFrame || 0;
+    // Static stars (fixed positions)
+    for (let i=0; i<40; i++) {
+      const sx = (i * 137 + 23) % W;
+      const sy = (i * 97 + 41) % H;
+      const sr = (i % 4 === 0) ? 1.4 : 0.6;
+      const twinkle = Math.sin((fi * 0.8) + i * 0.7) * 0.3 + 0.7;
+      ctx.globalAlpha = twinkle * (i % 3 === 0 ? 0.9 : 0.45);
+      ctx.fillStyle = i%5===0 ? '#ffe580' : '#ffffff';
+      ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI*2); ctx.fill();
+    }
+    // Shooting star on certain frames
+    if (fi % 3 === 0) {
+      const sx = (fi*71) % (W*0.7);
+      const sy = (fi*43) % (H*0.4);
+      ctx.globalAlpha = 0.6;
+      const trail = ctx.createLinearGradient(sx, sy, sx+30, sy+12);
+      trail.addColorStop(0, 'rgba(255,255,255,0)');
+      trail.addColorStop(1, 'rgba(255,255,255,0.8)');
+      ctx.strokeStyle = trail; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx+30, sy+12); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // ── CONFETTI ─────────────────────────────────────────────────────
+  if (state.effects.has('confetti')) {
+    const fi = state.currentFrame || 0;
+    const cols = ['#FFE500','#FF2D78','#00FFCC','#7B61FF','#FF8C00','#00BFFF'];
+    for (let i=0; i<28; i++) {
+      const cx2 = (i*113 + fi*23) % W;
+      const cy2 = (i*79 + fi*37) % H;
+      const cw = 4 + (i%4);
+      const ch = 3 + (i%3);
+      const angle = ((i*31 + fi*11) % 360) * Math.PI/180;
+      ctx.save();
+      ctx.translate(cx2, cy2);
+      ctx.rotate(angle);
+      ctx.globalAlpha = 0.75;
+      ctx.fillStyle = cols[i % cols.length];
+      ctx.fillRect(-cw/2, -ch/2, cw, ch);
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // ── NEON GLOW ────────────────────────────────────────────────────
+  if (state.effects.has('neonGlow')) {
+    const fi = state.currentFrame || 0;
+    const pulse = Math.sin(fi * 0.6) * 0.08 + 0.18;
+    // Purple core glow
+    const g1 = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, W*0.55);
+    g1.addColorStop(0, `rgba(123,97,255,${pulse})`);
+    g1.addColorStop(0.5, `rgba(123,97,255,${pulse*0.3})`);
+    g1.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g1; ctx.fillRect(0,0,W,H);
+    // Edge neon rim
+    const g2 = ctx.createRadialGradient(W/2,H/2,H*0.35,W/2,H/2,H*0.65);
+    g2.addColorStop(0,'rgba(0,0,0,0)');
+    g2.addColorStop(0.8,'rgba(0,0,0,0)');
+    g2.addColorStop(1,`rgba(0,255,204,${pulse*0.6})`);
+    ctx.fillStyle = g2; ctx.fillRect(0,0,W,H);
+  }
+
+  // ── FILM GRAIN ───────────────────────────────────────────────────
+  if (state.effects.has('filmGrain')) {
+    const fi = state.currentFrame || 0;
+    const imgData = ctx.getImageData(0,0,W,H);
+    const d = imgData.data;
+    // Seeded lightweight grain — no Math.random()
+    for (let i=0; i<d.length; i+=4) {
+      const pixel = Math.floor(i/4);
+      const nx = pixel % W;
+      const ny = Math.floor(pixel / W);
+      // Simple LCG hash
+      const hash = ((nx*1664525 + ny*1013904223 + fi*22695477) >>> 0) % 256;
+      const grain = (hash - 128) * 0.18;
+      d[i]   = Math.max(0, Math.min(255, d[i]   + grain));
+      d[i+1] = Math.max(0, Math.min(255, d[i+1] + grain));
+      d[i+2] = Math.max(0, Math.min(255, d[i+2] + grain));
+    }
+    ctx.putImageData(imgData, 0, 0);
+    // Subtle sepia overlay
+    ctx.fillStyle = 'rgba(120,80,30,0.06)';
+    ctx.fillRect(0,0,W,H);
+  }
+
+  // ── CHROMATIC ABERRATION ─────────────────────────────────────────
+  if (state.effects.has('chromatic')) {
+    const fi = state.currentFrame || 0;
+    const shift = 2 + (fi % 3);
+    const tmp2 = document.createElement('canvas'); tmp2.width=W; tmp2.height=H;
+    const tc2 = tmp2.getContext('2d');
+    tc2.drawImage(getCanvas(), 0, 0);
+    // Draw red channel shifted right
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.globalAlpha = 0.25;
+    // Red tint shifted
+    const tmpR = document.createElement('canvas'); tmpR.width=W; tmpR.height=H;
+    const tcR = tmpR.getContext('2d');
+    tcR.drawImage(tmp2, 0, 0);
+    const rdR = tcR.getImageData(0,0,W,H);
+    for(let i=0;i<rdR.data.length;i+=4){rdR.data[i+1]=0;rdR.data[i+2]=0;}
+    tcR.putImageData(rdR,0,0);
+    ctx.drawImage(tmpR, shift, 0);
+    // Cyan tint shifted left
+    const tmpC = document.createElement('canvas'); tmpC.width=W; tmpC.height=H;
+    const tcC = tmpC.getContext('2d');
+    tcC.drawImage(tmp2, 0, 0);
+    const rdC = tcC.getImageData(0,0,W,H);
+    for(let i=0;i<rdC.data.length;i+=4){rdC.data[i]=0;}
+    tcC.putImageData(rdC,0,0);
+    ctx.drawImage(tmpC, -shift, 0);
+    ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over';
+    ctx.restore();
+  }
+
+  // ── DUOTONE ──────────────────────────────────────────────────────
+  if (state.effects.has('duotone')) {
+    const imgData2 = ctx.getImageData(0,0,W,H);
+    const d2 = imgData2.data;
+    // Purple (#7B61FF) to Neon (#00FFCC) duotone
+    for (let i=0; i<d2.length; i+=4) {
+      const lum = (d2[i]*0.299 + d2[i+1]*0.587 + d2[i+2]*0.114) / 255;
+      d2[i]   = Math.round((1-lum)*123 + lum*0);     // R: purple->neon
+      d2[i+1] = Math.round((1-lum)*97  + lum*255);   // G
+      d2[i+2] = Math.round((1-lum)*255 + lum*204);   // B
+    }
+    ctx.putImageData(imgData2, 0, 0);
+  }
+
+  // ── BLOOM ─────────────────────────────────────────────────────────
+  if (state.effects.has('bloom')) {
+    const fi = state.currentFrame || 0;
+    const pulse = Math.sin(fi * 0.5) * 0.05 + 0.12;
+    // Soft light leak from corners
+    const corners = [
+      {x:0,   y:0,   c:`rgba(255,200,100,${pulse})`},
+      {x:W,   y:0,   c:`rgba(200,100,255,${pulse})`},
+      {x:0,   y:H,   c:`rgba(100,200,255,${pulse})`},
+      {x:W,   y:H,   c:`rgba(255,100,180,${pulse})`},
+    ];
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    corners.forEach(corner => {
+      const gB = ctx.createRadialGradient(corner.x, corner.y, 0, corner.x, corner.y, W*0.5);
+      gB.addColorStop(0, corner.c);
+      gB.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gB; ctx.fillRect(0,0,W,H);
+    });
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.restore();
+  }
+
+  // ── HALFTONE ─────────────────────────────────────────────────────
+  if (state.effects.has('halftone')) {
+    const imgSnap = ctx.getImageData(0,0,W,H);
+    ctx.fillStyle = '#080810';
+    ctx.fillRect(0,0,W,H);
+    const spacing = 8;
+    for (let gy=0; gy<H; gy+=spacing) {
+      for (let gx=0; gx<W; gx+=spacing) {
+        const px = Math.min(gx+spacing/2, W-1);
+        const py = Math.min(gy+spacing/2, H-1);
+        const idx = (Math.floor(py)*W + Math.floor(px))*4;
+        const r = imgSnap.data[idx];
+        const g = imgSnap.data[idx+1];
+        const b = imgSnap.data[idx+2];
+        const lum = (r*0.299+g*0.587+b*0.114)/255;
+        const radius = (lum * spacing * 0.52);
+        if (radius > 0.5) {
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          ctx.beginPath();
+          ctx.arc(gx+spacing/2, gy+spacing/2, radius, 0, Math.PI*2);
+          ctx.fill();
+        }
+      }
+    }
+  }
+
+  // ── VHS RETRO ─────────────────────────────────────────────────────
+  if (state.effects.has('retroVHS')) {
+    const fi = state.currentFrame || 0;
+    // Color bleed: slight hue desaturation + warm tint
+    const vhsData = ctx.getImageData(0,0,W,H);
+    const vd = vhsData.data;
+    for (let i=0; i<vd.length; i+=4) {
+      const avg = (vd[i]+vd[i+1]+vd[i+2])/3;
+      vd[i]   = Math.min(255, vd[i]*0.85   + avg*0.15 + 8);
+      vd[i+1] = Math.min(255, vd[i+1]*0.88 + avg*0.12);
+      vd[i+2] = Math.min(255, vd[i+2]*0.75 + avg*0.25);
+    }
+    ctx.putImageData(vhsData, 0, 0);
+    // Tracking lines
+    for (let t=0; t<3; t++) {
+      const ty = ((fi*17 + t*83) % H);
+      ctx.fillStyle = 'rgba(255,255,255,0.06)';
+      ctx.fillRect(0, ty, W, 1);
+    }
+    // VHS noise bands
+    const bandY = ((fi*29) % H);
+    ctx.fillStyle = 'rgba(255,220,180,0.07)';
+    ctx.fillRect(0, bandY, W, 6);
+    // Border noise
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillRect(0, 0, W, 3);
+    ctx.fillRect(0, H-3, W, 3);
   }
 }
 
@@ -1012,22 +1261,22 @@ async function pollUntilDone(predictionId, maxAttempts=40) {
         return data.imageUrl;
       }
       if (data.status === 'failed') {
-        throw new Error('Replicate: generowanie nie powiodło się');
+        throw new Error('Replicate: generation failed');
       }
 
-      // Aktualizuj progress
+      // Update progress
       const pct = 20 + Math.min(i * 2.5, 48);
       const statusMsg = {
-        'starting':    'Uruchamiam model AI…',
-        'processing':  'Generuję obraz… (' + (i*2) + 's)',
-      }[data.status] || 'Przetwarzam…';
-      setProgress(pct, '🎨 Replicate pracuje…', statusMsg);
+        'starting':    'Starting AI model…',
+        'processing':  'Generating image… (' + (i*2) + 's)',
+      }[data.status] || 'Processing…';
+      setProgress(pct, '🎨 Replicate working…', statusMsg);
 
     } catch(err) {
-      if (err.message.includes('nie powiodło')) throw err;
+      if (err.message.includes('failed')) throw err;
     }
   }
-  throw new Error('Timeout — generowanie trwało zbyt długo');
+  throw new Error('Timeout — generation took too long');
 }
 
 // ── X1 BLOCKCHAIN PAYMENT ──────────────────────────────────────────
@@ -1103,7 +1352,7 @@ async function sendAnalPayment() {
 
 async function generateWithAI() {
   const prompt = document.getElementById('prompt-input').value.trim();
-  if (!prompt) { toast('Wpisz prompt!'); return; }
+  if (!prompt) { toast('Enter a prompt first!'); return; }
   state.lastPrompt = prompt;
 
   const frameCount = parseInt(document.getElementById('frames-count').value);
@@ -1113,15 +1362,15 @@ async function generateWithAI() {
   document.getElementById('gen-btn').disabled = true;
   document.getElementById('ai-log').innerHTML = '';
   document.getElementById('progress-overlay').classList.add('show');
-  setProgress(0, 'Przygotowuję…', 'Inicjalizacja');
+  setProgress(0, 'Preparing…', 'Initializing');
 
   log('► Prompt: ' + prompt, 'info');
-  log('► Styl: ' + artStyle + ' | Klatki: ' + frameCount + ' | Rozmiar: ' + sz + 'px');
+  log('► Style: ' + artStyle + ' | Frames: ' + frameCount + ' | Size: ' + sz + 'px');
 
   try {
-    // Step 1: Wyślij zadanie do backend (zwraca natychmiast)
-    setProgress(5, 'Claude planuje…', 'Tworzę optymalny prompt dla AI');
-    log('► Wysyłam zadanie…', 'ai');
+    // Step 1: Send job to backend (returns immediately)
+    setProgress(5, 'Claude planning…', 'Creating optimal AI prompt');
+    log('► Sending job…', 'ai');
 
     const apiResp = await fetch('/api/generate', {
       method: 'POST',
@@ -1131,20 +1380,20 @@ async function generateWithAI() {
 
     if (!apiResp.ok) {
       const e = await apiResp.json().catch(() => ({}));
-      throw new Error(e.error || 'Błąd API: ' + apiResp.status);
+      throw new Error(e.error || 'API error: ' + apiResp.status);
     }
 
     const job = await apiResp.json();
-    log('► Zadanie wysłane ✓ ID: ' + job.predictionId, 'ok');
-    log('► Prompt AI: ' + job.imagePrompt?.slice(0,80) + '…', 'info');
+    log('► Job sent ✓ ID: ' + job.predictionId, 'ok');
+    log('► AI Prompt: ' + job.imagePrompt?.slice(0,80) + '…', 'info');
 
-    // Step 2: Odpytuj status co 2 sekundy
-    setProgress(20, '🎨 Replicate generuje…', 'Tworzę obraz AI — ~5 sekund');
+    // Step 2: Poll status every 2 seconds
+    setProgress(20, '🎨 Replicate generating…', 'Creating AI image — ~5 seconds');
     const imageUrl = await pollUntilDone(job.predictionId);
 
-    // Step 3: Załaduj obraz i animuj klatki
-    setProgress(70, '🖼 Ładuję obraz…', 'Wczytuję wynik');
-    log('► Obraz wygenerowany ✓', 'ok');
+    // Step 3: Load image and animate frames
+    setProgress(70, '🖼 Loading image…', 'Fetching result');
+    log('► Image generated ✓', 'ok');
 
     const baseImg = new Image();
     baseImg.crossOrigin = 'anonymous';
@@ -1156,15 +1405,15 @@ async function generateWithAI() {
 
     if (result.mode === 'single-image') {
       // ── SINGLE IMAGE + CANVAS ANIMATION ──
-      log('► Wczytuję obraz bazowy…', 'ai');
-      setProgress(40, '🎨 Obraz wygenerowany!', 'Tworzę animację…');
+      log('► Loading base image…', 'ai');
+      setProgress(40, '🎨 Image generated!', 'Creating animation…');
       const baseImg = new Image();
       baseImg.crossOrigin = 'anonymous';
       await new Promise(res => { baseImg.onload = res; baseImg.onerror = res; baseImg.src = result.baseImage; });
       const fc = result.frameCount || 6;
       const anim = result.animation || 'cartoon';
       initFrameDots(fc);
-      log('► Animuję ' + fc + ' klatek…', 'ai');
+      log('► Animating ' + fc + ' frames…', 'ai');
       const animDefs = [
         {scale:1.0, offX:0,     offY:0,     bright:1.0,  hue:0  },
         {scale:1.07,offX:0,     offY:-0.03, bright:1.12, hue:20 },
@@ -1177,7 +1426,7 @@ async function generateWithAI() {
       ];
       for (let i = 0; i < fc; i++) {
         setFrameDot(i, false);
-        setProgress(45 + (i/fc)*45, '🎬 Klatka '+(i+1)+' z '+fc, result.frameDescriptions?.[i] || '');
+        setProgress(45 + (i/fc)*45, '🎬 Frame '+(i+1)+' of '+fc, result.frameDescriptions?.[i] || '');
         const def = animDefs[i % animDefs.length];
         const t = i / fc;
         const oc = document.createElement('canvas'); oc.width=sz; oc.height=sz;
@@ -1207,30 +1456,30 @@ async function generateWithAI() {
         if (state.overlayText) applyOverlayToCtxDirect(oc2,sz);
         state.frames.push(oc2.getImageData(0,0,sz,sz));
         setFrameDot(i,true);
-        log('► Klatka '+(i+1)+' ✓','ok');
+        log('► Frame '+(i+1)+' ✓','ok');
         await sleep(20);
       }
 
     } else if (result.mode === 'replicate') {
       // ── REPLICATE multi (fallback) ──
-      log('► Wczytuję obrazy z Replicate (Flux AI)…', 'ai');
+      log('► Loading images from Replicate (Flux AI)…', 'ai');
       const images = result.images || [];
       initFrameDots(images.length);
       for (let i = 0; i < images.length; i++) {
         setFrameDot(i, false);
         const pct = 30 + (i / images.length) * 60;
         setProgress(pct,
-          `🎨 Klatka ${i+1} z ${images.length}`,
-          images[i].description || 'Ładuję obraz…');
+          `🎨 Frame ${i+1} of ${images.length}`,
+          images[i].description || 'Loading image…');
         if (images[i].error || !images[i].url) {
-          log(`► Klatka ${i+1} pominięta: ${images[i].error || 'brak obrazu'}`, 'err');
+          log(`► Frame ${i+1} skipped: ${images[i].error || 'no image'}`, 'err');
           continue;
         }
         const img = new Image();
         img.crossOrigin = 'anonymous';
         await new Promise((res, rej) => {
           img.onload = res;
-          img.onerror = () => res(); // nie blokuj przy błędzie CORS
+          img.onerror = () => res();
           img.src = images[i].url;
         });
         const oc = document.createElement('canvas'); oc.width = sz; oc.height = sz;
@@ -1239,16 +1488,16 @@ async function generateWithAI() {
         if (state.overlayText) applyOverlayToCtxDirect(oc2, sz);
         state.frames.push(oc2.getImageData(0, 0, sz, sz));
         setFrameDot(i, true);
-        log(`► Obraz ${i+1} wczytany ✓ — ${images[i].description}`, 'ok');
+        log(`► Image ${i+1} loaded ✓ — ${images[i].description}`, 'ok');
         await sleep(30);
       }
 
     } else if (result.mode === 'dalle') {
       // ── DALL-E fallback ──
-      log('► Wczytuję obrazy DALL-E…', 'ai');
+      log('► Loading DALL-E images…', 'ai');
       const images = result.images || [];
       for (let i = 0; i < images.length; i++) {
-        setProgress(30 + (i / images.length) * 60, `Obraz ${i+1} z ${images.length}`, '');
+        setProgress(30 + (i / images.length) * 60, `Image ${i+1} of ${images.length}`, '');
         const img = new Image();
         await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = images[i]; });
         const oc = document.createElement('canvas'); oc.width = sz; oc.height = sz;
@@ -1260,13 +1509,13 @@ async function generateWithAI() {
     } else {
       // ── Canvas mode: render scene ──
       const scene = result.scene;
-      log(`► Scena: "${scene.title}" — ${scene.frames.length} klatek`, 'ok');
+      log(`► Scene: "${scene.title}" — ${scene.frames.length} frames`, 'ok');
       for (let i = 0; i < scene.frames.length; i++) {
         const f = scene.frames[i];
         setProgress(30 + (i / scene.frames.length) * 60,
-          `Renderuję klatkę ${i+1} z ${scene.frames.length}`,
+          `Rendering frame ${i+1} of ${scene.frames.length}`,
           f.description || '');
-        log(`► Klatka ${i+1}: ${f.description || ''}`, 'info');
+        log(`► Frame ${i+1}: ${f.description || ''}`, 'info');
         const oc = document.createElement('canvas'); oc.width = sz; oc.height = sz;
         const oc2 = oc.getContext('2d');
         renderFrame(oc2, sz, f, i, scene.frames.length);
@@ -1279,15 +1528,15 @@ async function generateWithAI() {
     updateFrameStrip();
     renderCurrentFrame();
 
-    setProgress(100, 'Gotowe!', '');
+    setProgress(100, 'Done!', '');
     await sleep(400);
     document.getElementById('progress-overlay').classList.remove('show');
-    toast('🎉 GIF wygenerowany — ' + state.frames.length + ' klatek!');
+    toast('🎉 GIF ready — ' + state.frames.length + ' frames!');
 
   } catch (err) {
     document.getElementById('progress-overlay').classList.remove('show');
-    log('✗ Błąd: ' + err.message, 'err');
-    toast('Błąd: ' + err.message);
+    log('✗ Error: ' + err.message, 'err');
+    toast('Error: ' + err.message);
     console.error(err);
   }
 
@@ -1617,12 +1866,17 @@ async function exportGIF() {
     const oc = document.createElement('canvas'); oc.width=sz; oc.height=sz;
     const oc2 = oc.getContext('2d');
     oc2.putImageData(state.frames[i],0,0);
-    // apply effects
-    const prevEffects = new Set(state.effects);
-    if (state.effects.has('stars')) { applyStarsToCtx(oc2,sz); }
-    if (state.effects.has('confetti')) { applyConfettiToCtx(oc2,sz); }
-    if (state.effects.has('vignette')) { applyVignetteToCtx(oc2,sz); }
-    if (state.effects.has('scanlines')) { applyScanlinesCtx(oc2,sz); }
+
+    // Apply all active effects using the proper engine (temporarily swap ctx)
+    const savedCtx = ctx;
+    const savedFrame = state.currentFrame;
+    // @ts-ignore — temporarily redirect ctx for effect rendering
+    ctx = oc2;
+    state.currentFrame = i;
+    applyEffectsToCanvas();
+    ctx = savedCtx;
+    state.currentFrame = savedFrame;
+
     // overlay text
     if (state.overlayText) {
       const tsz = state.overlaySize*(sz/480);
@@ -1685,10 +1939,6 @@ async function exportGIF() {
   gif.render();
 }
 
-function applyStarsToCtx(c,sz){c.fillStyle='rgba(255,255,255,0.6)';for(let i=0;i<25;i++){c.beginPath();c.arc(Math.random()*sz,Math.random()*sz,Math.random()*1.2+0.3,0,Math.PI*2);c.fill();}}
-function applyConfettiToCtx(c,sz){const cols=['#FFE500','#FF2D78','#00FFCC','#7B61FF'];for(let i=0;i<18;i++){c.fillStyle=cols[i%4];c.fillRect(Math.random()*sz,Math.random()*sz,Math.random()*5+2,Math.random()*5+2);}}
-function applyVignetteToCtx(c,sz){const g=c.createRadialGradient(sz/2,sz/2,sz*0.3,sz/2,sz/2,sz*0.75);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,0.65)');c.fillStyle=g;c.fillRect(0,0,sz,sz);}
-function applyScanlinesCtx(c,sz){c.fillStyle='rgba(0,0,0,0.1)';for(let y=0;y<sz;y+=4)c.fillRect(0,y,sz,2);}
 
 function shareX() {
   const prompt = state.lastPrompt || 'AI GIF';
