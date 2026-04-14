@@ -251,18 +251,38 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 
 /* ── MOBILE ── */
 @media(max-width:768px){
-  .left-panel{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:300px;}
-  .app-body{flex-direction:column;}
+  .app-body{flex-direction:column;overflow:hidden;}
   .right-panel{display:none;}
-  .canvas-area{flex:1;min-height:0;display:flex;flex-direction:column;}
-  .canvas-stage{flex:1;padding:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
-  .canvas-wrap{display:flex;align-items:center;justify-content:center;}
-  #main-canvas{
-    max-width:calc(100vw - 12px) !important;
-    max-height:calc(100vw - 12px) !important;
-    width:auto !important;
-    height:auto !important;
+  /* Left panel: compact — only shows tabs + controls, no overflow */
+  .left-panel{
+    width:100%;
+    border-right:none;
+    border-bottom:1px solid var(--border);
+    max-height:260px;
+    flex-shrink:0;
+    overflow:hidden;
   }
+  .panel-content{padding:10px 14px;}
+  /* Canvas area takes all remaining space */
+  .canvas-area{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;}
+  .canvas-toolbar{padding:6px 10px;flex-wrap:nowrap;overflow-x:auto;gap:5px;flex-shrink:0;}
+  .canvas-stage{
+    flex:1;
+    padding:4px;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:0;
+  }
+  .canvas-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  .canvas-footer{padding:6px 10px;flex-shrink:0;}
+  .export-btn{padding:6px 14px;font-size:13px;}
 }
 
 /* ── TOAST ── */
@@ -2087,14 +2107,29 @@ function fitCanvasToScreen() {
   if (window.innerWidth > 768) return;
   const canvas = document.getElementById('main-canvas');
   if (!canvas || !canvas.width) return;
-  // Available width minus padding
-  const available = window.innerWidth - 12;
-  // Set CSS display size — internal resolution stays the same (full quality)
-  canvas.style.width  = available + 'px';
-  canvas.style.height = available + 'px';
+  // Calculate available space: full width, limit height so it stays square and visible
+  const hdr = document.querySelector('header');
+  const toolbar = document.querySelector('.canvas-toolbar');
+  const footer = document.querySelector('.canvas-footer');
+  const tabs = document.querySelector('.panel-tabs');
+  const leftPanel = document.querySelector('.left-panel');
+  const usedH = (hdr ? hdr.offsetHeight : 54)
+              + (toolbar ? toolbar.offsetHeight : 40)
+              + (footer ? footer.offsetHeight : 50)
+              + (leftPanel ? leftPanel.offsetHeight : 300)
+              + 20; // padding
+  const maxW = window.innerWidth - 12;
+  const maxH = window.innerHeight - usedH;
+  const size = Math.floor(Math.min(maxW, maxH, maxW)); // always square, fit width
+  canvas.style.width  = size + 'px';
+  canvas.style.height = size + 'px';
+  // Center the wrap
+  const wrap = canvas.parentElement;
+  if (wrap) { wrap.style.width = size + 'px'; wrap.style.height = size + 'px'; }
 }
 
 window.addEventListener('resize', fitCanvasToScreen);
+window.addEventListener('orientationchange', () => setTimeout(fitCanvasToScreen, 300));
 
 </script>
 </body>
