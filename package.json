@@ -1,9 +1,8 @@
 {
   "name": "analtena-gif-studio",
   "version": "1.0.0",
-  "description": "AI-powered GIF studio for the Analtena ($ANAL) token community",
   "private": true,
-  "engines": {
-    "node": ">=18"
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0"
   }
 }
