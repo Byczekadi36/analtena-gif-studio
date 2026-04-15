@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/gallery", "destination": "/gallery.html" }
+  ]
+}
