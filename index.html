@@ -573,6 +573,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
           <span class="frame-counter" id="frame-counter">Frame 1 / 1</span>
         </div>
         <button class="export-btn" id="export-btn" onclick="exportGIF()">⬇ Export MP4</button>
+        <button class="export-btn" id="save-orig-toolbar" onclick="saveOriginalImage()" style="display:none;background:var(--neon3);margin-left:8px;">🖼 Save Image</button>
       </div>
     </div>
 
@@ -617,7 +618,8 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
     <div class="result-title">GIF Ready! 🎉</div>
     <div class="result-meta" id="result-meta"></div>
     <div class="result-btns">
-      <button class="rbtn rbtn-dl" id="result-dl-btn">⬇ Download</button>
+      <button class="rbtn rbtn-dl" id="result-dl-btn">⬇ Download MP4</button>
+      <button class="rbtn rbtn-tg" id="result-save-orig-btn" onclick="saveOriginalImage()" style="display:none">🖼 Save Original Image</button>
       <button class="rbtn rbtn-x" onclick="shareX()">𝕏 Share on X</button>
       <button class="rbtn rbtn-tg" onclick="shareTG()">✈ Telegram</button>
       <button class="rbtn rbtn-close" onclick="closeResult()">← Back to editor</button>
@@ -1445,6 +1447,7 @@ async function generateWithAI() {
     // Step 2: Poll status every 2 seconds
     setProgress(20, '🎨 Replicate generating…', 'Creating AI image — ~5 seconds');
     const imageUrl = await pollUntilDone(job.predictionId);
+    state.originalImageUrl = imageUrl; // Save original Replicate URL for download
 
     // Step 3: Load image ONCE and animate frames
     setProgress(42, '🖼 Loading image…', 'Fetching result');
@@ -1650,6 +1653,9 @@ async function generateWithAI() {
     await sleep(400);
     document.getElementById('progress-overlay').classList.remove('show');
     toast('🎉 GIF ready — ' + state.frames.length + ' frames!'); setTimeout(fitCanvasToScreen, 200);
+    // Show save original button in toolbar
+    const saveOrigToolbar = document.getElementById('save-orig-toolbar');
+    if (saveOrigToolbar) saveOrigToolbar.style.display = '';
 
   } catch (err) {
     document.getElementById('progress-overlay').classList.remove('show');
@@ -2069,6 +2075,9 @@ async function exportGIF() {
     };
 
     document.getElementById('result-modal').classList.add('show');
+    // Show "Save Original Image" button if Replicate URL available
+    const origBtn = document.getElementById('result-save-orig-btn');
+    if (origBtn && state.originalImageUrl) origBtn.style.display = '';
     saveToHistory(url, blob, state.lastPrompt || '');
 
   } catch(err) {
@@ -2078,6 +2087,29 @@ async function exportGIF() {
     document.getElementById('export-btn').disabled = false;
   }
 }
+// Save original full-quality image from Replicate
+function saveOriginalImage() {
+  const url = state.originalImageUrl;
+  if (!url) { toast('No original image available'); return; }
+
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    // On mobile: open in new tab — user long-presses to save
+    window.open(url, '_blank');
+    toast('👆 Long-press the image → Save to Photos');
+  } else {
+    // On desktop: direct download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'analtena-original-' + Date.now() + '.webp';
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+}
+
 function shareX() {
   const prompt = state.lastPrompt || 'AI GIF';
   const text = encodeURIComponent(`Just generated this AI GIF with @Analtena GIF Studio on X1! 🦉\n\n"${prompt}"\n\n#ANAL #Analtena #X1Network #Web3`);
