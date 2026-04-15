@@ -16,7 +16,7 @@
   --r:12px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{min-height:100%;overflow-x:hidden;}
+html,body{min-height:100%;overflow-x:hidden;overflow-y:auto;}
 body{background:var(--bg);color:var(--text);font-family:var(--font-d);}
 
 /* grain */
@@ -53,8 +53,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
 .gate-net-links a:hover{color:#fff;}
 
 /* ── APP SHELL ── */
-#app{display:none;height:100vh;height:100dvh;flex-direction:column;}#app.visible{display:flex!important;position:fixed;inset:0;overflow:hidden;}
-#app.visible{display:flex;}
+#app{display:none;min-height:100dvh;flex-direction:column;}#app.visible{display:flex!important;overflow:visible;}
 
 header{background:var(--surface);border-bottom:1px solid var(--border);
   padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
@@ -72,16 +71,16 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 .disc-btn:hover{border-color:var(--neon2);color:var(--neon2);}
 
 /* ── MAIN LAYOUT ── */
-.app-body{display:flex;flex:1;overflow:hidden;}
+.app-body{display:flex;flex:1;overflow:visible;}
 
 /* ── LEFT PANEL ── */
 .left-panel{width:300px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;overflow:hidden;}
+  display:flex;flex-direction:column;overflow:visible;}
 .panel-tabs{display:flex;border-bottom:1px solid var(--border);}
 .ptab{flex:1;padding:12px 8px;background:transparent;border:none;font-family:var(--font-d);
   font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;}
 .ptab.active{color:var(--neon);border-bottom-color:var(--neon);}
-.panel-content{flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.panel-content{flex:1;overflow-y:visible;padding:16px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 
 /* ── AI PROMPT ── */
 .ai-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(123,97,255,.1);
@@ -148,7 +147,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 .tool-btn:hover,.tool-btn.active{border-color:var(--neon);color:var(--neon);background:rgba(0,255,204,.05);}
 .tool-sep{width:1px;height:24px;background:var(--border);flex-shrink:0;}
 
-.canvas-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden;}
+.canvas-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;overflow:visible;}
 .canvas-wrap{position:relative;box-shadow:0 0 0 1px var(--border2),0 20px 60px rgba(0,0,0,.6);}
 #main-canvas{display:block;border-radius:4px;}
 .canvas-overlay{position:absolute;inset:0;pointer-events:none;border-radius:4px;}
@@ -170,7 +169,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 
 /* ── RIGHT PANEL ── */
 .right-panel{width:260px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);
-  display:flex;flex-direction:column;overflow:hidden;}
+  display:flex;flex-direction:column;overflow:visible;}
 .rp-title{padding:14px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;
   letter-spacing:.08em;color:var(--muted);text-transform:uppercase;}
 .rp-content{flex:1;overflow-y:auto;padding:14px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
@@ -251,37 +250,31 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 
 /* ── MOBILE ── */
 @media(max-width:768px){
-  .app-body{flex-direction:column;overflow:hidden;}
+  .app-body{flex-direction:column;overflow:visible;}
   .right-panel{display:none;}
-  /* Left panel: compact — only shows tabs + controls, no overflow */
   .left-panel{
     width:100%;
     border-right:none;
     border-bottom:1px solid var(--border);
-    max-height:260px;
-    flex-shrink:0;
-    overflow:hidden;
+    overflow:visible;
+    height:auto;
   }
   .panel-content{padding:10px 14px;}
-  /* Canvas area takes all remaining space */
-  .canvas-area{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;}
-  .canvas-toolbar{padding:6px 10px;flex-wrap:nowrap;overflow-x:auto;gap:5px;flex-shrink:0;}
+  .canvas-area{display:flex;flex-direction:column;width:100%;}
+  .canvas-toolbar{padding:6px 10px;flex-wrap:wrap;gap:5px;}
   .canvas-stage{
-    flex:1;
-    padding:4px;
-    overflow:hidden;
+    padding:8px;
     display:flex;
     align-items:center;
     justify-content:center;
-    min-height:0;
+    width:100%;
   }
   .canvas-wrap{
     display:flex;
     align-items:center;
     justify-content:center;
-    flex-shrink:0;
   }
-  .canvas-footer{padding:6px 10px;flex-shrink:0;}
+  .canvas-footer{padding:6px 10px;}
   .export-btn{padding:6px 14px;font-size:13px;}
 }
 
