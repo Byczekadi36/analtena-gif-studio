@@ -353,9 +353,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
       <span class="logo-text">ANAL <em>GIF STUDIO</em></span>
     </div>
     <div class="hdr-right">
-      <a href="/gallery" style="padding:6px 14px;border-radius:8px;border:1px solid var(--border2);color:var(--muted);font-size:12px;font-weight:700;text-decoration:none;transition:all .12s;" onmouseover="this.style.borderColor='var(--neon3)';this.style.color='var(--neon3)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">🖼 Gallery</a>
       <div class="verified-pill"><span class="vpill-dot"></span><span id="hdr-wallet">verified</span></div>
-      <button class="disc-btn" onclick="disconnect()">disconnect</button>
     </div>
   </header>
 
@@ -455,6 +453,26 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
         <button class="gen-btn" id="gen-btn" onclick="generateWithAI()">
           🦉 Generate GIF with AI
         </button>
+
+        <!-- Community Gallery Banner -->
+        <a href="/gallery" style="
+          display:flex;align-items:center;justify-content:space-between;
+          margin-top:10px;padding:12px 16px;border-radius:12px;text-decoration:none;
+          background:linear-gradient(135deg,rgba(123,97,255,.15) 0%,rgba(255,45,120,.12) 100%);
+          border:1px solid rgba(123,97,255,.4);
+          transition:all .2s;
+        "
+        onmouseover="this.style.background='linear-gradient(135deg,rgba(123,97,255,.25) 0%,rgba(255,45,120,.2) 100%)';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 20px rgba(123,97,255,.3)'"
+        onmouseout="this.style.background='linear-gradient(135deg,rgba(123,97,255,.15) 0%,rgba(255,45,120,.12) 100%)';this.style.transform='';this.style.boxShadow=''">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:22px;">🖼️</span>
+            <div>
+              <div style="font-size:13px;font-weight:800;color:#e8e8f0;line-height:1.2;">Community Gallery</div>
+              <div style="font-size:11px;color:#7b61ff;font-weight:700;">Browse & upload $ANAL art</div>
+            </div>
+          </div>
+          <span style="font-size:18px;color:#7b61ff;">→</span>
+        </a>
 
         <div class="ai-log" id="ai-log"><span class="log-info">Ready. Enter a prompt and hit Generate.</span></div>
       </div>
