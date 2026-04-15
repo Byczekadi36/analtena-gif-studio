@@ -1,5 +1,10 @@
 {
   "rewrites": [
     { "source": "/gallery", "destination": "/gallery.html" }
-  ]
+  ],
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 60
+    }
+  }
 }
