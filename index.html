@@ -71,10 +71,10 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 .disc-btn:hover{border-color:var(--neon2);color:var(--neon2);}
 
 /* ── MAIN LAYOUT ── */
-.app-body{display:flex;flex:1;overflow:visible;}
+.app-body{display:flex;flex:1;overflow:visible;min-height:calc(100vh - 54px);}
 
 /* ── LEFT PANEL ── */
-.left-panel{width:300px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+.left-panel{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
   display:flex;flex-direction:column;overflow:visible;}
 .panel-tabs{display:flex;border-bottom:1px solid var(--border);}
 .ptab{flex:1;padding:12px 8px;background:transparent;border:none;font-family:var(--font-d);
@@ -147,7 +147,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 .tool-btn:hover,.tool-btn.active{border-color:var(--neon);color:var(--neon);background:rgba(0,255,204,.05);}
 .tool-sep{width:1px;height:24px;background:var(--border);flex-shrink:0;}
 
-.canvas-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;overflow:visible;}
+.canvas-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:16px;overflow:visible;min-height:0;}
 .canvas-wrap{position:relative;box-shadow:0 0 0 1px var(--border2),0 20px 60px rgba(0,0,0,.6);}
 #main-canvas{display:block;border-radius:4px;}
 .canvas-overlay{position:absolute;inset:0;pointer-events:none;border-radius:4px;}
@@ -340,19 +340,8 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
   <div class="gate-title">AI GIF<br>STUDIO</div>
   <p class="gate-sub">Create high-quality AI-powered animated GIFs.<br>Exclusively for $ANAL token holders. 🦉</p>
   <div class="gate-box">
-    <div class="gate-box-title">🔐 Connect wallet to enter</div>
-    <button class="wbtn wbtn-x1" onclick="connectX1Wallet()">🔷 Connect X1 Wallet</button>
-    <hr style="border:none;border-top:1px solid var(--border);margin:12px 0"/>
-    <button class="wbtn wbtn-honour" onclick="honourEntry()">🦉 I hold $ANAL (honour system)</button>
-  </div>
-  <p class="gate-note">Read-only verification. No transactions. Your keys, your crypto.</p>
-  <div class="gate-network">
-    <span class="x1-logo"><span class="x1-x">X</span><span class="x1-1">1</span></span>
-    <span class="gate-net-links">
-      Network <a href="https://x1.xyz" target="_blank">x1.xyz</a>
-      &nbsp;·&nbsp;
-      DEX <a href="https://xdex.xyz" target="_blank">xdex.xyz</a>
-    </span>
+    <div class="gate-box-title">🦉 Enter the Studio</div>
+    <button class="wbtn wbtn-honour" onclick="honourEntry()" style="font-size:16px;padding:16px;">🚀 Enter GIF Studio</button>
   </div>
 </div>
 
@@ -702,29 +691,6 @@ function setQuality(mode, btn) {
   document.getElementById('q-high').style.background = mode==='high' ? 'rgba(255,183,0,.1)' : 'transparent';
   document.getElementById('quality-label').textContent = mode==='high' ? '✨ Quality' : '⚡ Fast';
   document.getElementById('quality-label').style.color = mode==='high' ? 'var(--amber)' : 'var(--neon3)';
-}
-async function connectX1Wallet() {
-  try {
-    const provider = window.x1Wallet || window.x1;
-    if (provider) {
-      if (!provider._initialized) {
-        await new Promise(res => {
-          window.addEventListener('x1Wallet#initialized', res, {once:true});
-          setTimeout(res, 2000);
-        });
-      }
-      const resp = await provider.connect();
-      const pubkey = resp?.publicKey?.toString() || provider.publicKey?.toString();
-      if (pubkey) {
-        enterApp(pubkey, true);
-        return;
-      }
-    }
-    toast('X1 Wallet nie znaleziony — zainstaluj na x1.xyz');
-    setTimeout(() => window.open('https://x1.xyz','_blank'), 1000);
-  } catch(e) {
-    toast('Connection error: ' + (e.message || 'Cancelled'));
-  }
 }
 function honourEntry() {
   const fake = 'HONOUR' + Math.random().toString(36).slice(2,8).toUpperCase();
@@ -2219,30 +2185,31 @@ function toast(msg){
   toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
 }
 
-// ── MOBILE CANVAS SCALING ──────────────────────────────────────────
+// ── CANVAS SCALING — desktop + mobile ─────────────────────────────
 function fitCanvasToScreen() {
-  if (window.innerWidth > 768) return;
   const canvas = document.getElementById('main-canvas');
   if (!canvas || !canvas.width) return;
-  // Calculate available space: full width, limit height so it stays square and visible
-  const hdr = document.querySelector('header');
-  const toolbar = document.querySelector('.canvas-toolbar');
-  const footer = document.querySelector('.canvas-footer');
-  const tabs = document.querySelector('.panel-tabs');
-  const leftPanel = document.querySelector('.left-panel');
-  const usedH = (hdr ? hdr.offsetHeight : 54)
-              + (toolbar ? toolbar.offsetHeight : 40)
-              + (footer ? footer.offsetHeight : 50)
-              + (leftPanel ? leftPanel.offsetHeight : 300)
-              + 20; // padding
-  const maxW = window.innerWidth - 12;
-  const maxH = window.innerHeight - usedH;
-  const size = Math.floor(Math.min(maxW, maxH, maxW)); // always square, fit width
-  canvas.style.width  = size + 'px';
-  canvas.style.height = size + 'px';
-  // Center the wrap
   const wrap = canvas.parentElement;
-  if (wrap) { wrap.style.width = size + 'px'; wrap.style.height = size + 'px'; }
+  const stage = document.querySelector('.canvas-stage');
+  if (!stage) return;
+
+  const isMobile = window.innerWidth <= 768;
+
+  if (isMobile) {
+    // Mobile: fit to screen width
+    const size = window.innerWidth - 16;
+    canvas.style.width  = size + 'px';
+    canvas.style.height = size + 'px';
+    if (wrap) { wrap.style.width = size + 'px'; wrap.style.height = size + 'px'; }
+  } else {
+    // Desktop: fit to available stage area (keeps aspect ratio)
+    const stageW = stage.clientWidth - 48;
+    const stageH = stage.clientHeight - 48;
+    const size = Math.min(stageW, stageH, canvas.width);
+    canvas.style.width  = size + 'px';
+    canvas.style.height = size + 'px';
+    if (wrap) { wrap.style.width = size + 'px'; wrap.style.height = size + 'px'; }
+  }
 }
 
 window.addEventListener('resize', fitCanvasToScreen);
