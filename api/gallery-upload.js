@@ -1,7 +1,5 @@
 // api/gallery-upload.js
-// Uploads image to Vercel Blob Storage + saves metadata
-
-import { put, list } from '@vercel/blob';
+// Uses @vercel/blob to store images
 
 export const config = {
   api: { bodyParser: false }
@@ -14,53 +12,74 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) {
+    return res.status(500).json({ error: 'BLOB_READ_WRITE_TOKEN not set' });
+  }
+
   try {
-    // Parse multipart form data manually
+    // Read raw body
     const chunks = [];
     for await (const chunk of req) chunks.push(chunk);
     const body = Buffer.concat(chunks);
 
-    // Extract boundary from content-type
-    const contentType = req.headers['content-type'] || '';
-    const boundaryMatch = contentType.match(/boundary=([^\s;]+)/);
-    if (!boundaryMatch) return res.status(400).json({ error: 'No boundary in multipart' });
+    const ct = req.headers['content-type'] || '';
+    const bm = ct.match(/boundary=([^\s;]+)/);
+    if (!bm) return res.status(400).json({ error: 'No multipart boundary' });
 
-    const boundary = '--' + boundaryMatch[1];
-    const parts = parseMultipart(body, boundary);
-
+    const parts = parseMultipart(body, '--' + bm[1]);
     const filePart = parts.find(p => p.name === 'file');
     const nick = (parts.find(p => p.name === 'nick')?.value || 'Anonymous').slice(0, 30);
-    const tag = (parts.find(p => p.name === 'tag')?.value || 'meme').slice(0, 20);
+    const tag  = (parts.find(p => p.name === 'tag')?.value  || 'meme').slice(0, 20);
 
-    if (!filePart) return res.status(400).json({ error: 'No file provided' });
-    if (filePart.data.length > 5 * 1024 * 1024) return res.status(400).json({ error: 'File too large (max 5MB)' });
+    if (!filePart?.data?.length) return res.status(400).json({ error: 'No file data' });
+    if (filePart.data.length > 5 * 1024 * 1024) return res.status(400).json({ error: 'Max 5MB' });
 
-    const ext = filePart.filename?.split('.').pop()?.toLowerCase() || 'jpg';
-    const validExts = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-    if (!validExts.includes(ext)) return res.status(400).json({ error: 'Invalid file type' });
+    const ext = (filePart.filename?.split('.').pop() || 'jpg').toLowerCase();
+    if (!['jpg','jpeg','png','webp','gif'].includes(ext)) {
+      return res.status(400).json({ error: 'Invalid file type' });
+    }
 
-    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-    const filename = `gallery/${id}.${ext}`;
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    const imgType = filePart.contentType || 'image/jpeg';
 
-    // Upload image to Vercel Blob
-    const blob = await put(filename, filePart.data, {
-      access: 'public',
-      contentType: filePart.contentType || 'image/jpeg',
+    // Upload image via Vercel Blob REST API directly (no SDK needed)
+    const blobRes = await fetch(`https://blob.vercel-storage.com/gallery/${id}.${ext}`, {
+      method: 'PUT',
+      headers: {
+        'authorization': `Bearer ${token}`,
+        'content-type': imgType,
+        'x-api-version': '7',
+        'x-add-random-suffix': '0',
+        'x-cache-control-max-age': '31536000',
+      },
+      body: filePart.data,
     });
 
-    // Save metadata as JSON blob
+    if (!blobRes.ok) {
+      const errText = await blobRes.text();
+      throw new Error('Blob upload failed: ' + errText);
+    }
+
+    const blobData = await blobRes.json();
+    const imageUrl = blobData.url;
+
+    // Save metadata
     const item = {
-      id,
-      url: blob.url,
+      id, url: imageUrl,
       nick: nick.startsWith('@') ? nick : '@' + nick,
-      tag,
-      likes: 0,
-      createdAt: Date.now(),
+      tag, likes: 0, createdAt: Date.now()
     };
 
-    await put(`gallery-meta/${id}.json`, JSON.stringify(item), {
-      access: 'public',
-      contentType: 'application/json',
+    await fetch(`https://blob.vercel-storage.com/gallery-meta/${id}.json`, {
+      method: 'PUT',
+      headers: {
+        'authorization': `Bearer ${token}`,
+        'content-type': 'application/json',
+        'x-api-version': '7',
+        'x-add-random-suffix': '0',
+      },
+      body: JSON.stringify(item),
     });
 
     return res.status(200).json({ item });
@@ -71,64 +90,51 @@ export default async function handler(req, res) {
   }
 }
 
-// Simple multipart parser
 function parseMultipart(body, boundary) {
   const parts = [];
-  const sep = Buffer.from('\r\n' + boundary);
-  const start = Buffer.from(boundary);
+  const sep = Buffer.from(boundary);
+  const crlfcrlf = Buffer.from('\r\n\r\n');
 
-  let pos = body.indexOf(start);
+  let pos = indexOf(body, sep, 0);
   if (pos === -1) return parts;
-  pos += start.length;
 
-  while (pos < body.length) {
-    if (body[pos] === 45 && body[pos+1] === 45) break; // '--'
-    if (body[pos] === 13 && body[pos+1] === 10) pos += 2; // CRLF
+  while (true) {
+    pos += sep.length;
+    if (pos >= body.length || (body[pos]===45 && body[pos+1]===45)) break;
+    if (body[pos]===13 && body[pos+1]===10) pos += 2;
 
-    // Find end of headers
-    const headerEnd = indexOf(body, Buffer.from('\r\n\r\n'), pos);
-    if (headerEnd === -1) break;
+    const hEnd = indexOf(body, crlfcrlf, pos);
+    if (hEnd === -1) break;
 
-    const headerStr = body.slice(pos, headerEnd).toString();
-    const dataStart = headerEnd + 4;
+    const headers = body.slice(pos, hEnd).toString();
+    const dStart = hEnd + 4;
+    const nextSep = indexOf(body, Buffer.from('\r\n' + boundary), dStart);
+    const dEnd = nextSep === -1 ? body.length : nextSep;
 
-    const nextBoundary = indexOf(body, sep, dataStart);
-    const dataEnd = nextBoundary === -1 ? body.length - 2 : nextBoundary;
-
-    const data = body.slice(dataStart, dataEnd);
-
-    // Parse headers
-    const nameMatch = headerStr.match(/name="([^"]+)"/);
-    const filenameMatch = headerStr.match(/filename="([^"]+)"/);
-    const ctMatch = headerStr.match(/Content-Type:\s*([^\r\n]+)/i);
+    const nm = headers.match(/name="([^"]+)"/);
+    const fm = headers.match(/filename="([^"]+)"/);
+    const cm = headers.match(/Content-Type:\s*([^\r\n]+)/i);
 
     const part = {
-      name: nameMatch?.[1] || '',
-      filename: filenameMatch?.[1] || '',
-      contentType: ctMatch?.[1]?.trim() || 'text/plain',
-      data,
+      name: nm?.[1] || '',
+      filename: fm?.[1] || '',
+      contentType: cm?.[1]?.trim() || 'text/plain',
+      data: body.slice(dStart, dEnd),
     };
-
-    if (!part.filename) {
-      part.value = data.toString().trim();
-    }
-
+    if (!part.filename) part.value = part.data.toString().trim();
     parts.push(part);
-
-    if (nextBoundary === -1) break;
-    pos = nextBoundary + sep.length;
+    if (nextSep === -1) break;
+    pos = nextSep + 2;
   }
-
   return parts;
 }
 
 function indexOf(buf, search, start = 0) {
-  for (let i = start; i <= buf.length - search.length; i++) {
-    let found = true;
+  outer: for (let i = start; i <= buf.length - search.length; i++) {
     for (let j = 0; j < search.length; j++) {
-      if (buf[i+j] !== search[j]) { found = false; break; }
+      if (buf[i+j] !== search[j]) continue outer;
     }
-    if (found) return i;
+    return i;
   }
   return -1;
 }
