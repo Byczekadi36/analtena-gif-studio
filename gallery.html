@@ -546,5 +546,79 @@ function toast(msg, duration = 3000) {
   setTimeout(() => el.classList.remove('show'), duration);
 }
 </script>
+
+<audio id="main-audio" style="display:none"></audio>
+
+<script>
+// Resume music from studio if it was playing
+(function() {
+  const wasPlaying = localStorage.getItem('anal_music_playing');
+  if (!wasPlaying) return;
+
+  const TRACKS = {
+    senpai:     'Krisu_-_Senpai.mp3',
+    fairytale:  'Krisu_-_Fairytale__ft__Claudie_Mackula_.mp3',
+    monster:    'Krisu_-_The_Monster.mp3',
+    life:       'Krisu_-_Life.mp3',
+    solitude:   'Krisu_-_Sweet_Solitude.mp3',
+    kida:       'Krisu_-_Kida.mp3',
+    wrecking:   'Krisu_-_Wrecking_Ball.mp3',
+    melancholia:'Krisu_-_Melancholia.mp3',
+  };
+
+  const file = TRACKS[wasPlaying];
+  if (!file) return;
+
+  // Add floating music button
+  const btn = document.createElement('button');
+  btn.id = 'gallery-music-btn';
+  btn.textContent = '🎶';
+  btn.title = 'Music playing — click to stop';
+  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:999;width:48px;height:48px;border-radius:50%;border:2px solid #00ffcc;background:rgba(0,255,204,.15);backdrop-filter:blur(10px);cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;transition:all .2s;animation:gpulse 1.5s ease-in-out infinite;';
+  document.body.appendChild(btn);
+
+  const style = document.createElement('style');
+  style.textContent = '@keyframes gpulse{0%,100%{box-shadow:0 0 8px rgba(0,255,204,.3)}50%{box-shadow:0 0 24px rgba(0,255,204,.6)}}';
+  document.head.appendChild(style);
+
+  const audio = document.getElementById('main-audio');
+  audio.src = '/' + file;
+  audio.loop = true;
+
+  let playing = false;
+
+  function startMusic() {
+    audio.play().then(() => {
+      playing = true;
+      btn.textContent = '🎶';
+    }).catch(() => {});
+  }
+
+  // Start on first user interaction (browser policy)
+  document.addEventListener('click', function startOnce() {
+    if (!playing) startMusic();
+    document.removeEventListener('click', startOnce);
+  }, { once: true });
+
+  // Try immediate autoplay
+  startMusic();
+
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    if (playing) {
+      audio.pause();
+      playing = false;
+      btn.textContent = '🎵';
+      btn.style.borderColor = '#5a5a7a';
+      btn.style.animation = 'none';
+      localStorage.removeItem('anal_music_playing');
+    } else {
+      startMusic();
+      btn.style.borderColor = '#00ffcc';
+      btn.style.animation = 'gpulse 1.5s ease-in-out infinite';
+    }
+  };
+})();
+</script>
 </body>
 </html>
