@@ -278,6 +278,28 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
   .export-btn{padding:6px 14px;font-size:13px;}
 }
 
+/* ── MUSIC PLAYER ── */
+.music-player{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.music-btn{width:48px;height:48px;border-radius:50%;border:2px solid var(--neon3);background:rgba(123,97,255,.15);
+  backdrop-filter:blur(10px);cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;color:var(--text);}
+.music-btn:hover{background:rgba(123,97,255,.3);box-shadow:0 0 20px rgba(123,97,255,.4);transform:scale(1.1);}
+.music-btn.playing{border-color:var(--neon);background:rgba(0,255,204,.15);animation:music-pulse 1.5s ease-in-out infinite;}
+@keyframes music-pulse{0%,100%{box-shadow:0 0 8px rgba(0,255,204,.3)}50%{box-shadow:0 0 24px rgba(0,255,204,.6)}}
+.music-panel{background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:14px;
+  width:220px;display:none;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+.music-panel.show{display:block;}
+.music-panel-title{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+.music-track{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;cursor:pointer;transition:all .12s;border:1px solid transparent;}
+.music-track:hover{background:var(--card2);}
+.music-track.active{background:rgba(123,97,255,.12);border-color:var(--neon3);}
+.music-track-icon{font-size:14px;width:20px;text-align:center;}
+.music-track-name{font-size:12px;font-weight:700;flex:1;color:var(--text);}
+.music-track-bpm{font-size:10px;color:var(--muted);font-family:var(--font-m);}
+.music-vol{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.music-vol-label{font-size:10px;color:var(--muted);font-weight:700;}
+.music-vol input{flex:1;accent-color:var(--neon3);}
+
 /* ── TOAST ── */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
   background:var(--card);border:1px solid var(--border2);border-radius:99px;padding:9px 18px;
@@ -2289,6 +2311,162 @@ async function checkGalleryImport() {
     toast('Could not load gallery image');
   }
 }
+
+// ════════════════════════════════
+// RETRO MUSIC ENGINE — Web Audio API
+// ════════════════════════════════
+const TRACKS = [
+  { name:'Moon Rider',    icon:'🚀', bpm:140, style:'chiptune',  id:'moon'    },
+  { name:'ANAL Army',     icon:'💜', bpm:160, style:'punk',      id:'army'    },
+  { name:'Degen Nights',  icon:'🌙', bpm:120, style:'synthwave', id:'degen'   },
+  { name:'To The Moon',   icon:'📈', bpm:175, style:'rave',      id:'pump'    },
+  { name:'Owl Wisdom',    icon:'🦉', bpm:90,  style:'lofi',      id:'owl'     },
+  { name:'Pirate Bay',    icon:'🏴‍☠️', bpm:145, style:'sea',       id:'pirate'  },
+  { name:'XEN Warriors',  icon:'⚡', bpm:155, style:'metal',     id:'xen'     },
+  { name:'Crypto Winter', icon:'❄️', bpm:85,  style:'ambient',   id:'winter'  },
+  { name:'Bull Run',      icon:'🐂', bpm:180, style:'drum',      id:'bull'    },
+  { name:'Diamond Hands', icon:'💎', bpm:110, style:'jazz',      id:'diamond' },
+  { name:'Hodl Strong',   icon:'🔥', bpm:130, style:'rock',      id:'hodl'    },
+  { name:'Green Candles', icon:'🟢', bpm:165, style:'techno',    id:'green'   },
+];
+
+let audioCtx = null;
+let musicPlaying = false;
+let currentTrackId = null;
+let musicVolume = 0.4;
+let musicNodes = [];
+let musicTimeout = null;
+let trackStep = 0;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// Each track style has its own melody/pattern generator
+function getPattern(style, bpm) {
+  const beat = 60 / bpm;
+  const patterns = {
+    chiptune:  { notes:[523,659,784,1047,784,659,523,392,440,523,659,523],  dur:[.25,.25,.25,.5,.25,.25,.5,.25,.25,.25,.25,.5],  wave:'square'   },
+    punk:      { notes:[220,220,330,220,277,220,196,220,330,220,294,220],   dur:[.125,.125,.25,.125,.25,.125,.125,.125,.25,.125,.25,.25], wave:'sawtooth' },
+    synthwave: { notes:[262,330,392,523,392,330,262,220,247,330,392,330],   dur:[.5,.25,.25,.5,.25,.25,.5,.5,.25,.25,.5,.5],   wave:'sawtooth' },
+    rave:      { notes:[440,440,880,440,440,880,440,660,440,440,880,660],   dur:[.125,.125,.25,.125,.125,.25,.125,.25,.125,.125,.25,.25], wave:'square'   },
+    lofi:      { notes:[262,294,330,349,330,294,262,247,262,294,262,247],   dur:[.5,.5,.5,.5,.5,.5,.75,.25,.5,.5,.75,.25],     wave:'triangle' },
+    sea:       { notes:[196,220,262,294,330,294,262,220,196,175,196,220],   dur:[.375,.125,.25,.25,.5,.25,.25,.375,.375,.125,.25,.5],  wave:'sine'     },
+    metal:     { notes:[110,110,165,110,138,110,98,110,165,110,147,110],    dur:[.125,.125,.25,.125,.25,.125,.125,.125,.25,.125,.25,.25], wave:'sawtooth' },
+    ambient:   { notes:[196,247,294,370,294,247,196,165,185,247,294,247],   dur:[1,.5,.5,1,.5,.5,1,1,.5,.5,1,.5],             wave:'sine'     },
+    drum:      { notes:[880,440,880,880,440,880,880,440,660,440,880,660],   dur:[.125,.125,.125,.125,.125,.125,.125,.125,.25,.25,.25,.25], wave:'square'   },
+    jazz:      { notes:[294,370,440,494,440,370,294,262,294,370,330,294],   dur:[.375,.125,.25,.5,.375,.125,.25,.5,.375,.125,.375,.375], wave:'triangle' },
+    rock:      { notes:[165,165,220,165,196,165,147,165,220,165,185,165],   dur:[.25,.125,.25,.125,.25,.125,.25,.125,.25,.125,.25,.25],  wave:'sawtooth' },
+    techno:    { notes:[440,440,440,660,440,440,550,440,440,440,660,550],   dur:[.125,.125,.25,.125,.125,.25,.125,.125,.125,.25,.125,.125], wave:'square'   },
+  };
+  return patterns[style] || patterns.chiptune;
+}
+
+function playNote(freq, duration, time, wave, vol) {
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = wave;
+  osc.frequency.setValueAtTime(freq, time);
+  gain.gain.setValueAtTime(0, time);
+  gain.gain.linearRampToValueAtTime(vol * musicVolume, time + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + duration * 0.9);
+  osc.start(time);
+  osc.stop(time + duration);
+  musicNodes.push(osc);
+}
+
+function scheduleTrack(trackId) {
+  if (!musicPlaying || currentTrackId !== trackId) return;
+  const track = TRACKS.find(t => t.id === trackId);
+  if (!track) return;
+  const ctx = getAudioCtx();
+  const pattern = getPattern(track.style, track.bpm);
+  const beat = 60 / track.bpm;
+  let t = ctx.currentTime;
+  for (let i = 0; i < pattern.notes.length; i++) {
+    const dur = pattern.dur[i] * beat * 2;
+    playNote(pattern.notes[i], dur, t, pattern.wave, 0.12);
+    t += dur;
+  }
+  // Loop
+  const totalDur = pattern.dur.reduce((s,d) => s + d * beat * 2, 0) * 1000;
+  musicTimeout = setTimeout(() => scheduleTrack(trackId), totalDur - 50);
+}
+
+function stopMusic() {
+  musicPlaying = false;
+  clearTimeout(musicTimeout);
+  musicNodes.forEach(n => { try { n.stop(); } catch(e){} });
+  musicNodes = [];
+  document.getElementById('music-btn').classList.remove('playing');
+  document.getElementById('music-btn').textContent = '🎵';
+}
+
+function playTrack(trackId) {
+  stopMusic();
+  currentTrackId = trackId;
+  musicPlaying = true;
+  // Resume context (required by browser autoplay policy)
+  getAudioCtx().resume().then(() => {
+    scheduleTrack(trackId);
+  });
+  document.getElementById('music-btn').classList.add('playing');
+  document.getElementById('music-btn').textContent = '🎶';
+  // Update active track in list
+  document.querySelectorAll('.music-track').forEach(el => {
+    el.classList.toggle('active', el.dataset.id === trackId);
+  });
+}
+
+function toggleMusicPanel() {
+  const panel = document.getElementById('music-panel');
+  panel.classList.toggle('show');
+  if (panel.classList.contains('show') && !document.getElementById('track-list').innerHTML) {
+    renderTrackList();
+  }
+}
+
+function renderTrackList() {
+  const list = document.getElementById('track-list');
+  list.innerHTML = TRACKS.map(t => `
+    <div class="music-track ${currentTrackId===t.id?'active':''}" data-id="${t.id}"
+         onclick="currentTrackId==='${t.id}' && musicPlaying ? stopMusic() : playTrack('${t.id}')">
+      <span class="music-track-icon">${t.icon}</span>
+      <span class="music-track-name">${t.name}</span>
+      <span class="music-track-bpm">${t.bpm}bpm</span>
+    </div>
+  `).join('');
+}
+
+function setVolume(val) {
+  musicVolume = val / 100;
+}
+
+// Close panel when clicking outside
+document.addEventListener('click', e => {
+  const player = document.getElementById('music-player');
+  if (player && !player.contains(e.target)) {
+    document.getElementById('music-panel')?.classList.remove('show');
+  }
+});
 </script>
+<!-- ── MUSIC PLAYER ── -->
+<div class="music-player" id="music-player">
+  <div class="music-panel" id="music-panel">
+    <div class="music-panel-title">🎵 Retro Soundtrack</div>
+    <div id="track-list"></div>
+    <div class="music-vol">
+      <span class="music-vol-label">VOL</span>
+      <input type="range" id="music-vol" min="0" max="100" value="40" oninput="setVolume(this.value)"/>
+    </div>
+  </div>
+  <button class="music-btn" id="music-btn" onclick="toggleMusicPanel()" title="Music">🎵</button>
+</div>
+
+
 </body>
 </html>
