@@ -2230,15 +2230,29 @@ function saveOriginalImage() {
 
 function showCelebration() {
   const overlay = document.getElementById('celebration-overlay');
+  const canvasWrap = document.querySelector('.canvas-stage');
+  const canvasFooter = document.querySelector('.canvas-footer');
   if (!overlay) return;
+
+  // Hide canvas area
+  if (canvasWrap) canvasWrap.style.visibility = 'hidden';
+  if (canvasFooter) canvasFooter.style.visibility = 'hidden';
+
   overlay.classList.add('show');
-  // Auto-hide after 15 seconds
-  setTimeout(() => {
+
+  const dismiss = () => {
     overlay.classList.remove('show');
-  }, 15000);
-  // Click anywhere to dismiss
+    // Show canvas again
+    if (canvasWrap) canvasWrap.style.visibility = '';
+    if (canvasFooter) canvasFooter.style.visibility = '';
+  };
+
+  // Auto-hide after 15 seconds
+  setTimeout(dismiss, 15000);
+
+  // Click anywhere to dismiss early
   overlay.style.pointerEvents = 'all';
-  overlay.onclick = () => overlay.classList.remove('show');
+  overlay.onclick = dismiss;
 }
 
 function shareX() {
