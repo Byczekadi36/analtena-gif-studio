@@ -2232,10 +2232,10 @@ function showCelebration() {
   const overlay = document.getElementById('celebration-overlay');
   if (!overlay) return;
   overlay.classList.add('show');
-  // Auto-hide after 4 seconds
+  // Auto-hide after 15 seconds
   setTimeout(() => {
     overlay.classList.remove('show');
-  }, 4000);
+  }, 15000);
   // Click anywhere to dismiss
   overlay.style.pointerEvents = 'all';
   overlay.onclick = () => overlay.classList.remove('show');
@@ -2753,7 +2753,7 @@ document.addEventListener('click', e => {
   display:none;
 ">
   <div id="celebration-dancer" style="
-    position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+    position:absolute;bottom:90px;left:50%;transform:translateX(-50%);
     display:flex;flex-direction:column;align-items:center;gap:0;
   ">
     <div id="celebration-msg" style="
