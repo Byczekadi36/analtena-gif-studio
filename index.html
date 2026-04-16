@@ -2147,37 +2147,36 @@ function saveOriginalImage() {
 function showCelebration() {
   const overlay = document.getElementById('celebration-overlay');
   const dancer = document.getElementById('celebration-dancer');
-  const canvasWrap = document.querySelector('.canvas-wrap');
-  const canvasFooter = document.querySelector('.canvas-footer');
   if (!overlay) return;
 
-  // Position dancer: center of screen, fixed size
+  // Lock scroll on iOS
+  const scrollY = window.scrollY;
+  document.body.classList.add('celebration-active');
+  document.body.style.top = '-' + scrollY + 'px';
+
+  // Size dancer nicely
   if (dancer) {
-    const isMobile = window.innerWidth <= 768;
-    const dancerW = isMobile ? Math.min(window.innerWidth - 40, 260) : 280;
-    dancer.style.position = 'fixed';
+    const dancerW = Math.min(window.innerWidth - 40, 280);
+    dancer.style.position = 'relative';
     dancer.style.width = dancerW + 'px';
     dancer.style.height = 'auto';
-    dancer.style.left = '50%';
-    dancer.style.top = '50%';
-    dancer.style.transform = 'translate(-50%, -60%)';
-    dancer.style.zIndex = '10000';
+    dancer.style.transform = '';
+    dancer.style.left = '';
+    dancer.style.top = '';
   }
 
-  // Hide canvas
-  if (canvasWrap) canvasWrap.style.visibility = 'hidden';
-  if (canvasFooter) canvasFooter.style.visibility = 'hidden';
-
   overlay.classList.add('show');
+  overlay.style.pointerEvents = 'all';
 
   const dismiss = () => {
     overlay.classList.remove('show');
-    if (canvasWrap) canvasWrap.style.visibility = '';
-    if (canvasFooter) canvasFooter.style.visibility = '';
+    // Restore scroll
+    document.body.classList.remove('celebration-active');
+    document.body.style.top = '';
+    window.scrollTo(0, scrollY);
   };
 
   setTimeout(dismiss, 15000);
-  overlay.style.pointerEvents = 'all';
   overlay.onclick = dismiss;
 }
 
@@ -2696,9 +2695,14 @@ document.addEventListener('click', e => {
 
 <!-- ── CELEBRATION OVERLAY ── -->
 <div id="celebration-overlay" style="
-  display:none;position:fixed;inset:0;z-index:9999;
-  pointer-events:none;
   display:none;
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  width:100%;height:100%;
+  z-index:99999;
+  background:rgba(8,8,16,0.95);
+  pointer-events:none;
+  -webkit-overflow-scrolling:touch;
 ">
   <div id="celebration-dancer" style="
     position:absolute;
@@ -2722,7 +2726,17 @@ document.addEventListener('click', e => {
   from { transform:scale(0) translateY(20px); opacity:0; }
   to   { transform:scale(1) translateY(0);    opacity:1; }
 }
-#celebration-overlay.show { display:block !important; }
+#celebration-overlay.show {
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+}
+body.celebration-active {
+  overflow:hidden;
+  position:fixed;
+  width:100%;
+}
 </style>
 
 
