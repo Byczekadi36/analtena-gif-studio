@@ -753,7 +753,7 @@ function honourEntry() {
   enterApp(fake, false);
   // Autoplay Senpai track on enter
   setTimeout(() => {
-    playTrack('senpai');
+    playTrack('senpai');  // first track
     // Show panel briefly so user sees music is playing
     const panel = document.getElementById('music-panel');
     if (panel) {
@@ -2379,19 +2379,14 @@ async function checkGalleryImport() {
 // RETRO MUSIC ENGINE — Web Audio API
 // ════════════════════════════════
 const TRACKS = [
-  { name:'Moon Rider',    icon:'🚀', bpm:140, style:'chiptune',  id:'moon'    },
-  { name:'ANAL Army',     icon:'💜', bpm:160, style:'punk',      id:'army'    },
-  { name:'Degen Nights',  icon:'🌙', bpm:120, style:'synthwave', id:'degen'   },
-  { name:'To The Moon',   icon:'📈', bpm:175, style:'rave',      id:'pump'    },
-  { name:'Owl Wisdom',    icon:'🦉', bpm:90,  style:'lofi',      id:'owl'     },
-  { name:'Pirate Bay',    icon:'🏴‍☠️', bpm:145, style:'sea',       id:'pirate'  },
-  { name:'XEN Warriors',  icon:'⚡', bpm:155, style:'metal',     id:'xen'     },
-  { name:'Crypto Winter', icon:'❄️', bpm:85,  style:'ambient',   id:'winter'  },
-  { name:'Bull Run',      icon:'🐂', bpm:180, style:'drum',      id:'bull'    },
-  { name:'Diamond Hands', icon:'💎', bpm:110, style:'jazz',      id:'diamond' },
-  { name:'Hodl Strong',   icon:'🔥', bpm:130, style:'rock',      id:'hodl'    },
-  { name:'Green Candles', icon:'🟢', bpm:165, style:'techno',    id:'green'   },
-  { name:'Senpai 🔥',     icon:'🎸', bpm:128, style:'real',      id:'senpai'  },
+  { name:'Senpai',     icon:'🎸', style:'real', id:'senpai',    file:'Krisu_-_Senpai.mp3' },
+  { name:'Fairytale',  icon:'🧚', style:'real', id:'fairytale', file:'Krisu_-_Fairytale__ft__Claudie_Mackula_.mp3' },
+  { name:'The Monster',icon:'👹', style:'real', id:'monster',   file:'Krisu_-_The_Monster.mp3' },
+  { name:'Life',       icon:'🌿', style:'real', id:'life',      file:'Krisu_-_Life.mp3' },
+  { name:'Sweet Solitude',icon:'🌙',style:'real',id:'solitude', file:'Krisu_-_Sweet_Solitude.mp3' },
+  { name:'Kida',       icon:'✨', style:'real', id:'kida',      file:'Krisu_-_Kida.mp3' },
+  { name:'Wrecking Ball',icon:'💥',style:'real',id:'wrecking',  file:'Krisu_-_Wrecking_Ball.mp3' },
+  { name:'Melancholia', icon:'💜', style:'real', id:'melancholia',file:'Krisu_-_Melancholia.mp3' },
 ];
 
 let audioCtx = null;
@@ -2577,11 +2572,6 @@ function playNote(freq, duration, time, wave, vol) {
 }
 
 function scheduleTrack(trackId) {
-  if (trackId === 'senpai') {
-    const audio = document.getElementById('senpai-audio');
-    if (audio) { audio.currentTime = 0; audio.play().catch(()=>{}); }
-    return;
-  }
   if (!musicPlaying || currentTrackId !== trackId) return;
   const track = TRACKS.find(t => t.id === trackId);
   if (!track) return;
@@ -2604,8 +2594,8 @@ function stopMusic() {
   clearTimeout(musicTimeout);
   musicNodes.forEach(n => { try { n.stop(); } catch(e){} });
   musicNodes = [];
-  const senpaiAudio = document.getElementById('senpai-audio');
-  if (senpaiAudio) { senpaiAudio.pause(); senpaiAudio.currentTime = 0; }
+  const mainAudio = document.getElementById('main-audio');
+  if (mainAudio) { mainAudio.pause(); mainAudio.currentTime = 0; }
   document.getElementById('music-btn').classList.remove('playing');
   document.getElementById('music-btn').textContent = '🎵';
   const mascot = document.getElementById('punk-dancer');
@@ -2616,15 +2606,24 @@ function playTrack(trackId) {
   stopMusic();
   currentTrackId = trackId;
   musicPlaying = true;
-  // Resume context (required by browser autoplay policy)
-  getAudioCtx().resume().then(() => {
-    scheduleTrack(trackId);
-  });
+
+  const track = TRACKS.find(t => t.id === trackId);
+  if (track && track.file) {
+    let audio = document.getElementById('main-audio');
+    if (!audio) {
+      audio = document.createElement('audio');
+      audio.id = 'main-audio';
+      audio.loop = true;
+      document.body.appendChild(audio);
+    }
+    audio.src = '/' + track.file;
+    audio.play().catch(e => console.log('Audio play failed:', e));
+  }
+
   document.getElementById('music-btn').classList.add('playing');
   document.getElementById('music-btn').textContent = '🎶';
   const mascot = document.getElementById('punk-dancer');
   if (mascot) { mascot.classList.add('dancing'); mascot.style.filter='drop-shadow(0 0 8px #00ff88)'; }
-  // Update active track in list
   document.querySelectorAll('.music-track').forEach(el => {
     el.classList.toggle('active', el.dataset.id === trackId);
   });
@@ -2727,9 +2726,7 @@ document.addEventListener('click', e => {
 </style>
 
 
-<audio id="senpai-audio" loop preload="auto">
-  <source src="/Krisu_-_Senpai.mp3" type="audio/mpeg"/>
-</audio>
+
 
 </body>
 </html>
