@@ -2454,7 +2454,16 @@ function initGateParticles() {
     });
   }
 }
-document.addEventListener('DOMContentLoaded', initGateParticles);
+document.addEventListener('DOMContentLoaded', () => {
+  initGateParticles();
+  // Resume music if it was playing before navigation
+  const wasPlaying = localStorage.getItem('anal_music_playing');
+  if (wasPlaying) {
+    setTimeout(() => {
+      playTrack(wasPlaying);
+    }, 800);
+  }
+});
 
 // ── GALLERY IMPORT ─────────────────────────────────────────────────
 async function checkGalleryImport() {
@@ -2731,6 +2740,7 @@ function stopMusic() {
   musicNodes = [];
   const mainAudio = document.getElementById('main-audio');
   if (mainAudio) { mainAudio.pause(); mainAudio.currentTime = 0; }
+  localStorage.removeItem('anal_music_playing');
   document.getElementById('music-btn').classList.remove('playing');
   document.getElementById('music-btn').textContent = '🎵';
   const mascot = document.getElementById('punk-dancer');
@@ -2762,6 +2772,8 @@ function playTrack(trackId) {
   document.querySelectorAll('.music-track').forEach(el => {
     el.classList.toggle('active', el.dataset.id === trackId);
   });
+  // Save state so music continues after navigation
+  localStorage.setItem('anal_music_playing', trackId);
 }
 
 function toggleMusicPanel() {
