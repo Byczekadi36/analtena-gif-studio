@@ -842,7 +842,8 @@ function honourEntry() {
   enterApp(fake, false);
   // Autoplay Senpai track on enter
   setTimeout(() => {
-    playTrack('senpai');  // first track
+    const randomTrack = TRACKS[Math.floor(Math.random() * TRACKS.length)];
+    playTrack(randomTrack.id);
     // Show panel briefly so user sees music is playing
     const panel = document.getElementById('music-panel');
     if (panel) {
@@ -2456,7 +2457,7 @@ function initGateParticles() {
 }
 document.addEventListener('DOMContentLoaded', () => {
   initGateParticles();
-  // Resume music if it was playing before navigation
+  // Resume music if it was playing before navigation, else do nothing (honourEntry handles it)
   const wasPlaying = localStorage.getItem('anal_music_playing');
   if (wasPlaying) {
     setTimeout(() => {
@@ -2528,6 +2529,9 @@ const TRACKS = [
   { name:'The Monster', icon:'👹', style:'real', id:'monster',    file:'Krisu_-_The_Monster.mp3' },
   { name:'Life',        icon:'🌿', style:'real', id:'life',       file:'Krisu_-_Life.mp3' },
   { name:'Melancholia', icon:'💜', style:'real', id:'melancholia',file:'Krisu_-_Melancholia.mp3' },
+  { name:'Oasis',       icon:'🌊', style:'real', id:'oasis',      file:'Krisu_-_Oasis.mp3' },
+  { name:'Stardust',    icon:'⭐', style:'real', id:'stardust',   file:'Krisu_-_Stardust__ft__Elvya_.mp3' },
+  { name:'Follow Me',   icon:'🎵', style:'real', id:'followme',   file:'Krisu_-_Follow_Me__1_.mp3' },
 ];
 
 let audioCtx = null;
