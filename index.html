@@ -386,6 +386,163 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 /* ── RESULT MODAL ── */
 .result-box{border:1px solid var(--neon);box-shadow:0 0 60px rgba(0,255,204,.15);}
 .result-title{background:linear-gradient(90deg,var(--neon),var(--neon3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* ── GALLERY ── */
+
+:root{
+  --bg:#080810;--surface:#0f0f1a;--card:#14141f;--card2:#1a1a28;
+  --border:#252538;--border2:#2e2e48;
+  --neon:#00ffcc;--neon2:#ff2d78;--neon3:#7b61ff;--amber:#ffb700;
+  --text:#e8e8f0;--muted:#5a5a7a;--muted2:#3a3a58;
+  --font-d:'Syne',sans-serif;--font-m:'Share Tech Mono',monospace;
+  --r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--font-d);}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.4;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);padding:12px 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo img{width:36px;height:36px;border-radius:50%;object-fit:cover;}
+.nav-logo-text{font-size:16px;font-weight:800;color:var(--neon);}
+.nav-logo-text em{color:var(--text);font-style:normal;}
+.nav-links{display:flex;align-items:center;gap:8px;}
+.nav-btn{padding:8px 16px;border-radius:8px;font-family:var(--font-d);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;text-decoration:none;}
+.nav-btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted);}
+.nav-btn-ghost:hover{border-color:var(--neon3);color:var(--neon3);}
+.nav-btn-primary{background:var(--neon);border:none;color:#080810;}
+.nav-btn-primary:hover{box-shadow:0 0 20px rgba(0,255,204,.3);transform:translateY(-1px);}
+
+/* HERO */
+.hero{padding:48px 20px 32px;text-align:center;max-width:600px;margin:0 auto;}
+.hero-badge{font-size:11px;font-weight:700;letter-spacing:.15em;color:var(--neon3);text-transform:uppercase;margin-bottom:12px;}
+.hero-title{font-size:clamp(28px,6vw,48px);font-weight:800;line-height:1.1;margin-bottom:12px;
+  background:linear-gradient(135deg,var(--neon) 0%,var(--neon3) 50%,var(--neon2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:28px;}
+.hero-stats{display:flex;gap:24px;justify-content:center;margin-bottom:32px;}
+.stat{text-align:center;}
+.stat-num{font-size:24px;font-weight:800;color:var(--neon);}
+.stat-label{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.08em;}
+
+/* UPLOAD AREA */
+.upload-zone{background:var(--card);border:2px dashed var(--border2);border-radius:16px;
+  padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;margin:0 20px 32px;max-width:700px;margin-left:auto;margin-right:auto;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--neon3);background:rgba(123,97,255,.05);}
+.upload-icon{font-size:36px;margin-bottom:12px;}
+.upload-title{font-size:16px;font-weight:700;margin-bottom:6px;}
+.upload-sub{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.upload-meta-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+.upload-input-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.upload-nick{padding:10px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--card2);
+  color:var(--text);font-family:var(--font-d);font-size:13px;width:200px;}
+.upload-nick:focus{outline:none;border-color:var(--neon3);}
+.tag-select{padding:10px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--card2);
+  color:var(--text);font-family:var(--font-d);font-size:13px;}
+.upload-btn{padding:10px 20px;border-radius:8px;border:none;background:var(--neon3);color:#fff;
+  font-family:var(--font-d);font-weight:700;font-size:13px;cursor:pointer;transition:all .15s;}
+.upload-btn:hover{box-shadow:0 0 16px rgba(123,97,255,.4);}
+.upload-btn:disabled{opacity:.4;cursor:not-allowed;}
+.upload-progress{margin-top:12px;display:none;}
+.progress-bar{height:4px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:8px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--neon3),var(--neon));width:0%;transition:width .3s;}
+
+/* FILTERS */
+.filters{padding:0 20px 20px;max-width:900px;margin:0 auto;}
+.filter-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.filter-label{font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.08em;margin-right:4px;}
+.ftag{padding:6px 14px;border-radius:99px;border:1px solid var(--border2);background:transparent;
+  color:var(--muted);font-family:var(--font-d);font-size:12px;font-weight:700;cursor:pointer;transition:all .12s;}
+.ftag:hover{border-color:var(--neon3);color:var(--neon3);}
+.ftag.active{background:var(--neon3);border-color:var(--neon3);color:#fff;}
+.sort-select{margin-left:auto;padding:6px 12px;border-radius:8px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text);font-family:var(--font-d);font-size:12px;}
+
+/* GALLERY GRID */
+.gallery-wrap{padding:0 16px 40px;max-width:960px;margin:0 auto;}
+.gallery-grid{columns:2;gap:12px;}
+@media(min-width:600px){.gallery-grid{columns:3;}}
+@media(min-width:900px){.gallery-grid{columns:4;}}
+.gallery-item{break-inside:avoid;margin-bottom:12px;position:relative;border-radius:12px;overflow:hidden;
+  border:1px solid var(--border);cursor:pointer;background:var(--card);transition:transform .15s;}
+.gallery-item:hover{transform:translateY(-3px);border-color:var(--border2);}
+.gallery-item img{width:100%;display:block;border-radius:12px 12px 0 0;}
+.gallery-item-info{padding:10px 10px 8px;}
+.item-nick{font-size:11px;color:var(--neon3);font-weight:700;margin-bottom:2px;}
+.item-tag{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.06em;}
+.item-actions{display:flex;align-items:center;gap:6px;margin-top:8px;}
+.like-btn{display:flex;align-items:center;gap:4px;background:transparent;border:1px solid var(--border);
+  border-radius:99px;padding:4px 10px;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;transition:all .12s;font-family:var(--font-d);}
+.like-btn:hover,.like-btn.liked{border-color:var(--neon2);color:var(--neon2);}
+.like-btn.liked{background:rgba(255,45,120,.1);}
+.use-btn{flex:1;padding:5px 8px;border-radius:8px;border:none;background:rgba(0,255,204,.08);
+  color:var(--neon);font-family:var(--font-d);font-size:11px;font-weight:700;cursor:pointer;transition:all .12s;}
+.use-btn:hover{background:rgba(0,255,204,.15);}
+.share-btn{padding:5px 8px;border-radius:8px;border:1px solid var(--border);background:transparent;
+  color:var(--muted);font-family:var(--font-d);font-size:11px;cursor:pointer;transition:all .12s;}
+.share-btn:hover{border-color:var(--neon3);color:var(--neon3);}
+
+/* TOP BADGE */
+.top-badge{position:absolute;top:8px;left:8px;background:var(--amber);color:#080810;
+  border-radius:99px;padding:3px 10px;font-size:10px;font-weight:800;}
+.tag-badge{position:absolute;top:8px;right:8px;border-radius:99px;padding:3px 10px;font-size:10px;font-weight:700;}
+.tag-moon{background:rgba(123,97,255,.3);color:var(--neon3);border:1px solid rgba(123,97,255,.4);}
+.tag-meme{background:rgba(255,183,0,.2);color:var(--amber);border:1px solid rgba(255,183,0,.3);}
+.tag-team{background:rgba(0,255,204,.15);color:var(--neon);border:1px solid rgba(0,255,204,.25);}
+.tag-art{background:rgba(255,45,120,.15);color:var(--neon2);border:1px solid rgba(255,45,120,.25);}
+.tag-rebel{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.25);}
+
+/* LIGHTBOX */
+.lightbox{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.92);display:none;
+  align-items:center;justify-content:center;padding:20px;}
+.lightbox.show{display:flex;}
+.lb-box{background:var(--card);border:1px solid var(--border2);border-radius:20px;
+  max-width:560px;width:100%;overflow:hidden;}
+.lb-img{width:100%;display:block;max-height:60vh;object-fit:contain;background:#000;}
+.lb-body{padding:16px;}
+.lb-nick{font-size:13px;color:var(--neon3);font-weight:700;margin-bottom:4px;}
+.lb-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+.lb-btn{flex:1;min-width:80px;padding:10px;border-radius:10px;border:none;font-family:var(--font-d);font-weight:700;font-size:13px;cursor:pointer;transition:all .15s;text-align:center;}
+.lb-use{background:var(--neon);color:#080810;}
+.lb-use:hover{box-shadow:0 0 16px rgba(0,255,204,.3);}
+.lb-dl{background:var(--neon3);color:#fff;}
+.lb-share{background:var(--card2);color:var(--text);border:1px solid var(--border2);}
+.lb-close{position:absolute;top:16px;right:16px;background:var(--card2);border:1px solid var(--border);
+  border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;color:var(--muted);}
+.lb-close:hover{color:var(--text);}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty-icon{font-size:48px;margin-bottom:16px;}
+.empty-text{font-size:16px;font-weight:700;margin-bottom:8px;color:var(--text);}
+.empty-sub{font-size:13px;}
+
+/* LOADING */
+.loading{display:flex;justify-content:center;padding:40px;}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--neon3);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--card);
+  border:1px solid var(--border2);border-radius:12px;padding:12px 20px;font-size:13px;font-weight:700;
+  z-index:999;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+
+/* HIDDEN FILE INPUT */
+#file-input{display:none;}
+
+@media(max-width:480px){
+  .upload-input-row{flex-direction:column;align-items:stretch;}
+  .upload-nick{width:100%;}
+  .hero-stats{gap:16px;}
+}
+
 </style>
 </head>
 <body>
@@ -564,7 +721,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
         </button>
 
         <!-- Community Gallery Banner -->
-        <a href="/gallery" style="
+        <a href="#" onclick="openGallery();return false;" style="
           display:flex;align-items:center;justify-content:space-between;
           margin-top:10px;padding:12px 16px;border-radius:12px;text-decoration:none;
           background:linear-gradient(135deg,rgba(123,97,255,.15) 0%,rgba(255,45,120,.12) 100%);
@@ -759,6 +916,389 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
       <button class="rbtn rbtn-close" onclick="closeResult()">← Back to editor</button>
     </div>
   </div>
+</div>
+
+<div id="gallery-panel" style="display:none;position:fixed;inset:0;z-index:400;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;">
+  <div style="position:sticky;top:0;z-index:10;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-size:16px;font-weight:800;color:var(--neon);">🖼️ Community Gallery</span>
+    <button onclick="closeGallery()" style="background:var(--card);border:1px solid var(--border2);border-radius:8px;color:var(--muted);padding:6px 14px;font-family:var(--font-d);font-size:12px;font-weight:700;cursor:pointer;">← Back</button>
+  </div>
+  <div id="gallery-content">
+
+
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">🦉 $ANAL Community</div>
+  <div class="hero-title">Community Gallery</div>
+  <div class="hero-sub">Best memes, art & GIFs from the $ANAL community. Upload yours, like the best, use any image as your GIF base.</div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Images</div></div>
+    <div class="stat"><div class="stat-num" id="stat-likes">—</div><div class="stat-label">Total Likes</div></div>
+    <div class="stat"><div class="stat-num" id="stat-creators">—</div><div class="stat-label">Creators</div></div>
+  </div>
+</div>
+
+<!-- UPLOAD ZONE -->
+<div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()"
+     ondragover="event.preventDefault();this.classList.add('drag')"
+     ondragleave="this.classList.remove('drag')"
+     ondrop="handleDrop(event)">
+  <div class="upload-icon">📤</div>
+  <div class="upload-title">Upload your meme / artwork</div>
+  <div class="upload-sub">PNG, JPG, WebP, GIF — max 5MB</div>
+  <div class="upload-input-row" onclick="event.stopPropagation()">
+    <input class="upload-nick" id="upload-nick" type="text" placeholder="Your nickname (e.g. @MamaKrypto)" maxlength="30"/>
+    <select class="tag-select" id="upload-tag">
+      <option value="moon">🚀 Moon</option>
+      <option value="meme">😂 Meme</option>
+      <option value="team">💪 Team</option>
+      <option value="art">🎨 Art</option>
+      <option value="rebel">🔥 Rebel</option>
+    </select>
+    <button class="upload-btn" id="upload-btn" onclick="triggerUpload(event)">Upload</button>
+  </div>
+  <div class="upload-progress" id="upload-progress">
+    <div style="font-size:12px;color:var(--muted)" id="upload-status">Uploading…</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+</div>
+<input type="file" id="file-input" accept="image/*" onchange="handleFile(this.files[0])"/>
+
+<!-- FILTERS -->
+<div class="filters">
+  <div class="filter-row">
+    <span class="filter-label">Filter:</span>
+    <button class="ftag active" onclick="setFilter('all',this)">All</button>
+    <button class="ftag" onclick="setFilter('moon',this)">🚀 Moon</button>
+    <button class="ftag" onclick="setFilter('meme',this)">😂 Meme</button>
+    <button class="ftag" onclick="setFilter('team',this)">💪 Team</button>
+    <button class="ftag" onclick="setFilter('art',this)">🎨 Art</button>
+    <button class="ftag" onclick="setFilter('rebel',this)">🔥 Rebel</button>
+    <select class="sort-select" id="sort-select" onchange="sortGallery()">
+      <option value="new">Newest first</option>
+      <option value="hot">Most liked</option>
+    </select>
+  </div>
+</div>
+
+<!-- GALLERY GRID -->
+<div class="gallery-wrap">
+  <div class="loading" id="loading"><div class="spinner"></div></div>
+  <div class="gallery-grid" id="gallery-grid" style="display:none"></div>
+  <div class="empty" id="empty" style="display:none">
+    <div class="empty-icon">🖼️</div>
+    <div class="empty-text">No images yet</div>
+    <div class="empty-sub">Be the first to upload!</div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lb-box" onclick="event.stopPropagation()" style="position:relative;">
+    <button class="lb-close" onclick="closeLightbox()">×</button>
+    <img id="lb-img" class="lb-img" src="" alt=""/>
+    <div class="lb-body">
+      <div class="lb-nick" id="lb-nick"></div>
+      <div style="font-size:12px;color:var(--muted)" id="lb-tag"></div>
+      <div class="lb-actions">
+        <button class="lb-btn lb-use" onclick="useAsGIF()">🎬 Use as GIF base</button>
+        <button class="lb-btn lb-dl" onclick="downloadImage()">⬇ Download</button>
+        <button class="lb-btn lb-share" onclick="shareImage()">🐦 Share</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────
+let allItems = [];
+let filtered = [];
+let currentFilter = 'all';
+let currentItem = null;
+let pendingFile = null;
+let likedIds = new Set(JSON.parse(localStorage.getItem('anal_liked') || '[]'));
+
+// ── INIT ────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadGallery();
+});
+
+function scrollToUpload() {
+  document.getElementById('upload-zone').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── LOAD GALLERY ────────────────────────────────────────────────────
+async function loadGallery() {
+  try {
+    const resp = await fetch('/api/gallery-list');
+    if (!resp.ok) throw new Error('Failed to load');
+    const data = await resp.json();
+    allItems = data.items || [];
+    updateStats();
+    applyFilter();
+  } catch(e) {
+    console.error(e);
+    toast('Could not load gallery');
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('gallery-grid').style.display = '';
+  }
+}
+
+function updateStats() {
+  const creators = new Set(allItems.map(i => i.nick)).size;
+  const totalLikes = allItems.reduce((s,i) => s + (i.likes||0), 0);
+  document.getElementById('stat-total').textContent = allItems.length;
+  document.getElementById('stat-likes').textContent = totalLikes;
+  document.getElementById('stat-creators').textContent = creators;
+}
+
+// ── FILTER & SORT ──────────────────────────────────────────────────
+function setFilter(tag, btn) {
+  currentFilter = tag;
+  document.querySelectorAll('.ftag').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilter();
+}
+
+function sortGallery() { applyFilter(); }
+
+function applyFilter() {
+  filtered = currentFilter === 'all'
+    ? [...allItems]
+    : allItems.filter(i => i.tag === currentFilter);
+
+  const sort = document.getElementById('sort-select').value;
+  if (sort === 'hot') filtered.sort((a,b) => (b.likes||0) - (a.likes||0));
+  else filtered.sort((a,b) => b.createdAt - a.createdAt);
+
+  renderGrid();
+}
+
+// ── RENDER ──────────────────────────────────────────────────────────
+function renderGrid() {
+  const grid = document.getElementById('gallery-grid');
+  const empty = document.getElementById('empty');
+
+  if (!filtered.length) {
+    grid.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Top 3 most liked get badge
+  const sorted = [...filtered].sort((a,b)=>(b.likes||0)-(a.likes||0));
+  const topIds = new Set(sorted.slice(0,3).map(i=>i.id));
+
+  grid.innerHTML = filtered.map(item => {
+    const tagClass = 'tag-' + (item.tag || 'meme');
+    const tagLabel = {moon:'🚀 Moon',meme:'😂 Meme',team:'💪 Team',art:'🎨 Art',rebel:'🔥 Rebel'}[item.tag] || item.tag;
+    const liked = likedIds.has(item.id);
+    const isTop = topIds.has(item.id) && (item.likes||0) > 0;
+    return `<div class="gallery-item" onclick="openLightbox('${item.id}')">
+      <img src="${item.url}" alt="${item.nick}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%2314141f%22 width=%22200%22 height=%22200%22/><text x=%2250%%25%22 y=%2250%%25%22 fill=%22%235a5a7a%22 text-anchor=%22middle%22 dy=%22.3em%22>🖼️</text></svg>'"/>
+      ${isTop ? '<div class="top-badge">🏆 Top</div>' : ''}
+      <div class="tag-badge ${tagClass}">${tagLabel}</div>
+      <div class="gallery-item-info">
+        <div class="item-nick">${escHtml(item.nick || 'Anonymous')}</div>
+        <div class="item-actions">
+          <button class="like-btn ${liked?'liked':''}" onclick="event.stopPropagation();likeItem('${item.id}',this)">
+            ❤️ <span id="likes-${item.id}">${item.likes||0}</span>
+          </button>
+          <button class="use-btn" onclick="event.stopPropagation();useItemAsGIF('${item.id}')">🎬 Use</button>
+          <button class="share-btn" onclick="event.stopPropagation();shareItem('${item.id}')">↗</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── LIKE ────────────────────────────────────────────────────────────
+async function likeItem(id, btn) {
+  if (likedIds.has(id)) return;
+  likedIds.add(id);
+  localStorage.setItem('anal_liked', JSON.stringify([...likedIds]));
+  btn.classList.add('liked');
+
+  const item = allItems.find(i => i.id === id);
+  if (item) {
+    item.likes = (item.likes || 0) + 1;
+    const el = document.getElementById('likes-' + id);
+    if (el) el.textContent = item.likes;
+    updateStats();
+  }
+
+  try {
+    await fetch('/api/gallery-like', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+  } catch(e) {}
+}
+
+// ── LIGHTBOX ────────────────────────────────────────────────────────
+function openLightbox(id) {
+  currentItem = allItems.find(i => i.id === id);
+  if (!currentItem) return;
+  document.getElementById('lb-img').src = currentItem.url;
+  document.getElementById('lb-nick').textContent = '@' + (currentItem.nick || 'Anonymous');
+  const tagLabel = {moon:'🚀 Moon',meme:'😂 Meme',team:'💪 Team',art:'🎨 Art',rebel:'🔥 Rebel'}[currentItem.tag] || '';
+  document.getElementById('lb-tag').textContent = tagLabel + ' · ' + (currentItem.likes||0) + ' likes';
+  document.getElementById('lightbox').classList.add('show');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('show');
+  currentItem = null;
+}
+
+function useAsGIF() {
+  if (!currentItem) return;
+  localStorage.setItem('anal_gallery_import', JSON.stringify({ url: currentItem.url, id: currentItem.id }));
+  toast('🎬 Loading into GIF Studio…');
+  setTimeout(() => window.location.href = '/', 800);
+}
+
+function useItemAsGIF(id) {
+  const item = allItems.find(i => i.id === id);
+  if (!item) return;
+  localStorage.setItem('anal_gallery_import', JSON.stringify({ url: item.url, id: item.id }));
+  toast('🎬 Loading into GIF Studio…');
+  setTimeout(() => window.location.href = '/', 800);
+}
+
+function downloadImage() {
+  if (!currentItem) return;
+  const a = document.createElement('a');
+  a.href = currentItem.url;
+  a.download = 'analtena-' + currentItem.id + '.jpg';
+  a.target = '_blank';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile) toast('Long-press image → Save to Photos 📸');
+}
+
+function shareImage() {
+  if (!currentItem) return;
+  shareItem(currentItem.id);
+}
+
+function shareItem(id) {
+  const item = allItems.find(i => i.id === id);
+  if (!item) return;
+  const text = encodeURIComponent(`Check out this $ANAL community art! 🦉🚀\n\n#ANAL #Analtena #X1Network\n\n${window.location.origin}/gallery`);
+  window.open('https://twitter.com/intent/tweet?text=' + text, '_blank');
+}
+
+// ── UPLOAD ──────────────────────────────────────────────────────────
+let selectedFile = null;
+
+function triggerUpload(event) {
+  event.stopPropagation();
+  if (!selectedFile) {
+    document.getElementById('file-input').click();
+    return;
+  }
+  doUpload();
+}
+
+function handleDrop(event) {
+  event.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag');
+  const file = event.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    selectedFile = file;
+    toast('📁 File selected: ' + file.name);
+    document.getElementById('upload-btn').textContent = 'Upload ✓';
+  }
+}
+
+function handleFile(file) {
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { toast('File too large — max 5MB'); return; }
+  if (!file.type.startsWith('image/')) { toast('Only images allowed'); return; }
+  selectedFile = file;
+  toast('📁 ' + file.name + ' selected — click Upload!');
+  document.getElementById('upload-btn').textContent = 'Upload ✓';
+}
+
+async function doUpload() {
+  if (!selectedFile) { toast('Pick a file first!'); return; }
+  const nick = document.getElementById('upload-nick').value.trim() || 'Anonymous';
+  const tag = document.getElementById('upload-tag').value;
+
+  const btn = document.getElementById('upload-btn');
+  const progress = document.getElementById('upload-progress');
+  const fill = document.getElementById('progress-fill');
+  const status = document.getElementById('upload-status');
+
+  btn.disabled = true;
+  btn.textContent = 'Uploading…';
+  progress.style.display = 'block';
+  fill.style.width = '20%';
+  status.textContent = 'Uploading image…';
+
+  try {
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    formData.append('nick', nick);
+    formData.append('tag', tag);
+
+    fill.style.width = '50%';
+    const resp = await fetch('/api/gallery-upload', { method: 'POST', body: formData });
+    fill.style.width = '90%';
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || 'Upload failed');
+    }
+
+    const data = await resp.json();
+    fill.style.width = '100%';
+    status.textContent = 'Done! 🎉';
+
+    // Add to local list
+    allItems.unshift(data.item);
+    updateStats();
+    applyFilter();
+
+    toast('🎉 Uploaded! Your image is live in the gallery.');
+    selectedFile = null;
+    btn.textContent = 'Upload';
+    document.getElementById('upload-nick').value = '';
+
+    setTimeout(() => {
+      progress.style.display = 'none';
+      fill.style.width = '0%';
+    }, 2000);
+
+  } catch(err) {
+    toast('Upload failed: ' + err.message);
+    status.textContent = 'Failed';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── UTILS ───────────────────────────────────────────────────────────
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg, duration = 3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
+}
+</script>
+</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -2269,6 +2809,21 @@ function showCelebration() {
 
   setTimeout(dismiss, 10000);
   overlay.onclick = dismiss;
+}
+
+function openGallery() {
+  document.getElementById('gallery-panel').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  // Init gallery if not yet loaded
+  if (!window._galleryLoaded) {
+    window._galleryLoaded = true;
+    if (typeof loadGallery === 'function') loadGallery();
+  }
+}
+
+function closeGallery() {
+  document.getElementById('gallery-panel').style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 function shareX() {
