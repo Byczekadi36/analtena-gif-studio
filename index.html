@@ -1160,16 +1160,19 @@ function closeLightbox() {
 
 function useAsGIF() {
   if (!currentItem) return;
+  const url = currentItem.url;
   closeLightbox();
   closeGallery();
-  loadImageFromGallery(currentItem.url);
+  // Call main app function via window
+  setTimeout(() => { window._loadFromGallery(url); }, 300);
 }
 
 function useItemAsGIF(id) {
   const item = allItems.find(i => i.id === id);
   if (!item) return;
+  const url = item.url;
   closeGallery();
-  loadImageFromGallery(item.url);
+  setTimeout(() => { window._loadFromGallery(url); }, 300);
 }
 
 function downloadImage() {
@@ -2830,7 +2833,7 @@ function closeGallery() {
   }
 }
 
-async function loadImageFromGallery(url) {
+window._loadFromGallery = async function(url) {
   // Make sure app is visible and canvas is ready
   const gate = document.getElementById('gate');
   const app = document.getElementById('app');
