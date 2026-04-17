@@ -2474,7 +2474,12 @@ async function checkGalleryImport() {
   try {
     const { url } = JSON.parse(raw);
     if (!url) return;
-    await sleep(600);
+    // Auto-enter app if coming from gallery
+    if (document.getElementById('gate').style.display !== 'none') {
+      honourEntry();
+      await sleep(400);
+    }
+    await sleep(400);
     toast('🎬 Loading image from Gallery…');
     document.getElementById('progress-overlay').classList.add('show');
     setProgress(10, 'Loading from Gallery…', '');
