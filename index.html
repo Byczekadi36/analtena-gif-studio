@@ -2823,9 +2823,24 @@ function openGallery() {
 function closeGallery() {
   document.getElementById('gallery-panel').style.display = 'none';
   document.body.style.overflow = '';
+  // Switch to AI Generator tab
+  if (typeof switchPanel === 'function') {
+    const aiTab = document.querySelector('.ptab[onclick*="ai"]');
+    if (aiTab) switchPanel('ai', aiTab);
+  }
 }
 
 async function loadImageFromGallery(url) {
+  // Make sure app is visible and canvas is ready
+  const gate = document.getElementById('gate');
+  const app = document.getElementById('app');
+  if (gate && gate.style.display !== 'none') {
+    honourEntry();
+    await sleep(300);
+  }
+  // Ensure canvas context exists
+  if (!ctx) { initCanvas(); }
+
   toast('🎬 Loading image from Gallery…');
   try {
     document.getElementById('progress-overlay').classList.add('show');
@@ -2870,7 +2885,10 @@ async function loadImageFromGallery(url) {
     await sleep(400);
     document.getElementById('progress-overlay').classList.remove('show');
     toast('🎉 Gallery image loaded — ready to animate!');
-    setTimeout(fitCanvasToScreen, 100);
+    setTimeout(() => {
+      fitCanvasToScreen();
+      document.querySelector('.canvas-stage')?.scrollIntoView({ behavior:'smooth', block:'center' });
+    }, 200);
 
     // Show save original button
     const origBtn = document.getElementById('result-save-orig-btn');
@@ -3131,7 +3149,10 @@ async function checkGalleryImport() {
     await sleep(400);
     document.getElementById('progress-overlay').classList.remove('show');
     toast('🎉 Gallery image loaded — ready to animate!');
-    setTimeout(fitCanvasToScreen, 100);
+    setTimeout(() => {
+      fitCanvasToScreen();
+      document.querySelector('.canvas-stage')?.scrollIntoView({ behavior:'smooth', block:'center' });
+    }, 200);
   } catch(e) {
     document.getElementById('progress-overlay').classList.remove('show');
     toast('Could not load gallery image');
