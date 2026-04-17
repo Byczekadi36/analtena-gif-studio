@@ -43,6 +43,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-d);}
 }
 .float-e { position:absolute; font-size:16px; animation:float-emoji linear infinite; opacity:0; }
 
+/* ── CURSOR TRAIL ── */
+.trail-dot{position:fixed;border-radius:50%;pointer-events:none;z-index:99999;transition:opacity .5s ease,transform .5s ease;}
+
 /* grain */
 body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
@@ -2107,7 +2110,7 @@ async function generateWithAI() {
 
     const job = await apiResp.json();
     log('► Job sent ✓ ID: ' + job.predictionId, 'ok');
-    log('► AI Prompt: ' + job.imagePrompt?.slice(0,80) + '…', 'info');
+    window._typeLog('► AI Prompt: ' + (job.imagePrompt?.slice(0,80) || '') + '…', 'info');
 
     // Step 2: Poll status every 2 seconds
     setProgress(20, '🎨 Replicate generating…', 'Creating AI image — ~5 seconds');
@@ -2116,7 +2119,7 @@ async function generateWithAI() {
 
     // Step 3: Load image ONCE and animate frames
     setProgress(42, '🖼 Loading image…', 'Fetching result');
-    log('► Image generated ✓', 'ok');
+    window._typeLog('► Image generated ✓', 'ok');
 
     // Load image only ONCE — reuse for all frames (critical for mobile!)
     const baseImg = new Image();
@@ -2140,7 +2143,7 @@ async function generateWithAI() {
       // ── SINGLE IMAGE + CANVAS ANIMATION ──
       // Image already loaded above — no second fetch!
       setProgress(48, '🎨 Image ready!', 'Building animation frames…');
-      log('► Building frames from loaded image…', 'ai');
+      window._typeLog('► Building frames from loaded image…', 'ai');
       const fc = result.frameCount || 6;
       const anim = result.animation || 'cartoon';
       initFrameDots(fc);
@@ -3467,6 +3470,71 @@ document.addEventListener('click', e => {
     document.getElementById('music-panel')?.classList.remove('show');
   }
 });
+
+// ════════════════════════════════
+// CURSOR TRAIL
+// ════════════════════════════════
+(function() {
+  const COLORS = ['#7b61ff','#00ffcc','#ff2d78','#7b61ff','#00ffcc','#ffb700'];
+  let idx = 0;
+  function spawnDot(x, y) {
+    const dot = document.createElement('div');
+    dot.className = 'trail-dot';
+    const size = Math.random() * 9 + 4;
+    const color = COLORS[idx++ % COLORS.length];
+    dot.style.cssText = `left:${x - size/2}px;top:${y - size/2}px;width:${size}px;height:${size}px;background:${color};opacity:.85;box-shadow:0 0 ${size*2}px ${color};`;
+    document.body.appendChild(dot);
+    requestAnimationFrame(() => {
+      dot.style.opacity = '0';
+      dot.style.transform = 'scale(0.1)';
+    });
+    setTimeout(() => dot.remove(), 550);
+  }
+  let last = 0;
+  document.addEventListener('mousemove', e => {
+    const now = Date.now();
+    if (now - last < 30) return;
+    last = now;
+    spawnDot(e.clientX, e.clientY);
+  });
+  document.addEventListener('touchmove', e => {
+    const now = Date.now();
+    if (now - last < 40) return;
+    last = now;
+    const t = e.touches[0];
+    spawnDot(t.clientX, t.clientY);
+  }, { passive: true });
+})();
+
+// ════════════════════════════════
+// TYPING EFFECT FOR AI LOG
+// ════════════════════════════════
+const _origLog = log;
+function log(msg, type) {
+  _origLog(msg, type);
+}
+
+function typeIntoLog(msg, type, callback) {
+  const logEl = document.getElementById('ai-log');
+  if (!logEl) { if(callback) callback(); return; }
+  const line = document.createElement('div');
+  line.className = 'log-line' + (type ? ' log-' + type : '');
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+  let i = 0;
+  const interval = setInterval(() => {
+    line.textContent = msg.slice(0, i++);
+    logEl.scrollTop = logEl.scrollHeight;
+    if (i > msg.length) {
+      clearInterval(interval);
+      if (callback) callback();
+    }
+  }, 18);
+}
+
+// Override log function to type AI messages
+const _log = log;
+window._typeLog = typeIntoLog;
 </script>
 <!-- ── MUSIC PLAYER ── -->
 <div class="music-player" id="music-player">
