@@ -1160,17 +1160,16 @@ function closeLightbox() {
 
 function useAsGIF() {
   if (!currentItem) return;
-  localStorage.setItem('anal_gallery_import', JSON.stringify({ url: currentItem.url, id: currentItem.id }));
-  toast('🎬 Loading into GIF Studio…');
-  setTimeout(() => window.location.href = '/', 800);
+  closeLightbox();
+  closeGallery();
+  loadImageFromGallery(currentItem.url);
 }
 
 function useItemAsGIF(id) {
   const item = allItems.find(i => i.id === id);
   if (!item) return;
-  localStorage.setItem('anal_gallery_import', JSON.stringify({ url: item.url, id: item.id }));
-  toast('🎬 Loading into GIF Studio…');
-  setTimeout(() => window.location.href = '/', 800);
+  closeGallery();
+  loadImageFromGallery(item.url);
 }
 
 function downloadImage() {
@@ -2824,6 +2823,65 @@ function openGallery() {
 function closeGallery() {
   document.getElementById('gallery-panel').style.display = 'none';
   document.body.style.overflow = '';
+}
+
+async function loadImageFromGallery(url) {
+  toast('🎬 Loading image from Gallery…');
+  try {
+    document.getElementById('progress-overlay').classList.add('show');
+    setProgress(10, 'Loading from Gallery…', '');
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    await new Promise((res, rej) => {
+      img.onload = res;
+      img.onerror = rej;
+      fetch(url).then(r=>r.blob()).then(b=>{ img.src = URL.createObjectURL(b); }).catch(()=>{ img.src = url; });
+    });
+
+    const sz = 480;
+    setCanvasSize(sz);
+    state.frames = [];
+    state.originalImageUrl = url;
+    const fc = 6;
+    initFrameDots(fc);
+    setProgress(30, 'Creating animation…', '');
+
+    for (let i = 0; i < fc; i++) {
+      setProgress(30 + (i/fc)*60, 'Frame ' + (i+1) + ' of ' + fc, '');
+      const def = getAnimDef('zoom', i, fc);
+      const oc = document.createElement('canvas'); oc.width=sz; oc.height=sz;
+      const oc2 = oc.getContext('2d');
+      oc2.fillStyle='#080810'; oc2.fillRect(0,0,sz,sz);
+      oc2.save();
+      oc2.translate(sz/2 + def.offX*sz, sz/2 + def.offY*sz);
+      oc2.scale(def.scale, def.scale);
+      oc2.filter = 'brightness(' + def.bright + ')';
+      try { oc2.drawImage(img, -sz/2, -sz/2, sz, sz); } catch(e){}
+      oc2.filter='none'; oc2.restore();
+      state.frames.push(oc2.getImageData(0,0,sz,sz));
+      await sleep(30);
+    }
+
+    state.currentFrame = 0;
+    updateFrameStrip();
+    renderCurrentFrame();
+    setProgress(100, 'Done! 🎉', '');
+    await sleep(400);
+    document.getElementById('progress-overlay').classList.remove('show');
+    toast('🎉 Gallery image loaded — ready to animate!');
+    setTimeout(fitCanvasToScreen, 100);
+
+    // Show save original button
+    const origBtn = document.getElementById('result-save-orig-btn');
+    if (origBtn) origBtn.style.display = '';
+    const saveOrig = document.getElementById('save-orig-toolbar');
+    if (saveOrig) saveOrig.style.display = '';
+
+  } catch(e) {
+    document.getElementById('progress-overlay').classList.remove('show');
+    toast('Could not load image: ' + e.message);
+  }
 }
 
 function shareX() {
