@@ -550,31 +550,31 @@ function toast(msg, duration = 3000) {
 <audio id="main-audio" style="display:none"></audio>
 
 <script>
-// Resume music from studio if it was playing
 (function() {
+  const TRACKS = [
+    { id:'senpai',     file:'Krisu_-_Senpai.mp3' },
+    { id:'fairytale',  file:'Krisu_-_Fairytale__ft__Claudie_Mackula_.mp3' },
+    { id:'monster',    file:'Krisu_-_The_Monster.mp3' },
+    { id:'life',       file:'Krisu_-_Life.mp3' },
+    { id:'melancholia',file:'Krisu_-_Melancholia.mp3' },
+    { id:'oasis',      file:'Krisu_-_Oasis.mp3' },
+    { id:'stardust',   file:'Krisu_-_Stardust__ft__Elvya_.mp3' },
+    { id:'followme',   file:'Krisu_-_Follow_Me__1_.mp3' },
+  ];
+
+  // Get track to play - resume previous or pick random
   const wasPlaying = localStorage.getItem('anal_music_playing');
-  if (!wasPlaying) return;
+  const track = wasPlaying
+    ? TRACKS.find(t => t.id === wasPlaying) || TRACKS[Math.floor(Math.random()*TRACKS.length)]
+    : TRACKS[Math.floor(Math.random()*TRACKS.length)];
 
-  const TRACKS = {
-    senpai:     'Krisu_-_Senpai.mp3',
-    fairytale:  'Krisu_-_Fairytale__ft__Claudie_Mackula_.mp3',
-    monster:    'Krisu_-_The_Monster.mp3',
-    life:       'Krisu_-_Life.mp3',
-    solitude:   'Krisu_-_Sweet_Solitude.mp3',
-    kida:       'Krisu_-_Kida.mp3',
-    wrecking:   'Krisu_-_Wrecking_Ball.mp3',
-    melancholia:'Krisu_-_Melancholia.mp3',
-  };
+  if (!track) return;
 
-  const file = TRACKS[wasPlaying];
-  if (!file) return;
-
-  // Add floating music button
+  // Music button
   const btn = document.createElement('button');
   btn.id = 'gallery-music-btn';
   btn.textContent = '🎶';
-  btn.title = 'Music playing — click to stop';
-  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:999;width:48px;height:48px;border-radius:50%;border:2px solid #00ffcc;background:rgba(0,255,204,.15);backdrop-filter:blur(10px);cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;transition:all .2s;animation:gpulse 1.5s ease-in-out infinite;';
+  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:999;width:48px;height:48px;border-radius:50%;border:2px solid #00ffcc;background:rgba(0,255,204,.15);backdrop-filter:blur(10px);cursor:pointer;font-size:20px;transition:all .2s;animation:gpulse 1.5s ease-in-out infinite;';
   document.body.appendChild(btn);
 
   const style = document.createElement('style');
@@ -582,32 +582,29 @@ function toast(msg, duration = 3000) {
   document.head.appendChild(style);
 
   const audio = document.getElementById('main-audio');
-  audio.src = '/' + file;
+  audio.src = '/' + track.file;
   audio.loop = true;
-
   let playing = false;
 
   function startMusic() {
     audio.play().then(() => {
       playing = true;
       btn.textContent = '🎶';
+      localStorage.setItem('anal_music_playing', track.id);
     }).catch(() => {});
   }
 
-  // Start on first user interaction (browser policy)
-  document.addEventListener('click', function startOnce() {
-    if (!playing) startMusic();
-    document.removeEventListener('click', startOnce);
-  }, { once: true });
-
-  // Try immediate autoplay
+  // Try autoplay immediately, fallback to first click
   startMusic();
+  document.addEventListener('click', function once() {
+    if (!playing) startMusic();
+    document.removeEventListener('click', once);
+  }, { once: true });
 
   btn.onclick = (e) => {
     e.stopPropagation();
     if (playing) {
-      audio.pause();
-      playing = false;
+      audio.pause(); playing = false;
       btn.textContent = '🎵';
       btn.style.borderColor = '#5a5a7a';
       btn.style.animation = 'none';
