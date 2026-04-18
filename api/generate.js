@@ -1,10 +1,4 @@
 // api/generate.js
-// Architektura: fire-and-forget
-// 1. Claude generuje prompt obrazu
-// 2. Replicate startuje generowanie (bez czekania)
-// 3. Zwracamy prediction_id do frontendu
-// 4. Frontend odpytuje /api/status co 2 sekundy
-
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,7 +12,6 @@ export default async function handler(req, res) {
 
   const { prompt, artStyle = 'cartoon', frameCount = 4, promptOnly = false, userPrompt = '' } = req.body;
 
-  // Handle promptOnly mode — generate a random prompt idea
   if (promptOnly) {
     const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
     if (!ANTHROPIC_KEY) return res.status(500).json({ error: 'Brak klucza Anthropic' });
@@ -54,12 +47,12 @@ export default async function handler(req, res) {
     watercolor:'watercolor painting, soft washes, organic edges, artistic, pastel tones, paper texture',
     render3d:  'hyper-realistic 3D render, octane render, photorealistic, ray tracing, 8K quality, cinematic',
     comic:     'Marvel comic book style, bold ink lines, halftone dots, dynamic action pose, dramatic',
-    sketch:  'pencil sketch, hand-drawn, expressive lines',
-    retro:   '80s retro synthwave poster art, vintage colors',
+    sketch:    'pencil sketch, hand-drawn, expressive lines',
+    retro:     '80s retro synthwave poster art, vintage colors',
   };
   const styleDesc = styleMap[artStyle] || styleMap.cartoon;
 
-  // ── KROK 1: Claude tworzy optymalny prompt obrazu ─────────────────
+  // KROK 1: Claude tworzy prompt - używamy claude-haiku (szybki i tani)
   let imagePrompt, title;
   try {
     const claudeResp = await fetch('https://api.anthropic.com/v1/messages', {
@@ -70,23 +63,14 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 500,
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 300,
         system: 'You are an expert AI image prompt engineer for Flux image generation. Reply ONLY with valid JSON, no markdown, no explanation.',
         messages: [{
           role: 'user',
-          content: `Create a perfect Flux image generation prompt for this concept: "${prompt.trim()}"
+          content: `Create a perfect Flux image generation prompt for: "${prompt.trim()}"
 Style: ${styleDesc}
-
-Rules:
-- Stay TRUE to the user's concept — do NOT add owls or Analtena unless the user mentioned them
-- Make it vivid, cinematic, highly detailed
-- Optimize for animated GIF: dynamic composition, motion-friendly
-- Square format, no text overlays
-- Max 60 words for the prompt
-
-Reply with JSON only:
-{"title": "short title max 25 chars", "prompt": "detailed English Flux prompt, ${styleDesc}, vibrant, highly detailed, dynamic composition, cinematic lighting, square format, no text"}`,
+Reply with JSON only: {"title": "short title max 25 chars", "prompt": "detailed English Flux prompt, ${styleDesc}, vibrant, highly detailed, dynamic composition, cinematic lighting, square format, no text"}`,
         }],
       }),
     });
@@ -98,18 +82,16 @@ Reply with JSON only:
     try { parsed = JSON.parse(raw.replace(/```json|```/g, '').trim()); }
     catch { const m = raw.match(/\{[\s\S]*\}/); parsed = m ? JSON.parse(m[0]) : null; }
 
-    imagePrompt = parsed?.prompt || `${prompt}, ${styleDesc}, vibrant colors, cinematic lighting, highly detailed, dynamic composition`;
+    imagePrompt = parsed?.prompt || `${prompt}, ${styleDesc}, vibrant colors, cinematic lighting, highly detailed`;
     title = parsed?.title || prompt.slice(0, 25);
 
   } catch (err) {
-    // Fallback prompt jeśli Claude zawiedzie
-    imagePrompt = `${prompt}, ${styleDesc}, vibrant colors, cinematic lighting, highly detailed, dynamic composition, square format`;
+    imagePrompt = `${prompt}, ${styleDesc}, vibrant colors, cinematic lighting, highly detailed, square format`;
     title = prompt.slice(0, 25);
   }
 
-  // ── KROK 2: Wyślij zadanie do Replicate (fire and forget) ──────────
+  // KROK 2: Replicate
   try {
-    // Quality mode: flux-dev (better quality, ~15s), Speed mode: flux-schnell (~5s)
     const qualityMode = req.body.quality === 'high';
     const modelUrl = qualityMode
       ? 'https://api.replicate.com/v1/models/black-forest-labs/flux-dev/predictions'
@@ -141,7 +123,6 @@ Reply with JSON only:
 
     const prediction = await replicateResp.json();
 
-    // Zwróć natychmiast prediction_id — frontend będzie odpytywać status
     return res.status(200).json({
       predictionId: prediction.id,
       title,
