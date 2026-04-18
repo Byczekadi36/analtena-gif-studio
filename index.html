@@ -643,6 +643,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
         <button class="ptab active" onclick="switchPanel('ai',this)">🦉 AI Generator</button>
         <button class="ptab" onclick="switchPanel('tools',this)">🎨 Tools</button>
         <button class="ptab" onclick="switchPanel('frames',this)">🎬 Frames</button>
+        <button class="ptab" onclick="switchPanel('comic',this)">📖 Comic</button>
       </div>
 
       <!-- AI PANEL -->
@@ -3016,7 +3017,7 @@ function shareHistoryX(i) {
 // PANEL / MISC
 // ════════════════════════════════
 function switchPanel(name, el) {
-  ['ai','tools','frames'].forEach(p=>{
+  ['ai','tools','frames','comic'].forEach(p=>{
     document.getElementById('panel-'+p).style.display = p===name?'block':'none';
   });
   document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
