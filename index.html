@@ -547,7 +547,9 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 
 </style>
 <style>
-#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden;}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.35);display:block;}#gate{position:relative;overflow:hidden;}#gate::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 60% 65% at 50% 45%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.85) 22%,rgba(8,8,16,.5) 50%,rgba(8,8,16,.1) 70%,transparent 100%),linear-gradient(rgba(8,8,16,.6) 0%,transparent 15% 80%,rgba(8,8,16,.6) 100%),linear-gradient(90deg,rgba(8,8,16,.5) 0%,transparent 14% 86%,rgba(8,8,16,.5) 100%);}
+#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}
+#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}
+#gate::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}
 </style>
 </head>
 <body>
@@ -555,7 +557,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 
 <!-- ══ GATE ══ -->
 <div id="gate">
-  <div id="gate-comics"><img src="/comic1.jpg" alt=""><img src="/comic2.jpg" alt=""><img src="/comic3.jpg" alt=""><img src="/comic4.jpg" alt=""><img src="/comic5.jpg" alt=""><img src="/comic6.jpg" alt=""><img src="/comic7.jpg" alt=""><img src="/comic8.jpg" alt=""><img src="/comic9.jpg" alt=""></div>
+  <div id="gate-comics"><img src="/comic1.jpg"><img src="/comic2.jpg"><img src="/comic3.jpg"><img src="/comic4.jpg"><img src="/comic5.jpg"><img src="/comic6.jpg"><img src="/comic7.jpg"><img src="/comic8.jpg"><img src="/comic9.jpg"></div>
   <canvas id="gate-particles" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
   <div class="floating-emojis" id="gate-emojis" style="position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden;"></div>
 
