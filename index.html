@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,16 +43,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-d);}
   100% { transform:translateY(-600px) rotate(720deg); opacity:0; }
 }
 .float-e { position:absolute; font-size:16px; animation:float-emoji linear infinite; opacity:0; }
-
-/* ── COMIC STUDIO ── */
-.comic-char,.comic-style{padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font-d);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;}
-.comic-char.active{border-color:var(--neon);background:rgba(0,255,204,.1);color:var(--neon);}
-.comic-style{width:100%;text-align:left;padding:8px 12px;}
-.comic-style.active{border-color:var(--neon3);background:rgba(123,97,255,.1);color:var(--neon3);}
-.comic-panel-img{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
-.comic-panel-wrap{position:relative;background:#1a1a2e;}
-.comic-panel-title{position:absolute;top:0;left:0;right:0;background:rgba(0,0,0,.8);padding:3px 8px;font-family:'Share Tech Mono',monospace;font-size:10px;color:#ffcc00;font-weight:700;letter-spacing:.05em;}
-.comic-panel-dialog{position:absolute;bottom:6px;left:6px;right:6px;background:#fff;border:1.5px solid #111;border-radius:8px;padding:4px 8px;font-size:9px;font-weight:700;color:#111;line-height:1.3;text-align:center;}
 
 /* ── CURSOR TRAIL ── */
 .trail-dot{position:fixed;border-radius:50%;pointer-events:none;z-index:99999;transition:opacity .5s ease,transform .5s ease;}
@@ -643,7 +634,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
         <button class="ptab active" onclick="switchPanel('ai',this)">🦉 AI Generator</button>
         <button class="ptab" onclick="switchPanel('tools',this)">🎨 Tools</button>
         <button class="ptab" onclick="switchPanel('frames',this)">🎬 Frames</button>
-        <button class="ptab" onclick="switchPanel('comic',this)">📖 Comic</button>
       </div>
 
       <!-- AI PANEL -->
@@ -830,52 +820,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
         <div class="section-label" style="margin-top:16px">Import</div>
         <button class="add-layer-btn" onclick="document.getElementById('img-upload').click()">+ Upload image as frame</button>
         <input type="file" id="img-upload" accept="image/*" multiple style="display:none" onchange="importImages(event)"/>
-      </div>
-
-      <!-- COMIC PANEL -->
-      <div class="panel-content" id="panel-comic" style="display:none;overflow-y:auto;">
-        <div class="ai-badge">🎨 $ANAL Comic Studio · powered by Claude + Flux</div>
-
-        <div class="section-label">Postacie</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
-          <button class="comic-char active" data-char="zombie green skinned punk in leather jacket">🧟 Zombie</button>
-          <button class="comic-char active" data-char="cute cartoon owl mascot">🦉 Sówka</button>
-          <button class="comic-char" data-char="red devil demon">😈 Diabeł</button>
-          <button class="comic-char" data-char="angry Polish people in white red shirts">👴 Polacy</button>
-          <button class="comic-char" data-char="flying rocket with coins">🚀 Rakieta</button>
-        </div>
-
-        <div class="section-label">Styl komiksu</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
-          <button class="comic-style active" data-style="dark horror comic book style, detailed illustration, dramatic lighting, fire and chaos background">💥 Horror Comic</button>
-          <button class="comic-style" data-style="manga anime style, black and white with color accents, dynamic action lines">🎌 Manga</button>
-          <button class="comic-style" data-style="Marvel superhero comic style, vibrant colors, bold outlines, epic composition">🦸 Marvel</button>
-          <button class="comic-style" data-style="cartoon style, funny exaggerated expressions, bright colors, Cartoon Network style">😂 Cartoon</button>
-        </div>
-
-        <div class="section-label">Opisz historię</div>
-        <button class="wbtn" id="surprise-comic-btn" onclick="surpriseComic()" style="width:100%;margin-bottom:8px;background:rgba(255,45,120,.1);border-color:#ff2d78;color:#ff2d78;">🎲 Surprise Me — losowa historia!</button>
-        <textarea class="prompt-area" id="comic-story" rows="4" placeholder="np. Zombie $ANAL ucieka przed Polakami przez płonącą giełdę, sówka pomaga mu wspiąć się na rakietę do X1 Network..."></textarea>
-
-        <div class="section-label" style="margin-top:12px;">Dialogi w panelach</div>
-        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
-          <input class="prompt-area" id="dialog1" placeholder='Panel 1 — np. "Your analysis led us to ruin!"' style="padding:8px 10px;resize:none;"/>
-          <input class="prompt-area" id="dialog2" placeholder='Panel 2 — np. "Get them! For Poland!"' style="padding:8px 10px;resize:none;"/>
-          <input class="prompt-area" id="dialog3" placeholder='Panel 3 — np. "To the moon! $ANAL wins!"' style="padding:8px 10px;resize:none;"/>
-          <input class="prompt-area" id="dialog4" placeholder='Panel 4 — np. "No mercy! Token of the Banned!"' style="padding:8px 10px;resize:none;"/>
-        </div>
-
-        <button class="wbtn wbtn-main" id="comic-gen-btn" onclick="generateComic()" style="width:100%;font-size:15px;padding:14px;">🎨 Generuj Komiks</button>
-
-        <div id="comic-result" style="margin-top:14px;display:none;">
-          <div class="section-label">Gotowy komiks</div>
-          <div id="comic-panels" style="display:grid;grid-template-columns:1fr 1fr;gap:3px;background:#111;border:2px solid #333;border-radius:4px;overflow:hidden;margin-bottom:10px;"></div>
-          <div style="display:flex;gap:8px;">
-            <button class="wbtn" onclick="downloadComic()" style="flex:1;">⬇ Pobierz PNG</button>
-            <button class="wbtn" onclick="shareComicX()" style="flex:1;">🐦 Share na X</button>
-            <button class="wbtn" onclick="comicToGallery()" style="flex:1;">🖼 Do galerii</button>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -3017,7 +2961,7 @@ function shareHistoryX(i) {
 // PANEL / MISC
 // ════════════════════════════════
 function switchPanel(name, el) {
-  ['ai','tools','frames','comic'].forEach(p=>{
+  ['ai','tools','frames'].forEach(p=>{
     document.getElementById('panel-'+p).style.display = p===name?'block':'none';
   });
   document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
@@ -3464,12 +3408,6 @@ function playTrack(trackId) {
       document.body.appendChild(audio);
     }
     audio.src = '/' + track.file;
-    audio.loop = false;
-    audio.onended = () => {
-      const others = TRACKS.filter(t => t.id !== trackId);
-      const next = others[Math.floor(Math.random() * others.length)];
-      if (next) playTrack(next.id);
-    };
     audio.play().catch(e => console.log('Audio play failed:', e));
   }
 
@@ -3598,191 +3536,6 @@ function typeIntoLog(msg, type, callback) {
 // Override log function to type AI messages
 const _log = log;
 window._typeLog = typeIntoLog;
-
-// ════════════════════════════════
-// COMIC STUDIO
-// ════════════════════════════════
-document.querySelectorAll('.comic-char').forEach(btn => {
-  btn.addEventListener('click', () => btn.classList.toggle('active'));
-});
-document.querySelectorAll('.comic-style').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.comic-style').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  });
-});
-
-const COMIC_SURPRISES = [
-  { story: 'Zombie $ANAL ucieka z płonącej giełdy Solana przed wściekłymi Polakami. Sówka $ANAL leci obok z zielonymi świeczkami. W tle eksplozja z napisem XEN CRASH. Na końcu zombie i sówka wsiadają na rakietę do X1 Network Jack Levina i uciekają na księżyc.', d1:'Your analysis led us to ruin! XEN was a trap!', d2:'Get them! For Poland and our savings!', d3:'Hoo hoo! $ANAL to the moon! X1 Network wins!', d4:'No mercy! Token of the Banned prevails forever!' },
-  { story: 'Diabeł wzywa zombie $ANAL i sówkę na sąd w piekle za bycie zbanowanymi. Zombie broni się że dane były neutralne. Sówka trzyma zielony wykres $ANAL który idzie w górę nawet w piekle. Diabeł jest zdezorientowany bo $ANAL rośnie pomimo wszystko.', d1:'Sinner! You caused the banning of thousands!', d2:'But... the technicals were perfect, Your Darkness!', d3:'Even in hell, $ANAL chart goes up! Look!', d4:'This... is unprecedented. You may go. $ANAL wins.' },
-  { story: 'Zombie $ANAL i sówka odkrywają X1 Network — nowy blockchain Jack Levina. Wszyscy z Solany przeskakują do X1. Zombie tańczy z radości bo LP jest burned. Na końcu cała polska społeczność świętuje na księżycu.', d1:'What is this new blockchain? X1 Network?', d2:'It's Jack Levin's fork of Solana! LP burned!', d3:'No whitelist! No airdrop! Just buy $ANAL!', d4:'Poland, we are going to the MOON! WAGMI!' },
-];
-
-function surpriseComic() {
-  const s = COMIC_SURPRISES[Math.floor(Math.random() * COMIC_SURPRISES.length)];
-  document.getElementById('comic-story').value = s.story;
-  document.getElementById('dialog1').value = s.d1;
-  document.getElementById('dialog2').value = s.d2;
-  document.getElementById('dialog3').value = s.d3;
-  document.getElementById('dialog4').value = s.d4;
-}
-
-async function generateComic() {
-  const story = document.getElementById('comic-story').value.trim();
-  if (!story) { toast('Opisz historię komiksu!'); return; }
-
-  const activeChars = [...document.querySelectorAll('.comic-char.active')].map(b => b.dataset.char).join(', ');
-  const activeStyle = document.querySelector('.comic-style.active')?.dataset.style || 'dark horror comic book style';
-  const dialogs = [
-    document.getElementById('dialog1').value,
-    document.getElementById('dialog2').value,
-    document.getElementById('dialog3').value,
-    document.getElementById('dialog4').value,
-  ];
-  const panelTitles = ['THE ACCUSATION','THE CAPTURE','THE ESCAPE','THE VERDICT'];
-
-  const btn = document.getElementById('comic-gen-btn');
-  btn.disabled = true;
-  btn.textContent = '🎨 Generuję...';
-
-  document.getElementById('progress-overlay').classList.add('show');
-  setProgress(5, 'Claude tworzy scenariusz komiksu…', '');
-
-  try {
-    // Step 1: Claude creates detailed panel prompts
-    const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 800,
-        messages: [{
-          role: 'user',
-          content: `You are a comic book prompt engineer. Create 4 detailed image generation prompts for a comic strip.
-
-Story: ${story}
-Characters: ${activeChars}
-Art style: ${activeStyle}
-$ANAL token branding (cryptocurrency meme coin with owl mascot)
-
-Return ONLY a JSON array with exactly 4 strings, each being a detailed Flux image generation prompt for one panel.
-Each prompt must: describe the scene clearly, include the characters, use the art style, be self-contained.
-Add at the end of each: "comic book panel, ${activeStyle}, high quality, detailed, dramatic"
-Format: ["prompt1","prompt2","prompt3","prompt4"]`
-        }]
-      })
-    });
-
-    const claudeData = await claudeRes.json();
-    const rawText = claudeData.content?.[0]?.text || '[]';
-    const jsonMatch = rawText.match(/\[[\s\S]*\]/);
-    const panelPrompts = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
-
-    if (panelPrompts.length < 4) throw new Error('Claude did not return 4 prompts');
-
-    setProgress(15, 'Prompty gotowe! Generuję 4 panele…', '');
-
-    // Step 2: Generate all 4 panels
-    const panelImages = [];
-    for (let i = 0; i < 4; i++) {
-      setProgress(15 + (i * 20), `Generuję panel ${i+1} z 4…`, '');
-
-      const replicateRes = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: panelPrompts[i], quality: 'fast' })
-      });
-
-      const repData = await replicateRes.json();
-      const predictionId = repData.id;
-
-      // Poll for result
-      let imageUrl = null;
-      for (let attempt = 0; attempt < 30; attempt++) {
-        await sleep(2000);
-        const statusRes = await fetch(`/api/status?id=${predictionId}`);
-        const statusData = await statusRes.json();
-        if (statusData.status === 'succeeded') {
-          imageUrl = Array.isArray(statusData.output) ? statusData.output[0] : statusData.output;
-          break;
-        }
-        if (statusData.status === 'failed') throw new Error('Panel generation failed');
-      }
-
-      if (!imageUrl) throw new Error('Timeout on panel ' + (i+1));
-      panelImages.push(imageUrl);
-    }
-
-    setProgress(90, 'Składam komiks…', '');
-
-    // Step 3: Display comic
-    const panelsEl = document.getElementById('comic-panels');
-    panelsEl.innerHTML = '';
-    panelImages.forEach((url, i) => {
-      const wrap = document.createElement('div');
-      wrap.className = 'comic-panel-wrap';
-      wrap.style.cssText = 'position:relative;';
-
-      const img = document.createElement('img');
-      img.src = url;
-      img.className = 'comic-panel-img';
-      img.style.cssText = 'width:100%;aspect-ratio:1;object-fit:cover;display:block;';
-
-      const title = document.createElement('div');
-      title.className = 'comic-panel-title';
-      title.textContent = panelTitles[i] || `PANEL ${i+1}`;
-
-      if (dialogs[i]) {
-        const dialog = document.createElement('div');
-        dialog.className = 'comic-panel-dialog';
-        dialog.textContent = dialogs[i];
-        wrap.appendChild(dialog);
-      }
-
-      wrap.appendChild(img);
-      wrap.appendChild(title);
-      panelsEl.appendChild(wrap);
-    });
-
-    // Store for download
-    window._comicImages = panelImages;
-    window._comicDialogs = dialogs;
-    window._comicTitles = panelTitles;
-
-    document.getElementById('comic-result').style.display = 'block';
-    setProgress(100, 'Komiks gotowy! 🎉', '');
-    await sleep(500);
-    document.getElementById('progress-overlay').classList.remove('show');
-    showCelebration();
-    toast('🎉 Komiks wygenerowany! Pobierz lub wrzuć do galerii!');
-
-  } catch(e) {
-    document.getElementById('progress-overlay').classList.remove('show');
-    toast('Błąd: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '🎨 Generuj Komiks';
-  }
-}
-
-function downloadComic() {
-  if (!window._comicImages) return;
-  // Download first panel as preview
-  const a = document.createElement('a');
-  a.href = window._comicImages[0];
-  a.download = 'ANAL_comic_' + Date.now() + '.png';
-  a.click();
-  toast('Pobieranie komiksu…');
-}
-
-function shareComicX() {
-  const text = encodeURIComponent('Just created a $ANAL comic! 🦉🎨 #ANAL #X1Network #TokenOfTheBanned\nanaltena.com');
-  window.open('https://twitter.com/intent/tweet?text=' + text, '_blank');
-}
-
-function comicToGallery() {
-  toast('Funkcja wkrótce dostępna! 🦉');
-}
 </script>
 <!-- ── MUSIC PLAYER ── -->
 <div class="music-player" id="music-player">
