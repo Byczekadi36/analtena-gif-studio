@@ -1081,15 +1081,7 @@ let likedIds = new Set(JSON.parse(localStorage.getItem('anal_liked') || '[]'));
 
 // ── INIT ────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  initGateParticles();
-  // Resume music if was playing before navigation
-  const wasPlaying = localStorage.getItem('anal_music_playing');
-  if (wasPlaying) {
-    setTimeout(() => { playTrack(wasPlaying); }, 800);
-  }
-
-
-  try { loadGallery(); } catch(e) { console.warn('Gallery load error:', e); }
+  try { if(typeof loadGallery === 'function') loadGallery(); } catch(e) {}
 });
 
 function scrollToUpload() {
@@ -3156,24 +3148,9 @@ function initGateParticles() {
 }
 document.addEventListener('DOMContentLoaded', () => {
   initGateParticles();
-  // Resume music if was playing before navigation
   const wasPlaying = localStorage.getItem('anal_music_playing');
   if (wasPlaying) {
     setTimeout(() => { playTrack(wasPlaying); }, 800);
-  }
-  // Set logo image
-  const logoImg = document.getElementById('gate-logo-img');
-  if (logoImg) {
-    logoImg.src = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAQDAwQDAwQEAwQFBAQFBgoHBgYGBg0JCggKDw0QEA8NDw4RExgUERIXEg4PFRwVFxkZ...';
-  }
-
-  initGateParticles();
-  // Resume music if it was playing before navigation, else do nothing (honourEntry handles it)
-  const wasPlaying = localStorage.getItem('anal_music_playing');
-  if (wasPlaying) {
-    setTimeout(() => {
-      playTrack(wasPlaying);
-    }, 800);
   }
 });
 
