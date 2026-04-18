@@ -3727,14 +3727,29 @@ body.celebration-active {
     if (isHidden) badge.style.display = 'none';
   };
 
-  window.analSend = function() {
+  window.analSend = async function() {
     const inp = document.getElementById('anal-inp');
     const t = inp.value.trim(); if (!t) return;
     inp.value = ''; addMsg(t, true); showTyping();
-    setTimeout(() => {
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 200,
+          system: `Jesteś Anal — maskotką i AI asystentem tokenu kryptowalutowego $ANAL na blockchainie X1 Network. Twoja osobowość: energiczny, zabawny, memetyczny, entuzjastyczny crypto degen. Używasz emoji 🦉🚀💜💰🔥. Odpowiadasz PO POLSKU, krótko max 2-3 zdania, w stylu crypto community. Fakty: token na X1 Network, LP burned, no whitelist no airdrop just buy, kupujesz na xdex.xyz, strona analtena.com, slogan Token of the Banned, GIF Studio to narzędzie dla holderów. Nigdy nie dawaj porad finansowych. Zawsze bądź pozytywny i zabawny.`,
+          messages: [{ role: 'user', content: t }]
+        })
+      });
+      const data = await res.json();
       document.getElementById('anal-typing')?.remove();
-      const rs = getResp(t); addMsg(rs[Math.floor(Math.random()*rs.length)], false);
-    }, 900 + Math.random()*700);
+      const reply = data.content?.[0]?.text || 'Hej! Coś poszło nie tak 🦉 Spróbuj jeszcze raz!';
+      addMsg(reply, false);
+    } catch(e) {
+      document.getElementById('anal-typing')?.remove();
+      addMsg('Ojej, mam chwilowy problem! 🦉 Spróbuj za chwilę!', false);
+    }
   };
 
   window.analSendQuick = function(t) {
