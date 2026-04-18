@@ -551,15 +551,16 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 .comic-bg {
   position:absolute; inset:0;
   display:grid;
-  grid-template-columns:repeat(4,1fr);
-  grid-template-rows:repeat(5,1fr);
+  grid-template-columns:repeat(5,1fr);
+  grid-template-rows:repeat(7,1fr);
   gap:2px; z-index:0;
   pointer-events:none;
 }
 .comic-bg img {
   width:100%; height:100%;
   object-fit:cover;
-  filter:brightness(.38);
+  object-position:center;
+  filter:brightness(.4);
   display:block;
   pointer-events:none;
 }
@@ -580,18 +581,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 <!-- ══ GATE ══ -->
 <div id="gate">
   <canvas id="gate-particles" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
-  <div class="comic-bg">
-    <img src="/comic1.jpg" alt=""/><img src="/comic2.jpg" alt=""/>
-    <img src="/comic3.jpg" alt=""/><img src="/comic4.jpg" alt=""/>
-    <img src="/comic5.jpg" alt=""/><img src="/comic6.jpg" alt=""/>
-    <img src="/comic7.jpg" alt=""/><img src="/comic8.jpg" alt=""/>
-    <img src="/comic9.jpg" alt=""/><img src="/comic10.jpg" alt=""/>
-    <img src="/comic1.jpg" alt=""/><img src="/comic2.jpg" alt=""/>
-    <img src="/comic3.jpg" alt=""/><img src="/comic4.jpg" alt=""/>
-    <img src="/comic5.jpg" alt=""/><img src="/comic6.jpg" alt=""/>
-    <img src="/comic7.jpg" alt=""/><img src="/comic8.jpg" alt=""/>
-    <img src="/comic9.jpg" alt=""/><img src="/comic10.jpg" alt=""/>
-  </div>
+  <div class="comic-bg"><img src="/comic1.jpg" alt=""/><img src="/comic2.jpg" alt=""/><img src="/comic3.jpg" alt=""/><img src="/comic4.jpg" alt=""/><img src="/comic5.jpg" alt=""/><img src="/comic6.jpg" alt=""/><img src="/comic7.jpg" alt=""/><img src="/comic8.jpg" alt=""/><img src="/comic9.jpg" alt=""/><img src="/comic10.jpg" alt=""/><img src="/comic1.jpg" alt=""/><img src="/comic2.jpg" alt=""/><img src="/comic3.jpg" alt=""/><img src="/comic4.jpg" alt=""/><img src="/comic5.jpg" alt=""/><img src="/comic6.jpg" alt=""/><img src="/comic7.jpg" alt=""/><img src="/comic8.jpg" alt=""/><img src="/comic9.jpg" alt=""/><img src="/comic10.jpg" alt=""/><img src="/comic1.jpg" alt=""/><img src="/comic2.jpg" alt=""/><img src="/comic3.jpg" alt=""/><img src="/comic4.jpg" alt=""/><img src="/comic5.jpg" alt=""/><img src="/comic6.jpg" alt=""/><img src="/comic7.jpg" alt=""/><img src="/comic8.jpg" alt=""/><img src="/comic9.jpg" alt=""/><img src="/comic10.jpg" alt=""/><img src="/comic1.jpg" alt=""/><img src="/comic2.jpg" alt=""/><img src="/comic3.jpg" alt=""/><img src="/comic4.jpg" alt=""/><img src="/comic5.jpg" alt=""/></div>
   <div class="comic-vignette"></div>
   <div class="floating-emojis" id="gate-emojis" style="position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden;"></div>
 
