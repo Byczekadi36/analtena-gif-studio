@@ -78,7 +78,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
   margin-bottom:10px;transition:all .15s;}
 .wbtn-x1{background:linear-gradient(135deg,#0a0f3e,#1a2580);color:#FFE500;border:1px solid rgba(255,229,0,0.4);font-size:17px;letter-spacing:1px;}
 .wbtn-x1:hover{filter:brightness(1.2);transform:translateY(-1px);box-shadow:0 0 20px rgba(255,229,0,0.3);}
-.wbtn-honour{background:transparent;color:var(--muted);border:1px solid var(--border2);font-size:13px;padding:10px;}
+.wbtn-honour{background:linear-gradient(135deg,#00ffcc,#7b61ff)!important;color:#080810!important;border:none!important;font-size:15px!important;padding:14px!important;pointer-events:all!important;cursor:pointer!important;position:relative!important;z-index:9999!important;}
 .wbtn-honour:hover{border-color:var(--neon3);color:var(--neon3);}
 .gate-note{font-size:11px;color:var(--muted2);line-height:1.7;max-width:300px;}
 .gate-network{display:flex;align-items:center;gap:16px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);width:100%;max-width:320px;justify-content:center;}
@@ -603,7 +603,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 
     <div class="gate-box" style="margin-top:8px;pointer-events:auto;">
       <div class="gate-box-title">🦉 Enter the Studio</div>
-      <button class="wbtn wbtn-honour" onclick="honourEntry()" style="font-size:15px;padding:14px;background:linear-gradient(135deg,#00ffcc,#7b61ff);color:#080810;border:none;border-radius:10px;width:100%;cursor:pointer;font-weight:800;font-family:var(--font-d);white-space:nowrap;pointer-events:auto;">🚀 Enter GIF Studio</button>
+      <button class="wbtn wbtn-honour" onclick="(function(){try{honourEntry();}catch(e){var f=document.getElementById('gate');var a=document.getElementById('app');if(f)f.style.display='none';if(a){a.style.display='flex';a.classList.add('visible');}}})()" style="font-size:15px;padding:14px;background:linear-gradient(135deg,#00ffcc,#7b61ff);color:#080810;border:none;border-radius:10px;width:100%;cursor:pointer;font-weight:800;font-family:var(--font-d);white-space:nowrap;pointer-events:auto;">🚀 Enter GIF Studio</button>
     </div>
 
     <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:14px;">
