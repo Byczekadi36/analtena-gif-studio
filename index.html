@@ -804,15 +804,15 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
           <input type="color" id="bg-color" value="#080810" oninput="rerenderCurrentFrame()"/>
         </div>
 
-        <div class="section-label" style="margin-top:16px">🎵 Własna muzyka</div>
+        <div class="section-label" style="margin-top:16px">🎵 Custom Music</div>
         <div id="custom-music-section">
           <div id="custom-music-locked" style="background:rgba(255,183,0,0.06);border:1px solid rgba(255,183,0,0.2);border-radius:8px;padding:12px;text-align:center;">
             <div style="font-size:20px;margin-bottom:6px;">🔒</div>
-            <div style="font-size:11px;color:var(--amber);">Odblokuj za 10 ANAL</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:4px;">Przejdź do zakładki Credits</div>
+            <div style="font-size:11px;color:var(--amber);">Unlock for 10 ANAL</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:4px;">Go to Credits tab to unlock</div>
           </div>
           <div id="custom-music-unlocked" style="display:none;">
-            <button onclick="document.getElementById('custom-music-input').click()" style="width:100%;padding:9px;background:rgba(0,255,204,0.1);border:1px solid rgba(0,255,204,0.3);border-radius:8px;color:var(--neon);font-size:12px;cursor:pointer;">📂 Wgraj MP3</button>
+            <button onclick="document.getElementById('custom-music-input').click()" style="width:100%;padding:9px;background:rgba(0,255,204,0.1);border:1px solid rgba(0,255,204,0.3);border-radius:8px;color:var(--neon);font-size:12px;cursor:pointer;">📂 Upload MP3</button>
             <input type="file" id="custom-music-input" accept="audio/mp3,audio/*" style="display:none" onchange="loadCustomMusic(event)"/>
             <div id="custom-music-name" style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;"></div>
           </div>
@@ -838,31 +838,31 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
     <div class="panel-content" id="panel-credits" style="display:none">
       <div style="text-align:center;padding:8px 0 16px;">
         <div style="font-size:22px;font-weight:800;background:linear-gradient(90deg,var(--amber),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">ANAL Credits</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Doładuj konto i wydawaj w aplikacji</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Top up and spend in the app</div>
       </div>
 
       <!-- BALANCE -->
       <div style="background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.3);border-radius:12px;padding:14px;text-align:center;margin-bottom:14px;">
-        <div style="font-size:11px;color:var(--amber);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Twoje saldo</div>
+        <div style="font-size:11px;color:var(--amber);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Your balance</div>
         <div style="font-size:28px;font-weight:800;color:var(--amber)" id="credits-balance">0</div>
         <div style="font-size:11px;color:var(--muted)">$ANAL Credits</div>
       </div>
 
       <!-- DEPOSIT -->
       <div style="background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:14px;">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🔥 Doładuj konto</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Wyślij $ANAL na adres:</div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🔥 Top Up Account</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Send $ANAL to this address:</div>
         <div id="addr-box" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--font-m);font-size:10px;color:var(--neon);word-break:break-all;margin-bottom:10px;cursor:pointer;transition:all .2s;" onclick="copyAddress()">QvDfw6DEVFeVEhsu86auE7wwj1BMp7isBjqEd6MANAL</div>
-        <button id="copy-addr-btn" onclick="copyAddress()" style="width:100%;padding:8px;background:rgba(0,255,204,0.1);border:1px solid rgba(0,255,204,0.3);border-radius:8px;color:var(--neon);font-size:12px;font-family:var(--font-d);cursor:pointer;margin-bottom:12px;transition:all .2s;">📋 Kopiuj adres</button>
+        <button id="copy-addr-btn" onclick="copyAddress()" style="width:100%;padding:8px;background:rgba(0,255,204,0.1);border:1px solid rgba(0,255,204,0.3);border-radius:8px;color:var(--neon);font-size:12px;font-family:var(--font-d);cursor:pointer;margin-bottom:12px;transition:all .2s;">📋 Copy address</button>
 
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Wklej TX Hash po wysłaniu:</div>
-        <input id="tx-hash-input" type="text" placeholder="Wklej hash transakcji..." style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text);font-family:var(--font-m);font-size:11px;outline:none;box-sizing:border-box;margin-bottom:8px;"/>
-        <button id="verify-btn" onclick="verifyDeposit()" style="width:100%;padding:10px;background:linear-gradient(135deg,var(--neon3),var(--neon2));border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;font-family:var(--font-d);cursor:pointer;transition:all .2s;">✅ Zweryfikuj wpłatę</button>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Paste TX Hash after sending:</div>
+        <input id="tx-hash-input" type="text" placeholder="Paste transaction hash..." style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text);font-family:var(--font-m);font-size:11px;outline:none;box-sizing:border-box;margin-bottom:8px;"/>
+        <button id="verify-btn" onclick="verifyDeposit()" style="width:100%;padding:10px;background:linear-gradient(135deg,var(--neon3),var(--neon2));border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;font-family:var(--font-d);cursor:pointer;transition:all .2s;">✅ Verify deposit</button>
         <div id="deposit-status" style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px;min-height:16px;"></div>
       </div>
 
       <!-- SHOP -->
-      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🛍️ Sklep</div>
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🛍️ Shop</div>
 
       <div id="credits-shop">
         <div class="shop-item" onclick="buyItem('card_common',10,'🟤 Common Card')">
@@ -877,8 +877,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
         <div class="shop-item" onclick="buyItem('card_gold',10,'🥇 Gold Rebel')">
           <span>🥇 Gold Rebel</span><span style="color:var(--amber)">10 ANAL</span>
         </div>
-        <div class="shop-item" onclick="buyItem('music',10,'🎵 Własna muzyka')">
-          <span>🎵 Własna muzyka</span><span style="color:var(--amber)">10 ANAL</span>
+        <div class="shop-item" onclick="buyItem('music',10,'🎵 Custom Music')">
+          <span>🎵 Custom Music</span><span style="color:var(--amber)">10 ANAL</span>
         </div>
         <div class="shop-item" onclick="buyItem('style_premium',10,'🎨 Premium styl GIF')">
           <span>🎨 Premium styl GIF</span><span style="color:var(--amber)">10 ANAL</span>
@@ -901,12 +901,12 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
       <!-- HEADER -->
       <div style="text-align:center;padding:8px 0 14px;">
         <div style="font-size:22px;font-weight:800;background:linear-gradient(90deg,#ff2d78,var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">X1 Roast Machine</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Sprawdź każdy portfel na X1 Network</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Analyze any wallet on X1 Network</div>
       </div>
 
       <!-- BALANCE MINI -->
       <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,183,0,0.07);border:1px solid rgba(255,183,0,0.2);border-radius:10px;padding:10px 14px;margin-bottom:14px;">
-        <span style="font-size:11px;color:var(--muted);">Twoje saldo:</span>
+        <span style="font-size:11px;color:var(--muted);">Your balance:</span>
         <span style="font-size:14px;font-weight:800;color:var(--amber);" id="roast-balance-display">0 ANAL</span>
       </div>
 
@@ -926,7 +926,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 
       <!-- WALLET INPUT -->
       <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">X1 Wallet Address:</div>
-      <input id="roast-wallet-input" type="text" placeholder="Wklej adres X1 wallet..." style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;color:var(--text);font-family:var(--font-m);font-size:11px;outline:none;box-sizing:border-box;margin-bottom:10px;transition:border-color .2s;" onfocus="this.style.borderColor='var(--neon2)'" onblur="this.style.borderColor='var(--border2)'"/>
+      <input id="roast-wallet-input" type="text" placeholder="Paste X1 wallet address..." style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;color:var(--text);font-family:var(--font-m);font-size:11px;outline:none;box-sizing:border-box;margin-bottom:10px;transition:border-color .2s;" onfocus="this.style.borderColor='var(--neon2)'" onblur="this.style.borderColor='var(--border2)'"/>
 
       <!-- GENERATE BTN -->
       <button id="roast-generate-btn" onclick="generateRoast()" style="width:100%;padding:12px;background:linear-gradient(135deg,#ff2d78,var(--amber));border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;font-family:var(--font-d);cursor:pointer;letter-spacing:.05em;transition:opacity .2s;">
@@ -945,13 +945,13 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 
       <!-- HOW IT WORKS -->
       <div style="margin-top:20px;background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:14px;">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Jak to działa?</div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">How it works</div>
         <div style="font-size:11px;color:var(--muted);line-height:1.8;">
-          1️⃣ Wybierz tryb: <span style="color:#ff2d78">ROAST</span> lub <span style="color:var(--amber)">FLEX</span><br>
-          2️⃣ Wklej dowolny adres X1 wallet<br>
-          3️⃣ AI analizuje historię on-chain<br>
-          4️⃣ Generuje viralową kartę PNG<br>
-          5️⃣ Wrzuć na X z <span style="color:var(--neon)">#ANALRebel #X1Network</span>
+          1️⃣ Choose mode: <span style="color:#ff2d78">ROAST</span> lub <span style="color:var(--amber)">FLEX</span><br>
+          2️⃣ Paste any X1 wallet address<br>
+          3️⃣ AI analyzes on-chain history<br>
+          4️⃣ Generates a viral PNG card<br>
+          5️⃣ Post to X with <span style="color:var(--neon)">#ANALRebel #X1Network</span>
         </div>
       </div>
 
@@ -3333,7 +3333,7 @@ function copyAddress() {
   if (addrBox) { addrBox.style.border = '1px solid var(--neon)'; addrBox.style.background = 'rgba(0,255,204,0.08)'; }
 
   setTimeout(()=>{
-    if (btn) { btn.textContent = '📋 Kopiuj adres'; btn.style.background = 'rgba(0,255,204,0.1)'; }
+    if (btn) { btn.textContent = '📋 Copy address'; btn.style.background = 'rgba(0,255,204,0.1)'; }
     if (addrBox) { addrBox.style.border = '1px solid var(--border)'; addrBox.style.background = 'var(--surface)'; }
   }, 2000);
 
@@ -3342,7 +3342,7 @@ function copyAddress() {
   } else {
     fallbackCopy(addr);
   }
-  toast('📋 Adres skopiowany do schowka!');
+  toast('📋 Address copied to clipboard!');
 }
 
 function fallbackCopy(text) {
@@ -3362,7 +3362,7 @@ async function verifyDeposit() {
 
   if (!hash) {
     status.style.color = 'var(--neon2)';
-    status.textContent = '⚠️ Wklej TX hash transakcji!';
+    status.textContent = '⚠️ Paste TX hash first!';
     if (btn) { btn.style.animation = 'none'; btn.style.background = 'var(--neon2)'; setTimeout(()=>{ btn.style.background = 'linear-gradient(135deg,var(--neon3),var(--neon2))'; },1000); }
     return;
   }
@@ -3377,7 +3377,7 @@ async function verifyDeposit() {
   // Loading state
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Weryfikuję...'; btn.style.background = 'rgba(123,97,255,0.5)'; }
   status.style.color = 'var(--muted)';
-  status.textContent = '🔍 Sprawdzam transakcję na blockchainie X1...';
+  status.textContent = '🔍 Checking transaction on X1 blockchain...';
 
   let amount = 0;
   let txFound = false;
@@ -3458,11 +3458,11 @@ async function verifyDeposit() {
   } catch(e) {}
 
   // Restore button
-  if (btn) { btn.disabled = false; btn.textContent = '✅ Zweryfikuj wpłatę'; btn.style.background = 'linear-gradient(135deg,var(--neon3),var(--neon2))'; }
+  if (btn) { btn.disabled = false; btn.textContent = '✅ Verify deposit'; btn.style.background = 'linear-gradient(135deg,var(--neon3),var(--neon2))'; }
 
   if (!txFound) {
     status.style.color = 'var(--neon2)';
-    status.textContent = '❌ Nie można połączyć z blockchainem. Sprawdź czy masz internet lub spróbuj za chwilę.';
+    status.textContent = '❌ Cannot connect to blockchain. Check your internet or try again.';
     return;
   }
 
@@ -3474,20 +3474,20 @@ async function verifyDeposit() {
     document.getElementById('tx-hash-input').value = '';
     status.style.color = 'var(--neon)';
     status.textContent = `✅ Dodano ${amount.toLocaleString()} ANAL Credits!`;
-    toast(`🎉 Doładowano ${amount.toLocaleString()} ANAL Credits!`);
+    toast(`🎉 Topped up ${amount.toLocaleString()} ANAL Credits!`);
     // Flash balance
     const balEl = document.getElementById('credits-balance');
     if (balEl) { balEl.style.transform='scale(1.3)'; balEl.style.color='#fff'; setTimeout(()=>{balEl.style.transform='';balEl.style.color='var(--amber)';},600); }
   } else {
     status.style.color = 'var(--neon2)';
-    status.textContent = '❌ Nie znaleziono transferu $ANAL na nasz adres w tej TX. Upewnij się że wysłałeś na właściwy adres.';
+    status.textContent = '❌ No $ANAL transfer to our address found in this TX. Make sure you sent to the correct address.';
   }
 }
 
 function buyItem(id, cost, name) {
   const bal = getCredits();
   if (bal < cost) {
-    toast(`❌ Za mało kredytów! Potrzebujesz ${cost.toLocaleString()} ANAL`);
+    toast(`❌ Not enough credits! You need ${cost.toLocaleString()} ANAL`);
     return;
   }
 
@@ -3495,7 +3495,7 @@ function buyItem(id, cost, name) {
   const owned = JSON.parse(localStorage.getItem('anal_owned') || '[]');
   const nonStackable = ['music','style_premium','verified'];
   if (nonStackable.includes(id) && owned.includes(id)) {
-    toast(`✅ Już posiadasz: ${name}`);
+    toast(`✅ Already owned: ${name}`);
     return;
   }
 
@@ -3517,22 +3517,22 @@ function buyItem(id, cost, name) {
 
   // Special effects per item
   if (id === 'style_premium') {
-    toast('🎨 Premium style odblokowane! Sprawdź Animation Style w AI Generator.');
+    toast('🎨 Premium styles unlocked! Check Animation Style in AI Generator.');
     // Switch to AI panel to show
     setTimeout(()=>{
       const aiTab = document.querySelector('.ptab[onclick*="ai"]');
       if (aiTab) switchPanel('ai', aiTab);
     }, 1500);
   } else if (id === 'music') {
-    toast('🎵 Upload muzyki odblokowany! Sprawdź zakładkę Tools.');
+    toast('🎵 Custom music unlocked! Check the Tools tab.');
     setTimeout(()=>{
       const toolsTab = document.querySelector('.ptab[onclick*="tools"]');
       if (toolsTab) switchPanel('tools', toolsTab);
     }, 1500);
   } else if (id === 'verified') {
-    toast('✅ Verified badge aktywowany!');
+    toast('✅ Verified badge activated!');
   } else {
-    toast(`🎉 Kupiono: ${name}!`);
+    toast(`🎉 Purchased: ${name}!`);
   }
 }
 
@@ -4287,7 +4287,7 @@ async function fetchX1WalletData(addr) {
 async function generateRoast() {
   const wallet = document.getElementById('roast-wallet-input').value.trim();
   if(!wallet || wallet.length < 32) {
-    document.getElementById('roast-status').textContent = '⚠️ Wklej poprawny adres X1 wallet';
+    document.getElementById('roast-status').textContent = '⚠️ Paste a valid X1 wallet address';
     document.getElementById('roast-status').style.color = 'var(--neon2)';
     return;
   }
@@ -4295,7 +4295,7 @@ async function generateRoast() {
   const cost = roastMode === 'roast' ? 10 : 10;
   const bal  = getCredits();
   if(bal < cost) {
-    document.getElementById('roast-status').textContent = `❌ Za mało ANAL! Potrzebujesz ${cost.toLocaleString()} (masz ${bal.toLocaleString()})`;
+    document.getElementById('roast-status').textContent = `❌ Not enough ANAL! You need ${cost.toLocaleString()} (you have ${bal.toLocaleString()})`;
     document.getElementById('roast-status').style.color = 'var(--neon2)';
     return;
   }
@@ -4303,9 +4303,9 @@ async function generateRoast() {
   const btn = document.getElementById('roast-generate-btn');
   const status = document.getElementById('roast-status');
   btn.disabled = true;
-  btn.textContent = '⏳ Analizuję wallet...';
+  btn.textContent = '⏳ Analyzing wallet...';
   status.style.color = 'var(--muted)';
-  status.textContent = '🔍 Pobieram dane z X1 blockchain...';
+  status.textContent = '🔍 Fetching data from X1 blockchain...';
 
   // Fetch on-chain data
   const data = await fetchX1WalletData(wallet);
@@ -4539,7 +4539,7 @@ function downloadRoastCard() {
   link.download = `ANAL-${mode}-${roastWallet.slice(0,8)}.png`;
   link.href = canvas.toDataURL('image/png');
   link.click();
-  toast('⬇ Karta pobrana!');
+  toast('⬇ Card downloaded!');
 }
 
 function shareToX() {
@@ -4552,7 +4552,7 @@ function shareToX() {
   setTimeout(()=>{
     window.open(`https://twitter.com/intent/tweet?text=${tweetText}`, '_blank');
   }, 500);
-  toast('𝕏 Otwieranie Twitter...');
+  toast('𝕏 Opening Twitter...');
 }
 
 </script>
