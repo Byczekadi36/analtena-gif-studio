@@ -711,6 +711,10 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
             <option value="shake">💥 Shake Impact</option>
             <option value="rotate">🌀 Spin Zoom</option>
             <option value="breathe">🫧 Breathe</option>
+            <option value="neon" disabled class="premium-style">🔒 Neon Pulse [Premium]</option>
+            <option value="vhs" disabled class="premium-style">🔒 VHS Glitch [Premium]</option>
+            <option value="matrix" disabled class="premium-style">🔒 Matrix Rain [Premium]</option>
+            <option value="fire" disabled class="premium-style">🔒 Fire Aura [Premium]</option>
           </select>
         </div>
 
@@ -809,6 +813,20 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
         <div class="ctrl">
           <label>Colour</label>
           <input type="color" id="bg-color" value="#080810" oninput="rerenderCurrentFrame()"/>
+        </div>
+
+        <div class="section-label" style="margin-top:16px">🎵 Własna muzyka</div>
+        <div id="custom-music-section">
+          <div id="custom-music-locked" style="background:rgba(255,183,0,0.06);border:1px solid rgba(255,183,0,0.2);border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:20px;margin-bottom:6px;">🔒</div>
+            <div style="font-size:11px;color:var(--amber);">Odblokuj za 1,000 ANAL</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:4px;">Przejdź do zakładki Credits</div>
+          </div>
+          <div id="custom-music-unlocked" style="display:none;">
+            <button onclick="document.getElementById('custom-music-input').click()" style="width:100%;padding:9px;background:rgba(0,255,204,0.1);border:1px solid rgba(0,255,204,0.3);border-radius:8px;color:var(--neon);font-size:12px;cursor:pointer;">📂 Wgraj MP3</button>
+            <input type="file" id="custom-music-input" accept="audio/mp3,audio/*" style="display:none" onchange="loadCustomMusic(event)"/>
+            <div id="custom-music-name" style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;"></div>
+          </div>
         </div>
       </div>
 
@@ -2151,6 +2169,10 @@ function getAnimDef(style, frameIdx, totalFrames) {
     case 'glitch': { const ig=frameIdx%3===0; return { scale:1.0, offX:ig?Math.sin(frameIdx*7.3)*0.03:0, offY:0, bright:ig?1.4:1.0, hue:ig?(frameIdx%2===0?180:-90):0, rot:0, alpha:1 }; }
     case 'shake': { const decay=1-t; return { scale:1.0+0.06*(1-t), offX:sin(frameIdx*11.7)*0.03*decay, offY:sin(frameIdx*8.3)*0.02*decay, bright:1.0+0.1*(1-t), hue:0, rot:0, alpha:1 }; }
     case 'rotate': { const rot=t*PI*0.25; return { scale:1.0+t*0.15, offX:0, offY:0, bright:1.0+t*0.1, hue:t*30, rot, alpha:1 }; }
+    case 'neon': { const s=1.0+0.08*sin(t*PI*4); return { scale:s, offX:0, offY:0, bright:1.2+0.3*sin(t*PI*4), hue:t*360, rot:0, alpha:1 }; }
+    case 'vhs': { const offX=sin(frameIdx*13.7)*0.02; return { scale:1.0, offX, offY:sin(frameIdx*5)*0.01, bright:frameIdx%4===0?1.6:0.9, hue:frameIdx%2===0?-120:60, rot:0, alpha:frameIdx%7===0?0.7:1 }; }
+    case 'matrix': { const s=1.0+t*0.2; return { scale:s, offX:0, offY:-t*0.1, bright:0.8+t*0.5, hue:120+sin(t*PI*2)*20, rot:0, alpha:1 }; }
+    case 'fire': { const s=1.0+sin(t*PI*3)*0.06; return { scale:s, offX:sin(frameIdx*9)*0.015, offY:-t*0.05, bright:1.1+sin(t*PI*6)*0.3, hue:frameIdx%2===0?10:30, rot:sin(t*PI*2)*0.05, alpha:1 }; }
     default: { const s=1.0+0.07*sin(t*PI*2); return { scale:s, offX:0, offY:0, bright:0.92+0.16*sin(t*PI*2+PI/4), hue:0, rot:0, alpha:1 }; }
   }
 }
@@ -3183,12 +3205,130 @@ function buyItem(id, cost, name) {
     toast(`❌ Za mało kredytów! Potrzebujesz ${cost.toLocaleString()} ANAL`);
     return;
   }
-  const cards = getCards();
-  const num = cards.filter(c=>c.id===id).length + 1;
-  cards.push({ id, name, num, date: Date.now() });
+
+  // Check if already owned (for non-card items)
+  const owned = JSON.parse(localStorage.getItem('anal_owned') || '[]');
+  const nonStackable = ['music','style_premium','verified'];
+  if (nonStackable.includes(id) && owned.includes(id)) {
+    toast(`✅ Już posiadasz: ${name}`);
+    return;
+  }
+
   setCredits(bal - cost);
+
+  // Save to owned
+  if (nonStackable.includes(id)) {
+    owned.push(id);
+    localStorage.setItem('anal_owned', JSON.stringify(owned));
+  }
+
+  // Save card
+  const cards = getCards();
+  cards.push({ id, name, num: cards.filter(c=>c.id===id).length+1, date: Date.now() });
   saveCards(cards);
-  toast(`🎉 Kupiono: ${name}!`);
+
+  // Apply effect immediately
+  applyUnlocks();
+
+  // Special effects per item
+  if (id === 'style_premium') {
+    toast('🎨 Premium style odblokowane! Sprawdź Animation Style w AI Generator.');
+    // Switch to AI panel to show
+    setTimeout(()=>{
+      const aiTab = document.querySelector('.ptab[onclick*="ai"]');
+      if (aiTab) switchPanel('ai', aiTab);
+    }, 1500);
+  } else if (id === 'music') {
+    toast('🎵 Upload muzyki odblokowany! Sprawdź zakładkę Tools.');
+    setTimeout(()=>{
+      const toolsTab = document.querySelector('.ptab[onclick*="tools"]');
+      if (toolsTab) switchPanel('tools', toolsTab);
+    }, 1500);
+  } else if (id === 'verified') {
+    toast('✅ Verified badge aktywowany!');
+  } else {
+    toast(`🎉 Kupiono: ${name}!`);
+  }
+}
+
+function applyUnlocks() {
+  const owned = JSON.parse(localStorage.getItem('anal_owned') || '[]');
+
+  // Premium styles
+  const styleSelect = document.getElementById('anim-style');
+  if (styleSelect) {
+    styleSelect.querySelectorAll('.premium-style').forEach(opt => {
+      if (owned.includes('style_premium')) {
+        opt.disabled = false;
+        opt.textContent = opt.textContent.replace('🔒 ','').replace(' [Premium]','');
+      } else {
+        opt.disabled = true;
+      }
+    });
+  }
+
+  // Custom music
+  const locked = document.getElementById('custom-music-locked');
+  const unlocked = document.getElementById('custom-music-unlocked');
+  if (locked && unlocked) {
+    if (owned.includes('music')) {
+      locked.style.display = 'none';
+      unlocked.style.display = 'block';
+    } else {
+      locked.style.display = 'block';
+      unlocked.style.display = 'none';
+    }
+  }
+
+  // Verified badge
+  const pill = document.querySelector('.verified-pill');
+  const pillDot = document.querySelector('.vpill-dot');
+  if (pill && owned.includes('verified')) {
+    pill.style.background = 'rgba(0,255,204,0.15)';
+    pill.style.borderColor = 'rgba(0,255,204,0.5)';
+    if (pillDot) pillDot.style.background = 'var(--neon)';
+    const walletEl = document.getElementById('hdr-wallet');
+    if (walletEl && !walletEl.textContent.includes('✅')) {
+      walletEl.textContent = '✅ ' + walletEl.textContent;
+    }
+  }
+
+  // Update shop — show OWNED on bought items
+  updateShopUI(owned);
+}
+
+function updateShopUI(owned) {
+  const shopMap = {
+    music: document.querySelector('.shop-item[onclick*="music"]'),
+    style_premium: document.querySelector('.shop-item[onclick*="style_premium"]'),
+    verified: document.querySelector('.shop-item[onclick*="verified"]'),
+  };
+  for (const [id, el] of Object.entries(shopMap)) {
+    if (!el) continue;
+    if (owned.includes(id)) {
+      el.style.opacity = '0.5';
+      el.style.cursor = 'default';
+      const priceEl = el.querySelector('span:last-child');
+      if (priceEl) priceEl.textContent = '✅ Posiadasz';
+    }
+  }
+}
+
+function loadCustomMusic(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  // Stop current music
+  if (window._currentAudio) { window._currentAudio.pause(); window._currentAudio = null; }
+  // Play custom track
+  const audio = new Audio(url);
+  audio.loop = true;
+  audio.volume = 0.5;
+  audio.play().catch(()=>{});
+  window._currentAudio = audio;
+  window._customMusicUrl = url;
+  document.getElementById('custom-music-name').textContent = '▶ ' + file.name;
+  toast('🎵 Gra: ' + file.name);
 }
 
 function renderMyCards() {
@@ -3199,11 +3339,34 @@ function renderMyCards() {
     grid.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;grid-column:1/-1;padding:20px 0;">Brak kart — kup pierwszą!</div>';
     return;
   }
-  const tierColor = { card_common:'rgba(255,255,255,0.3)', card_rare:'#7b61ff', card_premium:'#00b4ff', card_gold:'#ffb700', music:'#00ffcc', style_premium:'#ff2d78', verified:'#00ffcc' };
+  const tierColor = {
+    card_common:'rgba(255,255,255,0.25)',
+    card_rare:'#7b61ff',
+    card_premium:'#00b4ff',
+    card_gold:'#ffb700',
+    music:'#00ffcc',
+    style_premium:'#ff2d78',
+    verified:'#00ffcc'
+  };
+  const tierGlow = {
+    card_rare:'0 0 12px rgba(123,97,255,0.4)',
+    card_premium:'0 0 12px rgba(0,180,255,0.4)',
+    card_gold:'0 0 16px rgba(255,183,0,0.5)',
+  };
+  const tierBg = {
+    card_common:'rgba(255,255,255,0.03)',
+    card_rare:'rgba(123,97,255,0.08)',
+    card_premium:'rgba(0,180,255,0.08)',
+    card_gold:'rgba(255,183,0,0.12)',
+    music:'rgba(0,255,204,0.08)',
+    style_premium:'rgba(255,45,120,0.08)',
+    verified:'rgba(0,255,204,0.08)',
+  };
   grid.innerHTML = cards.map(c=>`
-    <div style="background:var(--card);border:1px solid ${tierColor[c.id]||'var(--border2)'};border-radius:10px;padding:10px;text-align:center;">
-      <div style="font-size:20px;margin-bottom:4px">${c.name.split(' ')[0]}</div>
-      <div style="font-size:10px;color:${tierColor[c.id]||'var(--muted)'};">${c.name}</div>
+    <div style="background:${tierBg[c.id]||'var(--card)'};border:1px solid ${tierColor[c.id]||'var(--border2)'};border-radius:12px;padding:12px;text-align:center;box-shadow:${tierGlow[c.id]||'none'};transition:transform .2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform=''">
+      <div style="font-size:24px;margin-bottom:6px">${c.name.split(' ')[0]}</div>
+      <div style="font-size:10px;font-weight:700;color:${tierColor[c.id]||'var(--muted)'};">${c.name.replace(c.name.split(' ')[0]+' ','')}</div>
+      ${c.num > 1 ? `<div style="font-size:9px;color:var(--muted);margin-top:2px;">#${c.num}</div>` : ''}
     </div>
   `).join('');
 }
@@ -3212,6 +3375,7 @@ function renderMyCards() {
 document.addEventListener('DOMContentLoaded', ()=>{
   setCredits(getCredits());
   renderMyCards();
+  applyUnlocks();
 });
 
 function setPrompt(txt) {
