@@ -2261,7 +2261,6 @@ async function generateWithAI() {
         const oc2 = oc.getContext('2d');
         oc2.fillStyle='#080810'; oc2.fillRect(0,0,sz,sz);
         oc2.save();
-        // Apply rotation if any
         if (def.rot) {
           oc2.translate(sz/2, sz/2);
           oc2.rotate(def.rot);
@@ -2269,23 +2268,153 @@ async function generateWithAI() {
         }
         oc2.translate(sz/2 + def.offX*sz, sz/2 + def.offY*sz);
         oc2.scale(def.scale, def.scale);
-        oc2.filter = 'brightness('+def.bright+') hue-rotate('+(def.hue||0)+'deg)';
+        oc2.filter = 'brightness('+def.bright+') hue-rotate('+(def.hue||0)+'deg) saturate('+(def.sat||1)+')';
         oc2.globalAlpha = def.alpha || 1;
         try { oc2.drawImage(baseImg,-sz/2,-sz/2,sz,sz); } catch(e){}
         oc2.filter='none'; oc2.globalAlpha=1; oc2.restore();
 
-        // Glitch: add RGB split on glitch frames
+        // ── PREMIUM EFFECTS (canvas overlay) ────────────────────────
+        const t = i / Math.max(fc-1,1);
+
         if (animStyle === 'glitch' && i % 3 === 0) {
+          // RGB split
           oc2.save();
-          oc2.globalCompositeOperation = 'screen';
-          oc2.globalAlpha = 0.15;
-          oc2.drawImage(oc, 4, 0);
-          oc2.globalAlpha = 1;
-          oc2.globalCompositeOperation = 'source-over';
-          oc2.restore();
+          oc2.globalCompositeOperation='screen'; oc2.globalAlpha=0.15;
+          oc2.drawImage(oc,4,0); oc2.globalAlpha=1;
+          oc2.globalCompositeOperation='source-over'; oc2.restore();
         }
 
-        // Stars overlay (subtle)
+        if (animStyle === 'neon') {
+          // Animated neon glow border + scanlines
+          oc2.save();
+          const hue1 = (t*360 + i*30) % 360;
+          const hue2 = (hue1 + 120) % 360;
+          // Outer glow ring
+          const grad = oc2.createRadialGradient(sz/2,sz/2,sz*0.35, sz/2,sz/2,sz*0.52);
+          grad.addColorStop(0,'transparent');
+          grad.addColorStop(0.7,`hsla(${hue1},100%,60%,0)`);
+          grad.addColorStop(0.85,`hsla(${hue1},100%,60%,0.55)`);
+          grad.addColorStop(1,`hsla(${hue2},100%,70%,0.2)`);
+          oc2.globalCompositeOperation='screen';
+          oc2.fillStyle=grad; oc2.fillRect(0,0,sz,sz);
+          // Scanlines
+          oc2.globalCompositeOperation='multiply';
+          for(let y=0;y<sz;y+=4){
+            oc2.fillStyle=`rgba(0,0,0,${0.15+0.05*Math.sin(y*0.3+t*10)})`;
+            oc2.fillRect(0,y,sz,2);
+          }
+          // Corner sparks
+          const sparks=[[0,0],[sz,0],[0,sz],[sz,sz]];
+          oc2.globalCompositeOperation='screen';
+          sparks.forEach(([cx,cy],si)=>{
+            const sr=15+10*Math.sin(t*Math.PI*4+si*1.5);
+            const sg=oc2.createRadialGradient(cx,cy,0,cx,cy,sr);
+            sg.addColorStop(0,`hsla(${(hue1+si*90)%360},100%,80%,0.9)`);
+            sg.addColorStop(1,'transparent');
+            oc2.fillStyle=sg; oc2.fillRect(cx-sr,cy-sr,sr*2,sr*2);
+          });
+          oc2.globalCompositeOperation='source-over'; oc2.restore();
+        }
+
+        if (animStyle === 'vhs') {
+          oc2.save();
+          // Chromatic aberration — R/G/B shift
+          const shift = 3 + Math.sin(i*2.7)*4;
+          oc2.globalCompositeOperation='screen'; oc2.globalAlpha=0.25;
+          oc2.drawImage(oc, shift, 0);   // R shift right
+          oc2.drawImage(oc, -shift, 0);  // B shift left
+          // VHS noise bands
+          oc2.globalCompositeOperation='source-over'; oc2.globalAlpha=1;
+          const bands = Math.floor(Math.random()*3)+1;
+          for(let b=0;b<bands;b++){
+            const by = Math.floor(Math.random()*sz);
+            const bh = Math.floor(Math.random()*8)+2;
+            oc2.globalAlpha = 0.15+Math.random()*0.25;
+            oc2.fillStyle = Math.random()>0.5 ? 'rgba(255,255,255,1)' : 'rgba(0,0,0,1)';
+            oc2.fillRect(0, by, sz, bh);
+          }
+          // Tracking line
+          if(i%5===0){
+            const ly=(i*73)%sz;
+            oc2.globalAlpha=0.6;
+            oc2.fillStyle='rgba(255,255,255,0.8)';
+            oc2.fillRect(0,ly,sz,1);
+          }
+          // CRT vignette
+          oc2.globalAlpha=1;
+          const vg=oc2.createRadialGradient(sz/2,sz/2,sz*0.3,sz/2,sz/2,sz*0.75);
+          vg.addColorStop(0,'transparent');
+          vg.addColorStop(1,'rgba(0,0,0,0.55)');
+          oc2.globalCompositeOperation='multiply';
+          oc2.fillStyle=vg; oc2.fillRect(0,0,sz,sz);
+          // Timestamp watermark
+          oc2.globalCompositeOperation='source-over'; oc2.globalAlpha=0.7;
+          oc2.font=`bold ${Math.floor(sz*0.04)}px monospace`;
+          oc2.fillStyle='rgba(255,255,255,0.8)';
+          oc2.fillText(`REC ● ${String(Math.floor(t*59)).padStart(2,'0')}:${String(i).padStart(2,'0')}`, sz*0.04, sz*0.08);
+          oc2.globalCompositeOperation='source-over'; oc2.restore();
+        }
+
+        if (animStyle === 'matrix') {
+          oc2.save();
+          // Green digital rain overlay
+          oc2.globalCompositeOperation='screen';
+          const cols = Math.floor(sz/14);
+          for(let c=0;c<cols;c++){
+            const x = c*14;
+            const speed = 0.3+((c*7)%10)*0.07;
+            const y = ((t*sz*speed + c*sz*0.15) % (sz*1.2)) - sz*0.1;
+            const len = 6+((c*3)%8);
+            for(let r=0;r<len;r++){
+              const ry=y+r*14;
+              if(ry<0||ry>sz) continue;
+              const alpha = r===0 ? 0.95 : (1-r/len)*0.5;
+              oc2.globalAlpha=alpha;
+              oc2.fillStyle=r===0?`rgba(180,255,180,${alpha})`:`rgba(0,${150+Math.floor(105*(1-r/len))},0,${alpha})`;
+              const chars='ｱｲｳｴｵｶｷｸｹｺ01アイウエオカキクケコ';
+              const ch=chars[(c*len+r+i*3)%chars.length];
+              oc2.font=`bold ${Math.floor(sz*0.035)}px monospace`;
+              oc2.fillText(ch, x, ry);
+            }
+          }
+          // Dark green tint overlay
+          oc2.globalCompositeOperation='multiply'; oc2.globalAlpha=0.3;
+          oc2.fillStyle='rgba(0,30,0,1)'; oc2.fillRect(0,0,sz,sz);
+          oc2.globalCompositeOperation='source-over'; oc2.restore();
+        }
+
+        if (animStyle === 'fire') {
+          oc2.save();
+          // Fire particles rising from bottom
+          const particles = 40;
+          oc2.globalCompositeOperation='screen';
+          for(let p=0;p<particles;p++){
+            const px = (p*sz/particles + Math.sin(t*Math.PI*2+p*0.7)*30 + sz/2) % sz;
+            const baseY = sz - (p*7)%sz;
+            const py = baseY - t*sz*0.4 - ((i+p)*13)%80;
+            if(py>sz||py<0) continue;
+            const pr=sz*0.025*(1-py/sz)*2;
+            const heat=1-(py/sz);
+            const fg=oc2.createRadialGradient(px,py,0,px,py,pr*8);
+            fg.addColorStop(0,`rgba(255,${Math.floor(255*heat*0.3)},0,${0.6*heat})`);
+            fg.addColorStop(0.4,`rgba(255,${Math.floor(120*heat)},0,${0.3*heat})`);
+            fg.addColorStop(1,'transparent');
+            oc2.fillStyle=fg;
+            oc2.fillRect(px-pr*8,py-pr*8,pr*16,pr*16);
+          }
+          // Hot glow at bottom
+          const fireGrad=oc2.createLinearGradient(0,sz,0,sz*0.6);
+          fireGrad.addColorStop(0,`rgba(255,80,0,${0.35+0.15*Math.sin(t*Math.PI*6)})`);
+          fireGrad.addColorStop(0.5,`rgba(255,30,0,0.1)`);
+          fireGrad.addColorStop(1,'transparent');
+          oc2.fillStyle=fireGrad; oc2.fillRect(0,0,sz,sz);
+          // Heat shimmer
+          oc2.globalCompositeOperation='source-over'; oc2.globalAlpha=0.08;
+          oc2.drawImage(oc, Math.sin(t*Math.PI*8)*3, -Math.abs(Math.sin(t*Math.PI*4))*8);
+          oc2.globalCompositeOperation='source-over'; oc2.restore();
+        }
+
+        // Stars overlay (subtle, always)
         for(let s=0;s<8;s++){
           const sx=(s*173+i*37)%sz, sy=(s*97+i*53)%sz;
           const sr=((s*31+i*7)%4)/4*0.8+0.2;
