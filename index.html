@@ -3017,11 +3017,28 @@ function saveCards(cards) {
 }
 
 function copyAddress() {
-  navigator.clipboard.writeText(ANAL_DEPOSIT_ADDRESS).then(()=>{
-    toast('📋 Adres skopiowany!');
-  }).catch(()=>{
-    toast('Adres: ' + ANAL_DEPOSIT_ADDRESS);
-  });
+  const addr = ANAL_DEPOSIT_ADDRESS;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(addr).then(()=>{
+      toast('📋 Adres skopiowany!');
+    }).catch(()=>{
+      fallbackCopy(addr);
+    });
+  } else {
+    fallbackCopy(addr);
+  }
+}
+
+function fallbackCopy(text) {
+  const el = document.createElement('textarea');
+  el.value = text;
+  el.style.position = 'fixed';
+  el.style.opacity = '0';
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand('copy');
+  document.body.removeChild(el);
+  toast('📋 Adres skopiowany!');
 }
 
 async function verifyDeposit() {
@@ -3035,51 +3052,102 @@ async function verifyDeposit() {
   }
 
   const status = document.getElementById('deposit-status');
-  status.textContent = '⏳ Weryfikuję transakcję...';
+  status.style.color = 'var(--muted)';
+  status.textContent = '⏳ Weryfikuję transakcję na X1...';
 
-  try {
-    const resp = await fetch('https://rpc.mainnet.x1.xyz', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        jsonrpc:'2.0', id:1,
-        method:'getTransaction',
-        params:[hash, {encoding:'jsonParsed', commitment:'confirmed'}]
-      })
-    });
-    const data = await resp.json();
-    const tx = data.result;
+  // Try multiple RPC endpoints
+  const RPC_ENDPOINTS = [
+    'https://rpc.mainnet.x1.xyz',
+    'https://xolana.xen.network',
+  ];
 
-    if (!tx) { status.textContent = '❌ Transakcja nie znaleziona. Poczekaj chwilę i spróbuj ponownie.'; return; }
+  let tx = null;
+  let lastError = '';
 
-    // Find transfer to our address
-    let amount = 0;
-    const instructions = tx?.transaction?.message?.instructions || [];
-    for (const ix of instructions) {
-      if (ix.parsed?.type === 'transferChecked' || ix.parsed?.type === 'transfer') {
-        const info = ix.parsed?.info || {};
-        if (info.destination === ANAL_DEPOSIT_ADDRESS || info.authority === ANAL_DEPOSIT_ADDRESS) {
-          const raw = parseInt(info.tokenAmount?.amount || info.amount || '0');
-          const dec = parseInt(info.tokenAmount?.decimals || '9');
-          amount = Math.floor(raw / Math.pow(10, dec));
+  for (const rpc of RPC_ENDPOINTS) {
+    try {
+      const resp = await fetch(rpc, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          jsonrpc:'2.0', id:1,
+          method:'getTransaction',
+          params:[hash, {encoding:'jsonParsed', commitment:'confirmed', maxSupportedTransactionVersion:0}]
+        })
+      });
+      const data = await resp.json();
+      if (data.result) { tx = data.result; break; }
+      if (data.error) lastError = data.error.message || 'RPC error';
+    } catch(e) {
+      lastError = e.message;
+    }
+  }
+
+  if (!tx) {
+    status.style.color = 'var(--neon2)';
+    status.textContent = `❌ Transakcja nie znaleziona (${lastError || 'sprawdź hash i spróbuj ponownie'})`;
+    return;
+  }
+
+  // Parse SPL token transfer — check all instructions including inner
+  let amount = 0;
+  const allInstructions = [
+    ...(tx?.transaction?.message?.instructions || []),
+    ...(tx?.meta?.innerInstructions?.flatMap(i=>i.instructions) || [])
+  ];
+
+  for (const ix of allInstructions) {
+    const parsed = ix.parsed;
+    if (!parsed) continue;
+    const type = parsed.type || '';
+    const info = parsed.info || {};
+
+    // SPL transferChecked
+    if (type === 'transferChecked' && info.destination === ANAL_DEPOSIT_ADDRESS) {
+      const raw = parseInt(info.tokenAmount?.amount || '0');
+      const dec = parseInt(info.tokenAmount?.decimals || '9');
+      amount = Math.floor(raw / Math.pow(10, dec));
+      break;
+    }
+    // SPL transfer (older format)
+    if (type === 'transfer' && info.destination === ANAL_DEPOSIT_ADDRESS) {
+      const raw = parseInt(info.amount || '0');
+      amount = Math.floor(raw / Math.pow(10, 9));
+      break;
+    }
+  }
+
+  // Also check postTokenBalances vs preTokenBalances for our address
+  if (amount === 0) {
+    const pre = tx?.meta?.preTokenBalances || [];
+    const post = tx?.meta?.postTokenBalances || [];
+    for (const p of post) {
+      if (p.owner === ANAL_DEPOSIT_ADDRESS) {
+        const preEntry = pre.find(e => e.accountIndex === p.accountIndex);
+        const preAmt = parseInt(preEntry?.uiTokenAmount?.amount || '0');
+        const postAmt = parseInt(p.uiTokenAmount?.amount || '0');
+        const diff = postAmt - preAmt;
+        if (diff > 0) {
+          const dec = p.uiTokenAmount?.decimals || 9;
+          amount = Math.floor(diff / Math.pow(10, dec));
+          break;
         }
       }
     }
+  }
 
-    if (amount > 0) {
-      used.push(hash);
-      localStorage.setItem('anal_used_tx', JSON.stringify(used));
-      const newBal = getCredits() + amount;
-      setCredits(newBal);
-      document.getElementById('tx-hash-input').value = '';
-      status.textContent = `✅ Dodano ${amount.toLocaleString()} ANAL Credits!`;
-      toast(`🎉 Doładowano ${amount.toLocaleString()} ANAL Credits!`);
-    } else {
-      status.textContent = '❌ Nie znaleziono transferu $ANAL na nasz adres w tej transakcji.';
-    }
-  } catch(e) {
-    // Honour fallback - allow manual entry with confirmation
-    status.textContent = '⚠️ Nie można połączyć z blockchainem. Spróbuj ponownie.';
+  if (amount > 0) {
+    used.push(hash);
+    localStorage.setItem('anal_used_tx', JSON.stringify(used));
+    const newBal = getCredits() + amount;
+    setCredits(newBal);
+    document.getElementById('tx-hash-input').value = '';
+    status.style.color = 'var(--neon)';
+    status.textContent = `✅ Dodano ${amount.toLocaleString()} ANAL Credits!`;
+    toast(`🎉 Doładowano ${amount.toLocaleString()} ANAL Credits!`);
+  } else {
+    status.style.color = 'var(--neon2)';
+    status.textContent = '❌ Nie znaleziono transferu $ANAL na nasz adres. Sprawdź czy wysłałeś na właściwy adres.';
   }
 }
 
