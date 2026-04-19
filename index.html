@@ -2077,54 +2077,17 @@ async function sendAnalPayment() {
   }
 }
 
-// ── TYPE LOG stub — real version defined later (typeIntoLog), overwritten at line ~3541 ──
-window._typeLog = function(msg, cls) {
-  const el = document.getElementById('ai-log');
-  if (!el) return;
-  el.innerHTML += `<div class="log-line ${cls?'log-'+cls:''}">${msg}</div>`;
-  el.scrollTop = el.scrollHeight;
-};
-
-// ── ANIMATION DEFINITIONS (global — used by generateWithAI, gallery import, etc.) ──
+// ── ANIMATION DEFINITIONS (global scope) ──────────────────────────
 function getAnimDef(style, frameIdx, totalFrames) {
   const t = frameIdx / Math.max(totalFrames - 1, 1);
-  const sin = Math.sin;
-  const PI = Math.PI;
+  const sin = Math.sin, PI = Math.PI;
   switch(style) {
-    case 'zoom': {
-      const s = 1.0 + 0.12 * sin(t * PI * 2);
-      return { scale: s, offX: 0, offY: 0, bright: 1.0 + 0.08*sin(t*PI*2), hue: 0, rot: 0, alpha: 1 };
-    }
-    case 'float': {
-      const dy = sin(t * PI * 2) * 0.04;
-      const s = 1.0 + 0.05 * sin(t * PI * 2 + PI/2);
-      return { scale: s, offX: 0, offY: dy, bright: 1.0, hue: sin(t*PI*2)*10, rot: 0, alpha: 1 };
-    }
-    case 'glitch': {
-      const isGlitch = frameIdx % 3 === 0;
-      const offX = isGlitch ? (Math.sin(frameIdx*7.3)*0.03) : 0;
-      const hue = isGlitch ? (frameIdx % 2 === 0 ? 180 : -90) : 0;
-      const bright = isGlitch ? 1.4 : 1.0;
-      return { scale: 1.0, offX, offY: 0, bright, hue, rot: 0, alpha: 1 };
-    }
-    case 'shake': {
-      const decay = 1 - t;
-      const offX = sin(frameIdx * 11.7) * 0.03 * decay;
-      const offY = sin(frameIdx * 8.3) * 0.02 * decay;
-      const s = 1.0 + 0.06 * (1-t);
-      return { scale: s, offX, offY, bright: 1.0 + 0.1*(1-t), hue: 0, rot: 0, alpha: 1 };
-    }
-    case 'rotate': {
-      const rot = t * PI * 0.25;
-      const s = 1.0 + t * 0.15;
-      return { scale: s, offX: 0, offY: 0, bright: 1.0 + t*0.1, hue: t*30, rot, alpha: 1 };
-    }
-    case 'breathe':
-    default: {
-      const s = 1.0 + 0.07 * sin(t * PI * 2);
-      const bright = 0.92 + 0.16 * sin(t * PI * 2 + PI/4);
-      return { scale: s, offX: 0, offY: 0, bright, hue: 0, rot: 0, alpha: 1 };
-    }
+    case 'zoom': { const s = 1.0 + 0.12*sin(t*PI*2); return { scale:s, offX:0, offY:0, bright:1.0+0.08*sin(t*PI*2), hue:0, rot:0, alpha:1 }; }
+    case 'float': { const dy=sin(t*PI*2)*0.04; const s=1.0+0.05*sin(t*PI*2+PI/2); return { scale:s, offX:0, offY:dy, bright:1.0, hue:sin(t*PI*2)*10, rot:0, alpha:1 }; }
+    case 'glitch': { const ig=frameIdx%3===0; return { scale:1.0, offX:ig?Math.sin(frameIdx*7.3)*0.03:0, offY:0, bright:ig?1.4:1.0, hue:ig?(frameIdx%2===0?180:-90):0, rot:0, alpha:1 }; }
+    case 'shake': { const decay=1-t; return { scale:1.0+0.06*(1-t), offX:sin(frameIdx*11.7)*0.03*decay, offY:sin(frameIdx*8.3)*0.02*decay, bright:1.0+0.1*(1-t), hue:0, rot:0, alpha:1 }; }
+    case 'rotate': { const rot=t*PI*0.25; return { scale:1.0+t*0.15, offX:0, offY:0, bright:1.0+t*0.1, hue:t*30, rot, alpha:1 }; }
+    default: { const s=1.0+0.07*sin(t*PI*2); return { scale:s, offX:0, offY:0, bright:0.92+0.16*sin(t*PI*2+PI/4), hue:0, rot:0, alpha:1 }; }
   }
 }
 
