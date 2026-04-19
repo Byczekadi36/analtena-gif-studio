@@ -105,9 +105,10 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 /* ── LEFT PANEL ── */
 .left-panel{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
   display:flex;flex-direction:column;overflow:visible;}
-.panel-tabs{display:flex;border-bottom:1px solid var(--border);}
-.ptab{flex:1;padding:12px 8px;background:transparent;border:none;font-family:var(--font-d);
-  font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;}
+.panel-tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}
+.panel-tabs::-webkit-scrollbar{display:none;}
+.ptab{flex:0 0 auto;padding:10px 6px;background:transparent;border:none;font-family:var(--font-d);
+  font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;white-space:nowrap;}
 .ptab.active{color:var(--neon);border-bottom-color:var(--neon);}
 .panel-content{flex:1;overflow-y:visible;padding:16px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 
@@ -808,7 +809,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
         <div id="custom-music-section">
           <div id="custom-music-locked" style="background:rgba(255,183,0,0.06);border:1px solid rgba(255,183,0,0.2);border-radius:8px;padding:12px;text-align:center;">
             <div style="font-size:20px;margin-bottom:6px;">🔒</div>
-            <div style="font-size:11px;color:var(--amber);">Odblokuj za 1,000 ANAL</div>
+            <div style="font-size:11px;color:var(--amber);">Odblokuj za 10 ANAL</div>
             <div style="font-size:10px;color:var(--muted);margin-top:4px;">Przejdź do zakładki Credits</div>
           </div>
           <div id="custom-music-unlocked" style="display:none;">
@@ -865,26 +866,26 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
       <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🛍️ Sklep</div>
 
       <div id="credits-shop">
-        <div class="shop-item" onclick="buyItem('card_common',1000,'🟤 Common Card')">
-          <span>🟤 Common Card</span><span style="color:var(--amber)">1,000 ANAL</span>
+        <div class="shop-item" onclick="buyItem('card_common',10,'🟤 Common Card')">
+          <span>🟤 Common Card</span><span style="color:var(--amber)">10 ANAL</span>
         </div>
-        <div class="shop-item" onclick="buyItem('card_rare',10000,'💜 Rare Card')">
-          <span>💜 Rare Card</span><span style="color:var(--amber)">10,000 ANAL</span>
+        <div class="shop-item" onclick="buyItem('card_rare',10,'💜 Rare Card')">
+          <span>💜 Rare Card</span><span style="color:var(--amber)">10 ANAL</span>
         </div>
-        <div class="shop-item" onclick="buyItem('card_premium',50000,'⭐ Premium Card')">
-          <span>⭐ Premium Card</span><span style="color:var(--amber)">50,000 ANAL</span>
+        <div class="shop-item" onclick="buyItem('card_premium',10,'⭐ Premium Card')">
+          <span>⭐ Premium Card</span><span style="color:var(--amber)">10 ANAL</span>
         </div>
-        <div class="shop-item" onclick="buyItem('card_gold',100000,'🥇 Gold Rebel')">
-          <span>🥇 Gold Rebel</span><span style="color:var(--amber)">100,000 ANAL</span>
+        <div class="shop-item" onclick="buyItem('card_gold',10,'🥇 Gold Rebel')">
+          <span>🥇 Gold Rebel</span><span style="color:var(--amber)">10 ANAL</span>
         </div>
-        <div class="shop-item" onclick="buyItem('music',1000,'🎵 Własna muzyka')">
-          <span>🎵 Własna muzyka</span><span style="color:var(--amber)">1,000 ANAL</span>
+        <div class="shop-item" onclick="buyItem('music',10,'🎵 Własna muzyka')">
+          <span>🎵 Własna muzyka</span><span style="color:var(--amber)">10 ANAL</span>
         </div>
-        <div class="shop-item" onclick="buyItem('style_premium',500,'🎨 Premium styl GIF')">
-          <span>🎨 Premium styl GIF</span><span style="color:var(--amber)">500 ANAL</span>
+        <div class="shop-item" onclick="buyItem('style_premium',10,'🎨 Premium styl GIF')">
+          <span>🎨 Premium styl GIF</span><span style="color:var(--amber)">10 ANAL</span>
         </div>
-        <div class="shop-item" onclick="buyItem('verified',5000,'✅ Verified badge')">
-          <span>✅ Verified badge</span><span style="color:var(--amber)">5,000 ANAL</span>
+        <div class="shop-item" onclick="buyItem('verified',10,'✅ Verified badge')">
+          <span>✅ Verified badge</span><span style="color:var(--amber)">10 ANAL</span>
         </div>
       </div>
 
@@ -915,12 +916,12 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
         <div id="mode-roast-btn" onclick="selectRoastMode('roast')" style="background:rgba(255,45,120,0.15);border:2px solid #ff2d78;border-radius:10px;padding:12px;text-align:center;cursor:pointer;">
           <div style="font-size:20px;">🔥</div>
           <div style="font-size:12px;font-weight:700;color:#ff2d78;margin-top:4px;">ROAST</div>
-          <div style="font-size:10px;color:var(--muted);">500 ANAL</div>
+          <div style="font-size:10px;color:var(--muted);">10 ANAL</div>
         </div>
         <div id="mode-flex-btn" onclick="selectRoastMode('flex')" style="background:rgba(255,183,0,0.08);border:2px solid transparent;border-color:var(--border2);border-radius:10px;padding:12px;text-align:center;cursor:pointer;">
           <div style="font-size:20px;">💎</div>
           <div style="font-size:12px;font-weight:700;color:var(--amber);margin-top:4px;">FLEX</div>
-          <div style="font-size:10px;color:var(--muted);">2,000 ANAL</div>
+          <div style="font-size:10px;color:var(--muted);">10 ANAL</div>
         </div>
       </div>
 
@@ -4292,7 +4293,7 @@ async function generateRoast() {
     return;
   }
 
-  const cost = roastMode === 'roast' ? 500 : 2000;
+  const cost = roastMode === 'roast' ? 10 : 10;
   const bal  = getCredits();
   if(bal < cost) {
     document.getElementById('roast-status').textContent = `❌ Za mało ANAL! Potrzebujesz ${cost.toLocaleString()} (masz ${bal.toLocaleString()})`;
