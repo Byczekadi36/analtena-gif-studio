@@ -546,12 +546,14 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 }
 
 </style>
+<style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
 <body>
 <div id="particles"></div>
 
 <!-- ══ GATE ══ -->
 <div id="gate">
+  <div id="gate-comics"><img src="/comic1.jpg"><img src="/comic2.jpg"><img src="/comic3.jpg"><img src="/comic4.jpg"><img src="/comic5.jpg"><img src="/comic6.jpg"><img src="/comic7.jpg"><img src="/comic8.jpg"><img src="/comic9.jpg"></div><div id="gate-vignette"></div>
   <canvas id="gate-particles" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
   <div class="floating-emojis" id="gate-emojis" style="position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden;"></div>
 
@@ -2075,6 +2077,57 @@ async function sendAnalPayment() {
   }
 }
 
+// ── TYPE LOG stub — real version defined later (typeIntoLog), overwritten at line ~3541 ──
+window._typeLog = function(msg, cls) {
+  const el = document.getElementById('ai-log');
+  if (!el) return;
+  el.innerHTML += `<div class="log-line ${cls?'log-'+cls:''}">${msg}</div>`;
+  el.scrollTop = el.scrollHeight;
+};
+
+// ── ANIMATION DEFINITIONS (global — used by generateWithAI, gallery import, etc.) ──
+function getAnimDef(style, frameIdx, totalFrames) {
+  const t = frameIdx / Math.max(totalFrames - 1, 1);
+  const sin = Math.sin;
+  const PI = Math.PI;
+  switch(style) {
+    case 'zoom': {
+      const s = 1.0 + 0.12 * sin(t * PI * 2);
+      return { scale: s, offX: 0, offY: 0, bright: 1.0 + 0.08*sin(t*PI*2), hue: 0, rot: 0, alpha: 1 };
+    }
+    case 'float': {
+      const dy = sin(t * PI * 2) * 0.04;
+      const s = 1.0 + 0.05 * sin(t * PI * 2 + PI/2);
+      return { scale: s, offX: 0, offY: dy, bright: 1.0, hue: sin(t*PI*2)*10, rot: 0, alpha: 1 };
+    }
+    case 'glitch': {
+      const isGlitch = frameIdx % 3 === 0;
+      const offX = isGlitch ? (Math.sin(frameIdx*7.3)*0.03) : 0;
+      const hue = isGlitch ? (frameIdx % 2 === 0 ? 180 : -90) : 0;
+      const bright = isGlitch ? 1.4 : 1.0;
+      return { scale: 1.0, offX, offY: 0, bright, hue, rot: 0, alpha: 1 };
+    }
+    case 'shake': {
+      const decay = 1 - t;
+      const offX = sin(frameIdx * 11.7) * 0.03 * decay;
+      const offY = sin(frameIdx * 8.3) * 0.02 * decay;
+      const s = 1.0 + 0.06 * (1-t);
+      return { scale: s, offX, offY, bright: 1.0 + 0.1*(1-t), hue: 0, rot: 0, alpha: 1 };
+    }
+    case 'rotate': {
+      const rot = t * PI * 0.25;
+      const s = 1.0 + t * 0.15;
+      return { scale: s, offX: 0, offY: 0, bright: 1.0 + t*0.1, hue: t*30, rot, alpha: 1 };
+    }
+    case 'breathe':
+    default: {
+      const s = 1.0 + 0.07 * sin(t * PI * 2);
+      const bright = 0.92 + 0.16 * sin(t * PI * 2 + PI/4);
+      return { scale: s, offX: 0, offY: 0, bright, hue: 0, rot: 0, alpha: 1 };
+    }
+  }
+}
+
 async function generateWithAI() {
   const prompt = document.getElementById('prompt-input').value.trim();
   if (!prompt) { toast('Enter a prompt first!'); return; }
@@ -2150,55 +2203,6 @@ async function generateWithAI() {
       log('► Animating ' + fc + ' frames…', 'ai');
       // Get selected animation style
       const animStyle = document.getElementById('anim-style')?.value || 'zoom';
-
-      // Animation definitions per style
-      function getAnimDef(style, frameIdx, totalFrames) {
-        const t = frameIdx / Math.max(totalFrames - 1, 1); // 0..1
-        const sin = Math.sin;
-        const PI = Math.PI;
-        switch(style) {
-          case 'zoom': {
-            // Smooth zoom pulse — breathes in and out
-            const s = 1.0 + 0.12 * sin(t * PI * 2);
-            return { scale: s, offX: 0, offY: 0, bright: 1.0 + 0.08*sin(t*PI*2), hue: 0, rot: 0, alpha: 1 };
-          }
-          case 'float': {
-            // Gentle floating wave — moves up/down
-            const dy = sin(t * PI * 2) * 0.04;
-            const s = 1.0 + 0.05 * sin(t * PI * 2 + PI/2);
-            return { scale: s, offX: 0, offY: dy, bright: 1.0, hue: sin(t*PI*2)*10, rot: 0, alpha: 1 };
-          }
-          case 'glitch': {
-            // Glitch flash — sharp jumps, color shifts
-            const isGlitch = frameIdx % 3 === 0;
-            const offX = isGlitch ? (Math.sin(frameIdx*7.3)*0.03) : 0;
-            const hue = isGlitch ? (frameIdx % 2 === 0 ? 180 : -90) : 0;
-            const bright = isGlitch ? 1.4 : 1.0;
-            return { scale: 1.0, offX, offY: 0, bright, hue, rot: 0, alpha: 1 };
-          }
-          case 'shake': {
-            // Shake impact — quick vibration that settles
-            const decay = 1 - t;
-            const offX = sin(frameIdx * 11.7) * 0.03 * decay;
-            const offY = sin(frameIdx * 8.3) * 0.02 * decay;
-            const s = 1.0 + 0.06 * (1-t);
-            return { scale: s, offX, offY, bright: 1.0 + 0.1*(1-t), hue: 0, rot: 0, alpha: 1 };
-          }
-          case 'rotate': {
-            // Spin zoom — rotates while zooming in
-            const rot = t * PI * 0.25; // up to 45 degrees total
-            const s = 1.0 + t * 0.15;
-            return { scale: s, offX: 0, offY: 0, bright: 1.0 + t*0.1, hue: t*30, rot, alpha: 1 };
-          }
-          case 'breathe':
-          default: {
-            // Slow deep breathe — very subtle
-            const s = 1.0 + 0.07 * sin(t * PI * 2);
-            const bright = 0.92 + 0.16 * sin(t * PI * 2 + PI/4);
-            return { scale: s, offX: 0, offY: 0, bright, hue: 0, rot: 0, alpha: 1 };
-          }
-        }
-      }
 
       for (let i = 0; i < fc; i++) {
         setFrameDot(i, false);
@@ -3168,14 +3172,14 @@ async function checkGalleryImport() {
 // RETRO MUSIC ENGINE — Web Audio API
 // ════════════════════════════════
 const TRACKS = [
-  { name:'Senpai',      icon:'🎸', style:'real', id:'senpai',     file:'Krisu_-_Senpai.mp3' },
-  { name:'Fairytale',   icon:'🧚', style:'real', id:'fairytale',  file:'Krisu_-_Fairytale__ft__Claudie_Mackula_.mp3' },
-  { name:'The Monster', icon:'👹', style:'real', id:'monster',    file:'Krisu_-_The_Monster.mp3' },
-  { name:'Life',        icon:'🌿', style:'real', id:'life',       file:'Krisu_-_Life.mp3' },
-  { name:'Melancholia', icon:'💜', style:'real', id:'melancholia',file:'Krisu_-_Melancholia.mp3' },
-  { name:'Oasis',       icon:'🌊', style:'real', id:'oasis',      file:'Krisu_-_Oasis.mp3' },
-  { name:'Stardust',    icon:'⭐', style:'real', id:'stardust',   file:'Krisu_-_Stardust__ft__Elvya_.mp3' },
-  { name:'Follow Me',   icon:'🎵', style:'real', id:'followme',   file:'Krisu_-_Follow_Me__1_.mp3' },
+  { name:'Senpai',      icon:'🎸', style:'real', id:'senpai',     file:'Krisu_-_Senpai.mp3',                          bpm:120 },
+  { name:'Fairytale',   icon:'🧚', style:'real', id:'fairytale',  file:'Krisu_-_Fairytale__ft__Claudie_Mackula_.mp3', bpm:100 },
+  { name:'The Monster', icon:'👹', style:'real', id:'monster',    file:'Krisu_-_The_Monster.mp3',                     bpm:140 },
+  { name:'Life',        icon:'🌿', style:'real', id:'life',       file:'Krisu_-_Life.mp3',                            bpm:95  },
+  { name:'Melancholia', icon:'💜', style:'real', id:'melancholia',file:'Krisu_-_Melancholia.mp3',                     bpm:80  },
+  { name:'Oasis',       icon:'🌊', style:'real', id:'oasis',      file:'Krisu_-_Oasis.mp3',                           bpm:110 },
+  { name:'Stardust',    icon:'⭐', style:'real', id:'stardust',   file:'Krisu_-_Stardust__ft__Elvya_.mp3',            bpm:105 },
+  { name:'Follow Me',   icon:'🎵', style:'real', id:'followme',   file:'Krisu_-_Follow_Me__1_.mp3',                   bpm:128 },
 ];
 
 let audioCtx = null;
