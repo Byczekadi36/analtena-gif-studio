@@ -96,6 +96,8 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 .disc-btn{background:transparent;border:1px solid var(--border2);border-radius:8px;padding:5px 10px;
   font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--font-d);}
 .disc-btn:hover{border-color:var(--neon2);color:var(--neon2);}
+.shop-item{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:pointer;font-size:12px;color:var(--text);transition:border-color .15s;}
+.shop-item:hover{border-color:var(--amber);}
 
 /* ── MAIN LAYOUT ── */
 .app-body{display:flex;flex:1;overflow:visible;min-height:calc(100vh - 54px);}
@@ -635,6 +637,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
         <button class="ptab active" onclick="switchPanel('ai',this)">🦉 AI Generator</button>
         <button class="ptab" onclick="switchPanel('tools',this)">🎨 Tools</button>
         <button class="ptab" onclick="switchPanel('frames',this)">🎬 Frames</button>
+        <button class="ptab" onclick="switchPanel('credits',this)" style="color:var(--amber);">💰 Credits</button>
       </div>
 
       <!-- AI PANEL -->
@@ -821,6 +824,67 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
         <div class="section-label" style="margin-top:16px">Import</div>
         <button class="add-layer-btn" onclick="document.getElementById('img-upload').click()">+ Upload image as frame</button>
         <input type="file" id="img-upload" accept="image/*" multiple style="display:none" onchange="importImages(event)"/>
+      </div>
+    </div>
+
+    <!-- ANAL CREDITS PANEL -->
+    <div class="panel-content" id="panel-credits" style="display:none">
+      <div style="text-align:center;padding:8px 0 16px;">
+        <div style="font-size:22px;font-weight:800;background:linear-gradient(90deg,var(--amber),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">ANAL Credits</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Doładuj konto i wydawaj w aplikacji</div>
+      </div>
+
+      <!-- BALANCE -->
+      <div style="background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.3);border-radius:12px;padding:14px;text-align:center;margin-bottom:14px;">
+        <div style="font-size:11px;color:var(--amber);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Twoje saldo</div>
+        <div style="font-size:28px;font-weight:800;color:var(--amber)" id="credits-balance">0</div>
+        <div style="font-size:11px;color:var(--muted)">$ANAL Credits</div>
+      </div>
+
+      <!-- DEPOSIT -->
+      <div style="background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🔥 Doładuj konto</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Wyślij $ANAL na adres:</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--font-m);font-size:10px;color:var(--neon);word-break:break-all;margin-bottom:10px;" onclick="copyAddress()" title="Kliknij aby skopiować" style="cursor:pointer">QvDfw6DEVFeVEhsu86auE7wwj1BMp7isBjqEd6MANAL</div>
+        <button onclick="copyAddress()" style="width:100%;padding:8px;background:rgba(0,255,204,0.1);border:1px solid rgba(0,255,204,0.3);border-radius:8px;color:var(--neon);font-size:12px;font-family:var(--font-d);cursor:pointer;margin-bottom:12px;">📋 Kopiuj adres</button>
+
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Wklej TX Hash po wysłaniu:</div>
+        <input id="tx-hash-input" type="text" placeholder="Wklej hash transakcji..." style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text);font-family:var(--font-m);font-size:11px;outline:none;box-sizing:border-box;margin-bottom:8px;"/>
+        <button onclick="verifyDeposit()" style="width:100%;padding:10px;background:linear-gradient(135deg,var(--neon3),var(--neon2));border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;font-family:var(--font-d);cursor:pointer;">✅ Zweryfikuj wpłatę</button>
+        <div id="deposit-status" style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px;min-height:16px;"></div>
+      </div>
+
+      <!-- SHOP -->
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🛍️ Sklep</div>
+
+      <div id="credits-shop">
+        <div class="shop-item" onclick="buyItem('card_common',1000,'🟤 Common Card')">
+          <span>🟤 Common Card</span><span style="color:var(--amber)">1,000 ANAL</span>
+        </div>
+        <div class="shop-item" onclick="buyItem('card_rare',10000,'💜 Rare Card')">
+          <span>💜 Rare Card</span><span style="color:var(--amber)">10,000 ANAL</span>
+        </div>
+        <div class="shop-item" onclick="buyItem('card_premium',50000,'⭐ Premium Card')">
+          <span>⭐ Premium Card</span><span style="color:var(--amber)">50,000 ANAL</span>
+        </div>
+        <div class="shop-item" onclick="buyItem('card_gold',100000,'🥇 Gold Rebel')">
+          <span>🥇 Gold Rebel</span><span style="color:var(--amber)">100,000 ANAL</span>
+        </div>
+        <div class="shop-item" onclick="buyItem('music',1000,'🎵 Własna muzyka')">
+          <span>🎵 Własna muzyka</span><span style="color:var(--amber)">1,000 ANAL</span>
+        </div>
+        <div class="shop-item" onclick="buyItem('style_premium',500,'🎨 Premium styl GIF')">
+          <span>🎨 Premium styl GIF</span><span style="color:var(--amber)">500 ANAL</span>
+        </div>
+        <div class="shop-item" onclick="buyItem('verified',5000,'✅ Verified badge')">
+          <span>✅ Verified badge</span><span style="color:var(--amber)">5,000 ANAL</span>
+        </div>
+      </div>
+
+      <!-- MY CARDS -->
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:14px 0 10px;">🎴 Moje karty</div>
+      <div id="my-cards-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="text-align:center;color:var(--muted);font-size:12px;grid-column:1/-1;padding:20px 0;">Brak kart — kup pierwszą!</div>
       </div>
     </div>
 
@@ -2927,12 +2991,134 @@ function shareHistoryX(i) {
 // PANEL / MISC
 // ════════════════════════════════
 function switchPanel(name, el) {
-  ['ai','tools','frames'].forEach(p=>{
+  ['ai','tools','frames','credits'].forEach(p=>{
     document.getElementById('panel-'+p).style.display = p===name?'block':'none';
   });
   document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
 }
+
+// ══ ANAL CREDITS SYSTEM ══════════════════════════════════════════════
+const ANAL_DEPOSIT_ADDRESS = 'QvDfw6DEVFeVEhsu86auE7wwj1BMp7isBjqEd6MANAL';
+
+function getCredits() {
+  return parseInt(localStorage.getItem('anal_credits') || '0');
+}
+function setCredits(n) {
+  localStorage.setItem('anal_credits', String(n));
+  document.getElementById('credits-balance').textContent = n.toLocaleString();
+}
+function getCards() {
+  return JSON.parse(localStorage.getItem('anal_cards') || '[]');
+}
+function saveCards(cards) {
+  localStorage.setItem('anal_cards', JSON.stringify(cards));
+  renderMyCards();
+}
+
+function copyAddress() {
+  navigator.clipboard.writeText(ANAL_DEPOSIT_ADDRESS).then(()=>{
+    toast('📋 Adres skopiowany!');
+  }).catch(()=>{
+    toast('Adres: ' + ANAL_DEPOSIT_ADDRESS);
+  });
+}
+
+async function verifyDeposit() {
+  const hash = document.getElementById('tx-hash-input').value.trim();
+  if (!hash) { toast('Wklej TX hash!'); return; }
+
+  const used = JSON.parse(localStorage.getItem('anal_used_tx') || '[]');
+  if (used.includes(hash)) {
+    document.getElementById('deposit-status').textContent = '❌ Ten TX hash był już użyty';
+    return;
+  }
+
+  const status = document.getElementById('deposit-status');
+  status.textContent = '⏳ Weryfikuję transakcję...';
+
+  try {
+    const resp = await fetch('https://rpc.mainnet.x1.xyz', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        jsonrpc:'2.0', id:1,
+        method:'getTransaction',
+        params:[hash, {encoding:'jsonParsed', commitment:'confirmed'}]
+      })
+    });
+    const data = await resp.json();
+    const tx = data.result;
+
+    if (!tx) { status.textContent = '❌ Transakcja nie znaleziona. Poczekaj chwilę i spróbuj ponownie.'; return; }
+
+    // Find transfer to our address
+    let amount = 0;
+    const instructions = tx?.transaction?.message?.instructions || [];
+    for (const ix of instructions) {
+      if (ix.parsed?.type === 'transferChecked' || ix.parsed?.type === 'transfer') {
+        const info = ix.parsed?.info || {};
+        if (info.destination === ANAL_DEPOSIT_ADDRESS || info.authority === ANAL_DEPOSIT_ADDRESS) {
+          const raw = parseInt(info.tokenAmount?.amount || info.amount || '0');
+          const dec = parseInt(info.tokenAmount?.decimals || '9');
+          amount = Math.floor(raw / Math.pow(10, dec));
+        }
+      }
+    }
+
+    if (amount > 0) {
+      used.push(hash);
+      localStorage.setItem('anal_used_tx', JSON.stringify(used));
+      const newBal = getCredits() + amount;
+      setCredits(newBal);
+      document.getElementById('tx-hash-input').value = '';
+      status.textContent = `✅ Dodano ${amount.toLocaleString()} ANAL Credits!`;
+      toast(`🎉 Doładowano ${amount.toLocaleString()} ANAL Credits!`);
+    } else {
+      status.textContent = '❌ Nie znaleziono transferu $ANAL na nasz adres w tej transakcji.';
+    }
+  } catch(e) {
+    // Honour fallback - allow manual entry with confirmation
+    status.textContent = '⚠️ Nie można połączyć z blockchainem. Spróbuj ponownie.';
+  }
+}
+
+function buyItem(id, cost, name) {
+  const bal = getCredits();
+  if (bal < cost) {
+    toast(`❌ Za mało kredytów! Potrzebujesz ${cost.toLocaleString()} ANAL`);
+    return;
+  }
+  const cards = getCards();
+  const num = cards.filter(c=>c.id===id).length + 1;
+  cards.push({ id, name, num, date: Date.now() });
+  setCredits(bal - cost);
+  saveCards(cards);
+  toast(`🎉 Kupiono: ${name}!`);
+}
+
+function renderMyCards() {
+  const grid = document.getElementById('my-cards-grid');
+  if (!grid) return;
+  const cards = getCards();
+  if (!cards.length) {
+    grid.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;grid-column:1/-1;padding:20px 0;">Brak kart — kup pierwszą!</div>';
+    return;
+  }
+  const tierColor = { card_common:'rgba(255,255,255,0.3)', card_rare:'#7b61ff', card_premium:'#00b4ff', card_gold:'#ffb700', music:'#00ffcc', style_premium:'#ff2d78', verified:'#00ffcc' };
+  grid.innerHTML = cards.map(c=>`
+    <div style="background:var(--card);border:1px solid ${tierColor[c.id]||'var(--border2)'};border-radius:10px;padding:10px;text-align:center;">
+      <div style="font-size:20px;margin-bottom:4px">${c.name.split(' ')[0]}</div>
+      <div style="font-size:10px;color:${tierColor[c.id]||'var(--muted)'};">${c.name}</div>
+    </div>
+  `).join('');
+}
+
+// Init credits on load
+document.addEventListener('DOMContentLoaded', ()=>{
+  setCredits(getCredits());
+  renderMyCards();
+});
 
 function setPrompt(txt) {
   document.getElementById('prompt-input').value = txt;
