@@ -638,6 +638,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
         <button class="ptab" onclick="switchPanel('tools',this)">🎨 Tools</button>
         <button class="ptab" onclick="switchPanel('frames',this)">🎬 Frames</button>
         <button class="ptab" onclick="switchPanel('credits',this)" style="color:var(--amber);">💰 Credits</button>
+        <button class="ptab" onclick="switchPanel('roast',this)" style="color:#ff2d78;">🔥 Roast</button>
       </div>
 
       <!-- AI PANEL -->
@@ -904,6 +905,68 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
       <div id="my-cards-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <div style="text-align:center;color:var(--muted);font-size:12px;grid-column:1/-1;padding:20px 0;">Brak kart — kup pierwszą!</div>
       </div>
+    </div>
+
+    <!-- 🔥 ROAST / FLEX PANEL -->
+    <div class="panel-content" id="panel-roast" style="display:none;padding-bottom:30px;">
+
+      <!-- HEADER -->
+      <div style="text-align:center;padding:8px 0 14px;">
+        <div style="font-size:22px;font-weight:800;background:linear-gradient(90deg,#ff2d78,var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">X1 Roast Machine</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Sprawdź każdy portfel na X1 Network</div>
+      </div>
+
+      <!-- BALANCE MINI -->
+      <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,183,0,0.07);border:1px solid rgba(255,183,0,0.2);border-radius:10px;padding:10px 14px;margin-bottom:14px;">
+        <span style="font-size:11px;color:var(--muted);">Twoje saldo:</span>
+        <span style="font-size:14px;font-weight:800;color:var(--amber);" id="roast-balance-display">0 ANAL</span>
+      </div>
+
+      <!-- MODE SELECT -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        <div id="mode-roast-btn" onclick="selectRoastMode('roast')" style="background:rgba(255,45,120,0.15);border:2px solid #ff2d78;border-radius:10px;padding:12px;text-align:center;cursor:pointer;">
+          <div style="font-size:20px;">🔥</div>
+          <div style="font-size:12px;font-weight:700;color:#ff2d78;margin-top:4px;">ROAST</div>
+          <div style="font-size:10px;color:var(--muted);">500 ANAL</div>
+        </div>
+        <div id="mode-flex-btn" onclick="selectRoastMode('flex')" style="background:rgba(255,183,0,0.08);border:2px solid transparent;border-color:var(--border2);border-radius:10px;padding:12px;text-align:center;cursor:pointer;">
+          <div style="font-size:20px;">💎</div>
+          <div style="font-size:12px;font-weight:700;color:var(--amber);margin-top:4px;">FLEX</div>
+          <div style="font-size:10px;color:var(--muted);">2,000 ANAL</div>
+        </div>
+      </div>
+
+      <!-- WALLET INPUT -->
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">X1 Wallet Address:</div>
+      <input id="roast-wallet-input" type="text" placeholder="Wklej adres X1 wallet..." style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;color:var(--text);font-family:var(--font-m);font-size:11px;outline:none;box-sizing:border-box;margin-bottom:10px;transition:border-color .2s;" onfocus="this.style.borderColor='var(--neon2)'" onblur="this.style.borderColor='var(--border2)'"/>
+
+      <!-- GENERATE BTN -->
+      <button id="roast-generate-btn" onclick="generateRoast()" style="width:100%;padding:12px;background:linear-gradient(135deg,#ff2d78,var(--amber));border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;font-family:var(--font-d);cursor:pointer;letter-spacing:.05em;transition:opacity .2s;">
+        🔥 ROAST THIS WALLET
+      </button>
+      <div id="roast-status" style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px;min-height:16px;"></div>
+
+      <!-- RESULT CARD -->
+      <div id="roast-result" style="display:none;margin-top:16px;">
+        <canvas id="roast-canvas" width="480" height="480" style="width:100%;border-radius:12px;display:block;"></canvas>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+          <button onclick="downloadRoastCard()" style="padding:10px;background:rgba(0,255,204,0.1);border:1px solid rgba(0,255,204,0.3);border-radius:8px;color:var(--neon);font-size:12px;font-family:var(--font-d);cursor:pointer;">⬇ Download</button>
+          <button onclick="shareToX()" style="padding:10px;background:rgba(0,0,0,0.8);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-size:12px;font-family:var(--font-d);cursor:pointer;">𝕏 Post to X</button>
+        </div>
+      </div>
+
+      <!-- HOW IT WORKS -->
+      <div style="margin-top:20px;background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Jak to działa?</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.8;">
+          1️⃣ Wybierz tryb: <span style="color:#ff2d78">ROAST</span> lub <span style="color:var(--amber)">FLEX</span><br>
+          2️⃣ Wklej dowolny adres X1 wallet<br>
+          3️⃣ AI analizuje historię on-chain<br>
+          4️⃣ Generuje viralową kartę PNG<br>
+          5️⃣ Wrzuć na X z <span style="color:var(--neon)">#ANALRebel #X1Network</span>
+        </div>
+      </div>
+
     </div>
 
     <!-- CENTER: Canvas -->
@@ -3246,11 +3309,12 @@ function shareHistoryX(i) {
 // PANEL / MISC
 // ════════════════════════════════
 function switchPanel(name, el) {
-  ['ai','tools','frames','credits'].forEach(p=>{
+  ['ai','tools','frames','credits','roast'].forEach(p=>{
     document.getElementById('panel-'+p).style.display = p===name?'block':'none';
   });
   document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
+  if(name==='roast') updateRoastBalanceDisplay();
 }
 
 // ══ ANAL CREDITS SYSTEM ══════════════════════════════════════════════
@@ -4172,6 +4236,339 @@ function typeIntoLog(msg, type, callback) {
 
 // Override log function to type AI messages
 window._typeLog = typeIntoLog;
+
+// ══ ROAST MACHINE ═════════════════════════════════════════════════════
+
+let roastMode = 'roast';
+let roastText = '';
+let roastWallet = '';
+
+function updateRoastBalanceDisplay() {
+  const el = document.getElementById('roast-balance-display');
+  if(el) el.textContent = getCredits().toLocaleString() + ' ANAL';
+}
+
+function selectRoastMode(mode) {
+  roastMode = mode;
+  const roastBtn = document.getElementById('mode-roast-btn');
+  const flexBtn  = document.getElementById('mode-flex-btn');
+  const genBtn   = document.getElementById('roast-generate-btn');
+  if(mode === 'roast') {
+    roastBtn.style.border = '2px solid #ff2d78';
+    roastBtn.style.background = 'rgba(255,45,120,0.15)';
+    flexBtn.style.border = '2px solid var(--border2)';
+    flexBtn.style.background = 'rgba(255,183,0,0.08)';
+    genBtn.textContent = '🔥 ROAST THIS WALLET';
+    genBtn.style.background = 'linear-gradient(135deg,#ff2d78,var(--amber))';
+  } else {
+    flexBtn.style.border = '2px solid var(--amber)';
+    flexBtn.style.background = 'rgba(255,183,0,0.18)';
+    roastBtn.style.border = '2px solid var(--border2)';
+    roastBtn.style.background = 'rgba(255,45,120,0.05)';
+    genBtn.textContent = '💎 FLEX THIS WALLET';
+    genBtn.style.background = 'linear-gradient(135deg,var(--amber),#ffdd00)';
+  }
+}
+
+async function fetchX1WalletData(addr) {
+  const RPC = 'https://rpc.mainnet.x1.xyz';
+  let balance = 0, txCount = 0, firstTx = null, lastTx = null;
+  try {
+    // SOL balance
+    const balResp = await fetch(RPC, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({jsonrpc:'2.0',id:1,method:'getBalance',params:[addr]})
+    });
+    const balData = await balResp.json();
+    balance = ((balData.result?.value || 0) / 1e9).toFixed(4);
+
+    // TX signatures
+    const sigResp = await fetch(RPC, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({jsonrpc:'2.0',id:2,method:'getSignaturesForAddress',params:[addr,{limit:1000}]})
+    });
+    const sigData = await sigResp.json();
+    const sigs = sigData.result || [];
+    txCount = sigs.length;
+    if(sigs.length > 0) {
+      lastTx  = new Date((sigs[0].blockTime || Date.now()/1000)*1000);
+      firstTx = new Date((sigs[sigs.length-1].blockTime || Date.now()/1000)*1000);
+    }
+  } catch(e) {}
+  return { balance, txCount, firstTx, lastTx, addr };
+}
+
+async function generateRoast() {
+  const wallet = document.getElementById('roast-wallet-input').value.trim();
+  if(!wallet || wallet.length < 32) {
+    document.getElementById('roast-status').textContent = '⚠️ Wklej poprawny adres X1 wallet';
+    document.getElementById('roast-status').style.color = 'var(--neon2)';
+    return;
+  }
+
+  const cost = roastMode === 'roast' ? 500 : 2000;
+  const bal  = getCredits();
+  if(bal < cost) {
+    document.getElementById('roast-status').textContent = `❌ Za mało ANAL! Potrzebujesz ${cost.toLocaleString()} (masz ${bal.toLocaleString()})`;
+    document.getElementById('roast-status').style.color = 'var(--neon2)';
+    return;
+  }
+
+  const btn = document.getElementById('roast-generate-btn');
+  const status = document.getElementById('roast-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Analizuję wallet...';
+  status.style.color = 'var(--muted)';
+  status.textContent = '🔍 Pobieram dane z X1 blockchain...';
+
+  // Fetch on-chain data
+  const data = await fetchX1WalletData(wallet);
+  status.textContent = '🤖 AI generuje tekst...';
+
+  // Build prompt for Claude
+  const shortAddr = wallet.slice(0,6)+'...'+wallet.slice(-4);
+  const daysSinceFirst = data.firstTx ? Math.floor((Date.now()-data.firstTx)/86400000) : 0;
+  const daysSinceLast  = data.lastTx  ? Math.floor((Date.now()-data.lastTx )/86400000) : 0;
+
+  const contextStr = `X1 Wallet: ${shortAddr}
+SOL Balance: ${data.balance} SOL
+Total Transactions: ${data.txCount}
+On X1 since: ${daysSinceFirst} days ago
+Last activity: ${daysSinceLast} days ago`;
+
+  const promptMap = {
+    roast: `You are a savage crypto roast comedian. Roast this X1 Network wallet based on its on-chain data. Be brutal, funny, use crypto slang. Max 3 short punchy sentences. End with a savage nickname in quotes. No hashtags in text.
+Data: ${contextStr}`,
+    flex:  `You are a hype man for crypto degens. Flex this X1 Network wallet hard. Make them sound legendary, like an OG whale. Max 3 short punchy sentences. End with an epic title in quotes. No hashtags in text.
+Data: ${contextStr}`
+  };
+
+  let aiText = '';
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:200,
+        messages:[{role:'user',content:promptMap[roastMode]}]
+      })
+    });
+    const aiData = await resp.json();
+    aiText = aiData.content?.[0]?.text || '';
+  } catch(e) {}
+
+  if(!aiText) {
+    // Fallback texts
+    const roastFallbacks = [
+      `${shortAddr} has ${data.txCount} txs and ${data.balance} SOL. Either a ghost or a tax write-off. Classic X1 tourist. "The Invisible Degen"`,
+      `${data.balance} SOL left in wallet after ${data.txCount} transactions. The math ain't mathing. Bought high, sold lower. "Paper Hands Supreme"`,
+      `${data.txCount} transactions on X1 and still holding ${data.balance} SOL. This wallet has seen things. Bad things. "The Eternal BagHolder"`
+    ];
+    const flexFallbacks = [
+      `${shortAddr} — ${data.txCount} transactions deep in X1. While others were sleeping, this wallet was building. ${data.balance} SOL and still standing. "The X1 Survivor"`,
+      `On X1 for ${daysSinceFirst} days. ${data.txCount} moves made. ${data.balance} SOL locked and loaded. This is what conviction looks like. "The Diamond Architect"`,
+      `${data.txCount} transactions. ${data.balance} SOL. First mover. X1 OG status confirmed. When this wallet speaks, the chain listens. "The X1 Legend"`
+    ];
+    const arr = roastMode==='roast' ? roastFallbacks : flexFallbacks;
+    aiText = arr[Math.floor(Math.random()*arr.length)];
+  }
+
+  roastText = aiText;
+  roastWallet = wallet;
+
+  // Deduct credits
+  setCredits(bal - cost);
+  updateRoastBalanceDisplay();
+
+  status.textContent = '🎨 Rysuję kartę...';
+  await drawRoastCard(data, aiText);
+
+  document.getElementById('roast-result').style.display = 'block';
+  document.getElementById('roast-result').scrollIntoView({behavior:'smooth', block:'nearest'});
+  btn.disabled = false;
+  btn.textContent = roastMode==='roast' ? '🔥 ROAST THIS WALLET' : '💎 FLEX THIS WALLET';
+  status.textContent = `✅ Gotowe! Spalono ${cost.toLocaleString()} ANAL`;
+  status.style.color = 'var(--neon)';
+}
+
+async function drawRoastCard(data, text) {
+  const canvas = document.getElementById('roast-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = 480, H = 480;
+  canvas.width = W; canvas.height = H;
+
+  const isRoast = roastMode === 'roast';
+  const shortAddr = data.addr.slice(0,6)+'...'+data.addr.slice(-4);
+
+  // ── BACKGROUND ──
+  const bg = ctx.createLinearGradient(0,0,W,H);
+  if(isRoast) {
+    bg.addColorStop(0,'#0d0008'); bg.addColorStop(0.5,'#1a0010'); bg.addColorStop(1,'#0d0005');
+  } else {
+    bg.addColorStop(0,'#060810'); bg.addColorStop(0.5,'#0d1020'); bg.addColorStop(1,'#060810');
+  }
+  ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+
+  // ── GRID LINES ──
+  ctx.strokeStyle = isRoast ? 'rgba(255,45,120,0.08)' : 'rgba(255,183,0,0.06)';
+  ctx.lineWidth = 0.5;
+  for(let x=0;x<W;x+=30){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for(let y=0;y<H;y+=30){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // ── GLOW CIRCLES ──
+  const gc1 = ctx.createRadialGradient(W*0.2,H*0.3,0,W*0.2,H*0.3,W*0.4);
+  gc1.addColorStop(0, isRoast?'rgba(255,45,120,0.18)':'rgba(255,183,0,0.15)');
+  gc1.addColorStop(1,'transparent');
+  ctx.fillStyle=gc1; ctx.fillRect(0,0,W,H);
+
+  const gc2 = ctx.createRadialGradient(W*0.8,H*0.7,0,W*0.8,H*0.7,W*0.35);
+  gc2.addColorStop(0, isRoast?'rgba(255,100,0,0.12)':'rgba(100,100,255,0.12)');
+  gc2.addColorStop(1,'transparent');
+  ctx.fillStyle=gc2; ctx.fillRect(0,0,W,H);
+
+  // ── BORDER FRAME ──
+  const borderColor = isRoast ? '#ff2d78' : '#ffb700';
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = 2;
+  ctx.shadowColor = borderColor;
+  ctx.shadowBlur = 12;
+  ctx.strokeRect(14,14,W-28,H-28);
+  // Corner accents
+  const corners = [[14,14],[W-14,14],[14,H-14],[W-14,H-14]];
+  const cSize = 18;
+  corners.forEach(([cx,cy])=>{
+    ctx.strokeStyle = borderColor; ctx.lineWidth=2.5; ctx.shadowBlur=16;
+    ctx.beginPath();
+    if(cx<W/2 && cy<H/2){ ctx.moveTo(cx,cy+cSize); ctx.lineTo(cx,cy); ctx.lineTo(cx+cSize,cy); }
+    else if(cx>W/2 && cy<H/2){ ctx.moveTo(cx-cSize,cy); ctx.lineTo(cx,cy); ctx.lineTo(cx,cy+cSize); }
+    else if(cx<W/2 && cy>H/2){ ctx.moveTo(cx,cy-cSize); ctx.lineTo(cx,cy); ctx.lineTo(cx+cSize,cy); }
+    else { ctx.moveTo(cx-cSize,cy); ctx.lineTo(cx,cy); ctx.lineTo(cx,cy-cSize); }
+    ctx.stroke();
+  });
+  ctx.shadowBlur=0;
+
+  // ── TOP BADGE ──
+  const badgeText = isRoast ? '🔥 ROASTED ON X1' : '💎 FLEXING ON X1';
+  const badgeBg = isRoast ? 'rgba(255,45,120,0.25)' : 'rgba(255,183,0,0.22)';
+  const badgeColor = isRoast ? '#ff2d78' : '#ffb700';
+  ctx.fillStyle = badgeBg;
+  const bw=220, bh=28, bx=(W-bw)/2, by=28;
+  ctx.beginPath(); ctx.roundRect(bx,by,bw,bh,14); ctx.fill();
+  ctx.font = `700 12px 'Syne', sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline='middle';
+  ctx.fillStyle = badgeColor;
+  ctx.shadowColor = badgeColor; ctx.shadowBlur=8;
+  ctx.fillText(badgeText, W/2, by+bh/2);
+  ctx.shadowBlur=0;
+
+  // ── WALLET ADDRESS ──
+  ctx.font = `600 13px 'Space Mono', monospace`;
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(shortAddr, W/2, 76);
+
+  // ── STATS ROW ──
+  const stats = [
+    { label:'SOL Balance', value: data.balance+' SOL' },
+    { label:'Transactions', value: data.txCount.toLocaleString() },
+    { label:'Network', value: 'X1' }
+  ];
+  const sw = (W-60)/3;
+  stats.forEach((s,i)=>{
+    const sx = 30 + i*(sw+10) + sw/2;
+    const sy = 108;
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.beginPath(); ctx.roundRect(sx-sw/2, sy-18, sw, 40, 8); ctx.fill();
+    ctx.font='700 13px Syne,sans-serif'; ctx.fillStyle=badgeColor;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(s.value, sx, sy-2);
+    ctx.font='10px Syne,sans-serif'; ctx.fillStyle='rgba(255,255,255,0.4)';
+    ctx.fillText(s.label, sx, sy+14);
+  });
+
+  // ── DIVIDER ──
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(30,158); ctx.lineTo(W-30,158); ctx.stroke();
+
+  // ── MAIN TEXT ──
+  const lines = wrapText(ctx, text, W-60, '15px');
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  let ty = 172;
+  lines.forEach((line, li)=>{
+    // Highlight last line (nickname) differently
+    const isLast = li===lines.length-1;
+    if(isLast && line.includes('"')) {
+      ctx.font = `800 17px 'Syne', sans-serif`;
+      ctx.fillStyle = badgeColor;
+      ctx.shadowColor = badgeColor; ctx.shadowBlur=10;
+    } else {
+      ctx.font = `500 14px 'Syne', sans-serif`;
+      ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      ctx.shadowBlur=0;
+    }
+    ctx.fillText(line, W/2, ty);
+    ty += isLast ? 24 : 20;
+  });
+  ctx.shadowBlur=0;
+
+  // ── HASHTAGS ──
+  ty = Math.max(ty+20, H-100);
+  ctx.font='11px Space Mono,monospace';
+  ctx.fillStyle='rgba(255,255,255,0.3)';
+  ctx.textAlign='center';
+  ctx.fillText('#ANALRebel  #X1Network  #BurnANAL', W/2, ty);
+
+  // ── BOTTOM LOGO ──
+  ctx.fillStyle='rgba(255,255,255,0.12)';
+  ctx.font='700 11px Syne,sans-serif';
+  ctx.fillText('analtena.com', W/2, H-36);
+  // Small owl
+  ctx.font='18px serif'; ctx.fillText('🦉', W/2-52, H-38);
+
+  // ── POWERED BY X1 ──
+  ctx.fillStyle = isRoast?'rgba(255,45,120,0.5)':'rgba(255,183,0,0.5)';
+  ctx.font='9px Space Mono,monospace';
+  ctx.fillText('POWERED BY X1 NETWORK', W/2, H-20);
+}
+
+function wrapText(ctx, text, maxW, fontSize) {
+  ctx.font = `500 ${fontSize} 'Syne', sans-serif`;
+  const words = text.split(' ');
+  const lines = [];
+  let cur = '';
+  for(const w of words){
+    const test = cur ? cur+' '+w : w;
+    if(ctx.measureText(test).width > maxW && cur){ lines.push(cur); cur=w; }
+    else cur=test;
+  }
+  if(cur) lines.push(cur);
+  return lines;
+}
+
+function downloadRoastCard() {
+  const canvas = document.getElementById('roast-canvas');
+  const link = document.createElement('a');
+  const mode = roastMode==='roast'?'ROASTED':'FLEXED';
+  link.download = `ANAL-${mode}-${roastWallet.slice(0,8)}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  toast('⬇ Karta pobrana!');
+}
+
+function shareToX() {
+  const canvas = document.getElementById('roast-canvas');
+  const mode = roastMode==='roast'?'🔥 ROASTED':'💎 FLEXED';
+  const short = roastWallet.slice(0,6)+'...'+roastWallet.slice(-4);
+  const tweetText = encodeURIComponent(`${mode} on X1 Network 👇\n\nWallet: ${short}\n\n#ANALRebel #X1Network #BurnANAL\n\nanaltena.com`);
+  // Download first, then open tweet
+  downloadRoastCard();
+  setTimeout(()=>{
+    window.open(`https://twitter.com/intent/tweet?text=${tweetText}`, '_blank');
+  }, 500);
+  toast('𝕏 Otwieranie Twitter...');
+}
+
 </script>
 <!-- ── MUSIC PLAYER ── -->
 <div class="music-player" id="music-player">
