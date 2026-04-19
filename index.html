@@ -3512,12 +3512,6 @@ document.addEventListener('click', e => {
 
 // ════════════════════════════════
 // TYPING EFFECT FOR AI LOG
-// ════════════════════════════════
-const _origLog = log;
-function log(msg, type) {
-  _origLog(msg, type);
-}
-
 function typeIntoLog(msg, type, callback) {
   const logEl = document.getElementById('ai-log');
   if (!logEl) { if(callback) callback(); return; }
@@ -3537,7 +3531,6 @@ function typeIntoLog(msg, type, callback) {
 }
 
 // Override log function to type AI messages
-const _log = log;
 window._typeLog = typeIntoLog;
 </script>
 <!-- ── MUSIC PLAYER ── -->
