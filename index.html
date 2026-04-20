@@ -547,6 +547,12 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 .streak-dot.wrong{background:#ff2d78;}
 
 @keyframes coinSpin{0%{transform:rotateY(0deg);}50%{transform:rotateY(180deg);}100%{transform:rotateY(360deg);}}
+@media(max-width:768px){
+  .canvas-area{display:none!important;}
+  #panel-games{min-height:60vh;overflow-y:auto;}
+  #mario-canvas{height:240px!important;}
+}
+
 
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
@@ -3443,7 +3449,7 @@ function switchPanel(name, el) {
   document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   if(name==='roast') updateRoastBalanceDisplay();
-  if(name==='games') { setTimeout(initGamesPanel,50); }
+  if(name==='games') { setTimeout(function(){ initGamesPanel(); var btn=document.querySelector('.game-sel-btn'); selectGame('mario',btn); },80); }
 }
 
 // ══ ANAL CREDITS SYSTEM ══════════════════════════════════════════════
@@ -4763,6 +4769,18 @@ body.celebration-active {
 
 
 <script>
+
+if(!CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+    r=Math.min(r||0,w/2,h/2);
+    this.beginPath();this.moveTo(x+r,y);
+    this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);
+    this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);
+    this.closePath();return this;
+  };
+}
+
+
 
 // ══ GAMES SYSTEM v2 ═══════════════════════════════════════════════════
 
