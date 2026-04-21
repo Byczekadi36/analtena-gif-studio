@@ -871,7 +871,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
       </div>
 
       <!-- SHOP -->
-      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🛍️ Shop</div>
+      
 
           </div>
 
@@ -960,113 +960,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 
     <!-- CENTER: Canvas -->
     <div class="canvas-area">
-      <div id="games-center-overlay" style="display:none;width:100%;height:100%;overflow-y:auto;overflow-x:hidden;background:#080810;flex-direction:column;flex:1;">
-
-      <!-- MARIO RUNNER -->
-      <div id="gcenter-mario" style="width:100%;display:flex;flex-direction:column;min-height:400px;">
-        <div style="text-align:center;padding:8px 0 4px;">
-          <span style="font-size:15px;font-weight:800;color:#fff;">🦉 ANAL Runner</span>
-          <span style="font-size:10px;color:rgba(255,255,255,0.35);margin-left:8px;">Space/tap to jump • collect $ANAL • avoid bears!</span>
-        </div>
-        <canvas id="mario-canvas" style="width:100%;flex:1;min-height:320px;cursor:pointer;display:block;"></canvas>
-        <div style="display:flex;gap:6px;padding:8px 12px;">
-          <div style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:6px;text-align:center;">
-            <div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;">Score</div>
-            <div style="font-size:20px;font-weight:800;color:#fff;" id="mario-score">0</div>
-          </div>
-          <div style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:6px;text-align:center;">
-            <div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;">Best</div>
-            <div style="font-size:20px;font-weight:800;color:#fff;" id="mario-best">0</div>
-          </div>
-          <div style="flex:1;background:rgba(255,183,0,0.07);border:1px solid rgba(255,183,0,0.2);border-radius:8px;padding:6px;text-align:center;">
-            <div style="font-size:9px;color:rgba(255,183,0,0.6);text-transform:uppercase;">$ANAL</div>
-            <div style="font-size:20px;font-weight:800;color:#ffb700;" id="mario-coins">0</div>
-          </div>
-        </div>
-        <button id="mario-share-btn" onclick="shareMarioScore()" style="display:none;margin:0 12px 8px;padding:10px;background:rgba(0,0,0,0.8);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">𝕏 Post score to X</button>
-      </div>
-
-      <!-- SLOTS -->
-      <div id="gcenter-slots" style="display:none;width:100%;flex-direction:column;align-items:center;padding:8px 0 0 0;overflow-y:auto;">
-        <div style="text-align:center;margin-bottom:6px;">
-          <span style="font-size:15px;font-weight:800;color:#fff;">🎰 ANAL Slots</span>
-          <span style="font-size:10px;color:rgba(255,255,255,0.35);margin-left:8px;">Jackpot = Analtena!</span>
-        </div>
-        <canvas id="slots-canvas" style="cursor:pointer;display:block;max-width:100%;"></canvas>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:8px;padding:0 16px;">
-          <button onclick="slotsChangeBet(-10)" style="width:34px;height:34px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;">-</button>
-          <div style="flex:1;text-align:center;font-size:14px;font-weight:800;color:#ffb700;">Bet: <span id="slots-bet">10</span> ANAL</div>
-          <button onclick="slotsChangeBet(10)" style="width:34px;height:34px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;">+</button>
-        </div>
-        <div id="slots-result" style="text-align:center;font-size:16px;font-weight:800;min-height:24px;color:#00ffcc;margin-top:6px;"></div>
-      </div>
-
-      <!-- COIN FLIP -->
-      <div id="gcenter-coinflip" style="display:none;width:100%;padding:16px;max-width:420px;margin:0 auto;">
-        <div style="text-align:center;margin-bottom:12px;">
-          <span style="font-size:15px;font-weight:800;color:#fff;">🪙 Coin Flip</span>
-          <span style="font-size:10px;color:rgba(255,255,255,0.35);display:block;margin-top:2px;">50/50 — double or nothing</span>
-        </div>
-        <div style="display:flex;justify-content:center;margin-bottom:16px;">
-          <div id="flip-coin" style="width:100px;height:100px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe566,#ffb700);border:4px solid #ff9500;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:#7a4000;cursor:pointer;user-select:none;box-shadow:0 6px 24px rgba(255,183,0,0.25);transition:transform 0.6s;">$</div>
-        </div>
-        <div style="display:flex;gap:10px;margin-bottom:10px;">
-          <div id="pick-heads" onclick="cfPick('heads')" style="flex:1;padding:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:rgba(255,255,255,0.5);font-size:13px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;">HEADS</div>
-          <div id="pick-tails" onclick="cfPick('tails')" style="flex:1;padding:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:rgba(255,255,255,0.5);font-size:13px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;">TAILS</div>
-        </div>
-        <div style="display:flex;gap:8px;margin-bottom:10px;">
-          <div onclick="cfSetBet(10)" style="flex:1;padding:6px;background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.2);border-radius:6px;color:#ffb700;font-size:11px;font-weight:700;cursor:pointer;text-align:center;">10</div>
-          <div onclick="cfSetBet(50)" style="flex:1;padding:6px;background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.2);border-radius:6px;color:#ffb700;font-size:11px;font-weight:700;cursor:pointer;text-align:center;">50</div>
-          <div onclick="cfSetBet(100)" style="flex:1;padding:6px;background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.2);border-radius:6px;color:#ffb700;font-size:11px;font-weight:700;cursor:pointer;text-align:center;">100</div>
-          <div onclick="cfSetBet(500)" style="flex:1;padding:6px;background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.2);border-radius:6px;color:#ffb700;font-size:11px;font-weight:700;cursor:pointer;text-align:center;">500</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-          <input id="cf-bet-input" type="number" value="10" min="10" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 12px;color:#fff;font-size:14px;font-weight:700;outline:none;width:100%;">
-          <span style="font-size:11px;color:rgba(255,255,255,0.4);">ANAL</span>
-        </div>
-        <button onclick="doFlip()" style="width:100%;padding:14px;background:linear-gradient(135deg,#7b61ff,#00ffcc);border:none;border-radius:10px;color:#080810;font-size:15px;font-weight:800;cursor:pointer;">FLIP</button>
-        <div id="cf-result" style="text-align:center;font-size:16px;font-weight:800;margin-top:12px;min-height:24px;"></div>
-        <div style="display:flex;gap:8px;margin-top:12px;">
-          <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px;text-align:center;">
-            <div style="font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;">Wins</div>
-            <div style="font-size:22px;font-weight:800;color:#00ffcc;" id="cf-wins">0</div>
-          </div>
-          <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px;text-align:center;">
-            <div style="font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;">Losses</div>
-            <div style="font-size:22px;font-weight:800;color:#ff2d78;" id="cf-losses">0</div>
-          </div>
-          <div style="flex:1;background:rgba(255,183,0,0.07);border:1px solid rgba(255,183,0,0.2);border-radius:10px;padding:10px;text-align:center;">
-            <div style="font-size:10px;color:rgba(255,183,0,0.6);text-transform:uppercase;">Balance</div>
-            <div style="font-size:15px;font-weight:800;color:#ffb700;" id="cf-balance-disp">0</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CHART GUESSER -->
-      <div id="gcenter-chart" style="display:none;width:100%;padding:16px;max-width:560px;margin:0 auto;">
-        <div style="text-align:center;margin-bottom:10px;">
-          <span style="font-size:15px;font-weight:800;color:#fff;">📈 Chart Guesser</span>
-          <span style="font-size:10px;color:rgba(255,255,255,0.35);display:block;margin-top:2px;">Will $ANAL go up or down?</span>
-        </div>
-        <canvas id="chart-canvas" style="width:100%;height:200px;background:#050510;border-radius:12px;border:1px solid rgba(255,255,255,0.08);display:block;margin-bottom:12px;"></canvas>
-        <div style="text-align:center;font-size:13px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:12px;">What happens next?</div>
-        <div style="display:flex;gap:12px;margin-bottom:12px;">
-          <button onclick="chartGuess('up')" style="flex:1;padding:18px;background:rgba(0,255,100,0.1);border:1px solid rgba(0,255,100,0.3);border-radius:12px;color:#00ff64;font-size:28px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;">▲<span style="font-size:11px;opacity:.7;">MOON</span></button>
-          <button onclick="chartGuess('down')" style="flex:1;padding:18px;background:rgba(255,45,120,0.1);border:1px solid rgba(255,45,120,0.3);border-radius:12px;color:#ff2d78;font-size:28px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;">▼<span style="font-size:11px;opacity:.7;">DUMP</span></button>
-        </div>
-        <div id="chart-result" style="text-align:center;font-size:15px;font-weight:800;min-height:24px;margin-bottom:10px;"></div>
-        <div style="display:flex;justify-content:center;gap:8px;margin-bottom:12px;" id="chart-streak">
-          <div class="streak-dot"></div><div class="streak-dot"></div><div class="streak-dot"></div><div class="streak-dot"></div><div class="streak-dot"></div>
-        </div>
-        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px;">
-          <div style="font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;">Weekly leaderboard</div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.5);display:flex;justify-content:space-between;padding:3px 0;"><span>1. 0x4f2a...9b1c</span><span style="color:#ffb700;">47pts</span></div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.5);display:flex;justify-content:space-between;padding:3px 0;"><span>2. 0x8d3e...2a7f</span><span style="color:#ffb700;">39pts</span></div>
-          <div style="font-size:12px;color:#00ffcc;display:flex;justify-content:space-between;padding:3px 0;font-weight:700;"><span>— YOU</span><span id="chart-your-score">0pts</span></div>
-        </div>
-      </div>
-
-    </div><div class="canvas-toolbar">
+      <div class="canvas-toolbar">
         <button class="tool-btn active" id="tool-select" onclick="setTool('select',this)">↖ Select</button>
         <button class="tool-btn" id="tool-text" onclick="setTool('text',this)">T Text</button>
         <button class="tool-btn" id="tool-draw" onclick="setTool('draw',this)">✏ Draw</button>
@@ -1092,6 +986,119 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
         </div>
         <button class="export-btn" id="save-orig-toolbar" onclick="saveOriginalImage()" style="display:none;background:var(--neon3);margin-left:8px;">🖼 Save Image</button>
       </div>
+    </div>
+
+    <!-- 🎮 GAMES OVERLAY - sibling to canvas-area -->
+    <div id="games-center-overlay" style="display:none;flex:1;flex-direction:column;overflow:hidden;background:#080810;">
+
+      <!-- MARIO RUNNER -->
+      <div id="gcenter-mario" style="display:none;width:100%;height:100%;flex-direction:column;">
+        <div style="text-align:center;padding:8px 0 4px;flex-shrink:0;">
+          <span style="font-size:15px;font-weight:800;color:#fff;">🦉 ANAL Runner</span>
+          <span style="font-size:10px;color:rgba(255,255,255,0.35);margin-left:8px;">Space/tap to jump • collect $ANAL • avoid bears!</span>
+        </div>
+        <canvas id="mario-canvas" style="width:100%;flex:1;cursor:pointer;display:block;min-height:0;"></canvas>
+        <div style="display:flex;gap:6px;padding:8px 12px;flex-shrink:0;">
+          <div style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:6px;text-align:center;">
+            <div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;">Score</div>
+            <div style="font-size:20px;font-weight:800;color:#fff;" id="mario-score">0</div>
+          </div>
+          <div style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:6px;text-align:center;">
+            <div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;">Best</div>
+            <div style="font-size:20px;font-weight:800;color:#fff;" id="mario-best">0</div>
+          </div>
+          <div style="flex:1;background:rgba(255,183,0,0.07);border:1px solid rgba(255,183,0,0.2);border-radius:8px;padding:6px;text-align:center;">
+            <div style="font-size:9px;color:rgba(255,183,0,0.6);text-transform:uppercase;">$ANAL</div>
+            <div style="font-size:20px;font-weight:800;color:#ffb700;" id="mario-coins">0</div>
+          </div>
+        </div>
+        <button id="mario-share-btn" onclick="shareMarioScore()" style="display:none;margin:0 12px 8px;padding:10px;background:rgba(0,0,0,0.8);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">𝕏 Post score to X</button>
+      </div>
+
+      <!-- SLOTS -->
+      <div id="gcenter-slots" style="display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;overflow-y:auto;padding:16px 0;">
+        <div style="text-align:center;margin-bottom:8px;flex-shrink:0;">
+          <span style="font-size:15px;font-weight:800;color:#fff;">🎰 ANAL Slots</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.35);margin-left:8px;">Jackpot = Analtena!</span>
+        </div>
+        <canvas id="slots-canvas" style="cursor:pointer;display:block;flex-shrink:0;"></canvas>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:0 16px;flex-shrink:0;">
+          <button onclick="slotsChangeBet(-10)" style="width:36px;height:36px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:18px;cursor:pointer;">-</button>
+          <div style="flex:1;text-align:center;font-size:15px;font-weight:800;color:#ffb700;">Bet: <span id="slots-bet">10</span> ANAL</div>
+          <button onclick="slotsChangeBet(10)" style="width:36px;height:36px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:18px;cursor:pointer;">+</button>
+        </div>
+        <div id="slots-result" style="text-align:center;font-size:16px;font-weight:800;min-height:26px;color:#00ffcc;margin-top:8px;flex-shrink:0;"></div>
+      </div>
+
+      <!-- COIN FLIP -->
+      <div id="gcenter-coinflip" style="display:none;width:100%;height:100%;overflow-y:auto;align-items:center;justify-content:center;">
+        <div style="width:100%;max-width:420px;margin:0 auto;padding:16px;">
+          <div style="text-align:center;margin-bottom:12px;">
+            <span style="font-size:16px;font-weight:800;color:#fff;">🪙 Coin Flip</span>
+            <span style="font-size:11px;color:rgba(255,255,255,0.35);display:block;margin-top:2px;">50/50 — double or nothing</span>
+          </div>
+          <div style="display:flex;justify-content:center;margin-bottom:16px;">
+            <div id="flip-coin" style="width:100px;height:100px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe566,#ffb700);border:4px solid #ff9500;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:#7a4000;cursor:pointer;user-select:none;">$</div>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:10px;">
+            <div id="pick-heads" onclick="cfPick('heads')" style="flex:1;padding:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:rgba(255,255,255,0.5);font-size:13px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;">HEADS</div>
+            <div id="pick-tails" onclick="cfPick('tails')" style="flex:1;padding:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:rgba(255,255,255,0.5);font-size:13px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;">TAILS</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <div onclick="cfSetBet(10)" style="flex:1;padding:6px;background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.2);border-radius:6px;color:#ffb700;font-size:12px;font-weight:700;cursor:pointer;text-align:center;">10</div>
+            <div onclick="cfSetBet(50)" style="flex:1;padding:6px;background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.2);border-radius:6px;color:#ffb700;font-size:12px;font-weight:700;cursor:pointer;text-align:center;">50</div>
+            <div onclick="cfSetBet(100)" style="flex:1;padding:6px;background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.2);border-radius:6px;color:#ffb700;font-size:12px;font-weight:700;cursor:pointer;text-align:center;">100</div>
+            <div onclick="cfSetBet(500)" style="flex:1;padding:6px;background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.2);border-radius:6px;color:#ffb700;font-size:12px;font-weight:700;cursor:pointer;text-align:center;">500</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <input id="cf-bet-input" type="number" value="10" min="10" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 12px;color:#fff;font-size:14px;font-weight:700;outline:none;width:100%;">
+            <span style="font-size:11px;color:rgba(255,255,255,0.4);">ANAL</span>
+          </div>
+          <button onclick="doFlip()" style="width:100%;padding:14px;background:linear-gradient(135deg,#7b61ff,#00ffcc);border:none;border-radius:10px;color:#080810;font-size:15px;font-weight:800;cursor:pointer;">FLIP</button>
+          <div id="cf-result" style="text-align:center;font-size:16px;font-weight:800;margin-top:12px;min-height:24px;"></div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px;text-align:center;">
+              <div style="font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;">Wins</div>
+              <div style="font-size:22px;font-weight:800;color:#00ffcc;" id="cf-wins">0</div>
+            </div>
+            <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px;text-align:center;">
+              <div style="font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;">Losses</div>
+              <div style="font-size:22px;font-weight:800;color:#ff2d78;" id="cf-losses">0</div>
+            </div>
+            <div style="flex:1;background:rgba(255,183,0,0.07);border:1px solid rgba(255,183,0,0.2);border-radius:10px;padding:10px;text-align:center;">
+              <div style="font-size:10px;color:rgba(255,183,0,0.6);text-transform:uppercase;">Balance</div>
+              <div style="font-size:15px;font-weight:800;color:#ffb700;" id="cf-balance-disp">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHART GUESSER -->
+      <div id="gcenter-chart" style="display:none;width:100%;height:100%;overflow-y:auto;align-items:center;justify-content:center;">
+        <div style="width:100%;max-width:560px;margin:0 auto;padding:16px;">
+          <div style="text-align:center;margin-bottom:10px;">
+            <span style="font-size:16px;font-weight:800;color:#fff;">📈 Chart Guesser</span>
+            <span style="font-size:11px;color:rgba(255,255,255,0.35);display:block;margin-top:2px;">Will $ANAL go up or down?</span>
+          </div>
+          <canvas id="chart-canvas" style="width:100%;height:200px;background:#050510;border-radius:12px;border:1px solid rgba(255,255,255,0.08);display:block;margin-bottom:12px;"></canvas>
+          <div style="text-align:center;font-size:13px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:12px;">What happens next?</div>
+          <div style="display:flex;gap:12px;margin-bottom:12px;">
+            <button onclick="chartGuess('up')" style="flex:1;padding:18px;background:rgba(0,255,100,0.1);border:1px solid rgba(0,255,100,0.3);border-radius:12px;color:#00ff64;font-size:28px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;">▲<span style="font-size:11px;opacity:.7;">MOON</span></button>
+            <button onclick="chartGuess('down')" style="flex:1;padding:18px;background:rgba(255,45,120,0.1);border:1px solid rgba(255,45,120,0.3);border-radius:12px;color:#ff2d78;font-size:28px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;">▼<span style="font-size:11px;opacity:.7;">DUMP</span></button>
+          </div>
+          <div id="chart-result" style="text-align:center;font-size:15px;font-weight:800;min-height:24px;margin-bottom:10px;"></div>
+          <div style="display:flex;justify-content:center;gap:8px;margin-bottom:12px;" id="chart-streak">
+            <div class="streak-dot"></div><div class="streak-dot"></div><div class="streak-dot"></div><div class="streak-dot"></div><div class="streak-dot"></div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px;">
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;">Weekly leaderboard</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.5);display:flex;justify-content:space-between;padding:3px 0;"><span>1. 0x4f2a...9b1c</span><span style="color:#ffb700;">47pts</span></div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.5);display:flex;justify-content:space-between;padding:3px 0;"><span>2. 0x8d3e...2a7f</span><span style="color:#ffb700;">39pts</span></div>
+            <div style="font-size:12px;color:#00ffcc;display:flex;justify-content:space-between;padding:3px 0;font-weight:700;"><span>— YOU</span><span id="chart-your-score">0pts</span></div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- RIGHT: Layers -->
@@ -3410,28 +3417,27 @@ function switchPanel(name, el) {
   document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   if(name==='roast') updateRoastBalanceDisplay();
-  if(name==='games') { 
-    setTimeout(function(){ 
+  if(name==='games') {
+    setTimeout(function(){
       initGamesPanel();
-      // Show games overlay in canvas area
+      // Hide canvas-area, show games overlay (they are siblings in app-body)
       var overlay=document.getElementById('games-center-overlay');
-      var canvasToolbar=document.querySelector('.canvas-toolbar');
-      var canvasStage=document.querySelector('.canvas-stage');
-      if(overlay){overlay.style.display='flex';overlay.style.flex='1';}
-      if(canvasToolbar){canvasToolbar.style.display='none';}
-      if(canvasStage){canvasStage.style.display='none';}
-      // Select first game
+      var canvasArea=document.querySelector('.canvas-area');
+      var rightPanel=document.querySelector('.right-panel');
+      if(overlay){overlay.style.display='flex';}
+      if(canvasArea){canvasArea.style.display='none';}
+      if(rightPanel){rightPanel.style.display='none';}
       var firstBtn=document.querySelector('.game-left-btn');
       selectGameCenter('mario', firstBtn);
-    },80); 
+    },80);
   } else {
-    // Hide games overlay when switching away
+    // Restore canvas-area when switching away from games
     var overlay=document.getElementById('games-center-overlay');
-    var canvasToolbar=document.querySelector('.canvas-toolbar');
-    var canvasStage=document.querySelector('.canvas-stage');
+    var canvasArea=document.querySelector('.canvas-area');
+    var rightPanel=document.querySelector('.right-panel');
     if(overlay){overlay.style.display='none';}
-    if(canvasToolbar){canvasToolbar.style.display='';}
-    if(canvasStage){canvasStage.style.display='';}
+    if(canvasArea){canvasArea.style.display='';}
+    if(rightPanel){rightPanel.style.display='';}
   }
 }
 
@@ -4741,7 +4747,7 @@ function selectGameCenter(id,btn){
     if(el){el.style.display='none';}
   });
   var target=document.getElementById('gcenter-'+id);
-  if(target) target.style.display=(id==='mario'||id==='slots')?'flex':'block';
+  if(target) target.style.display='flex';
   document.querySelectorAll('.game-left-btn').forEach(function(b){b.classList.remove('game-left-active');});
   if(btn) btn.classList.add('game-left-active');
   // Longer delay to ensure DOM has rendered with new display value
@@ -4759,11 +4765,12 @@ function initMario(){
   if(!canvas) return;
   if(gMarioAnimId){cancelAnimationFrame(gMarioAnimId);gMarioAnimId=null;}
 
-  // Use window width - reliable even when container was hidden
+  // Canvas fills the gcenter-mario container
+  var container=document.getElementById('gcenter-mario');
   var isMob=window.innerWidth<700;
   var W=isMob?window.innerWidth:Math.max(window.innerWidth-320,400);
-  var H=isMob?Math.round(window.innerHeight*0.45):Math.round(window.innerHeight*0.55);
-  H=Math.max(H,260);
+  var statsH=isMob?90:90;
+  var H=Math.max(window.innerHeight-120-statsH,260);
   canvas.width=W; canvas.height=H;
   canvas.style.width=W+'px'; canvas.style.height=H+'px';
   var ctx=canvas.getContext('2d');
@@ -5202,11 +5209,11 @@ function slotsChangeBet(d){
 function initSlotsCanvas(){
   var canvas=document.getElementById('slots-canvas');
   if(!canvas) return;
-  // Use window dimensions - reliable even when container was display:none
   var isMob=window.innerWidth<700;
-  var W=isMob?Math.min(window.innerWidth-32,360):300;
-  W=Math.max(W,220);
-  var H=Math.round(W*1.65);
+  // On mobile use most of screen width, desktop cap smaller for aesthetics
+  var W=isMob?Math.min(window.innerWidth-24,380):Math.min(window.innerWidth-360,340);
+  W=Math.max(W,240);
+  var H=Math.round(W*1.62);
   canvas.width=W;canvas.height=H;
   canvas.style.width=W+'px';canvas.style.height=H+'px';
   drawCasinoMachine(canvas.getContext('2d'),W,H,gSlotResults,false,0);
