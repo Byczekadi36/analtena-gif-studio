@@ -5207,7 +5207,7 @@ function shareMarioScore(){
 // ══════════════════════════════════════════════════════════
 // SLOTS — Full casino machine on canvas
 // ══════════════════════════════════════════════════════════
-var SLOT_SYMS=['💎','🦉','🌙','💰','🔥','7️⃣'];
+var SLOT_SYMS=['7️⃣','🍒','🍋','💎','🦉','🌙'];
 
 function slotsChangeBet(d){
   gSlotBet=Math.max(10,Math.min(500,gSlotBet+d));
@@ -5232,115 +5232,139 @@ function drawCasinoMachine(ctx,W,H,reels,spinning,f){
   ctx.clearRect(0,0,W,H);
   var mx=W/2;
 
-  // ── FLOOR GLOW ──
-  ctx.fillStyle='rgba(100,20,220,0.15)';
-  ctx.beginPath();ctx.ellipse(mx,H-4,W*0.5,10,0,0,Math.PI*2);ctx.fill();
+  // ── CASINO ROOM BACKGROUND ──
+  // Deep warm casino amber/brown gradient
+  var bgG=ctx.createLinearGradient(0,0,W,H);
+  bgG.addColorStop(0,'#1a0e05');bgG.addColorStop(0.5,'#2a1508');bgG.addColorStop(1,'#110a03');
+  ctx.fillStyle=bgG;ctx.fillRect(0,0,W,H);
 
-  // ── CABINET OUTER CHROME ──
-  var chrome=ctx.createLinearGradient(0,0,W,H);
-  chrome.addColorStop(0,'#d0a8ff');chrome.addColorStop(0.2,'#8040d0');
-  chrome.addColorStop(0.8,'#6030b0');chrome.addColorStop(1,'#c090ff');
-  ctx.fillStyle=chrome;
-  rRect(ctx,0,0,W,H-14,12);ctx.fill();
-
-  // ── CABINET BODY ──
-  var body=ctx.createLinearGradient(0,0,W,H);
-  body.addColorStop(0,'#38168a');body.addColorStop(0.3,'#220a5a');
-  body.addColorStop(0.7,'#180838');body.addColorStop(1,'#0e0420');
-  ctx.fillStyle=body;
-  rRect(ctx,3,3,W-6,H-20,10);ctx.fill();
-
-  // ── TOPPER ──
-  var TH=Math.round(H*0.22);
-  var tg=ctx.createLinearGradient(0,3,0,TH+3);
-  tg.addColorStop(0,'#5a20b0');tg.addColorStop(0.5,'#3a1078');tg.addColorStop(1,'#280c5a');
-  ctx.fillStyle=tg;
-  rRect(ctx,3,3,W-6,TH,10);ctx.fill();
-
-  // Topper separator
-  ctx.strokeStyle='rgba(200,140,255,0.5)';ctx.lineWidth=2;
-  ctx.beginPath();ctx.moveTo(8,TH+3);ctx.lineTo(W-8,TH+3);ctx.stroke();
-
-  // Stars/sparkles on topper
-  var starPts=[[mx-60,TH*0.15],[mx+60,TH*0.15],[mx-90,TH*0.5],[mx+90,TH*0.5]];
-  starPts.forEach(function(s,i){
-    var on=Math.sin(f*0.2+i*1.3)>0;
-    ctx.fillStyle=on?'#ffdd44':'rgba(255,220,50,0.15)';
-    ctx.font=(on?'bold ':'')+Math.round(W*0.04)+'px serif';
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('★',s[0],s[1]);
+  // Bokeh lights in background
+  var bokehPositions=[[0.15,0.08],[0.35,0.05],[0.55,0.06],[0.75,0.07],[0.9,0.09],
+    [0.05,0.15],[0.25,0.12],[0.45,0.1],[0.65,0.11],[0.85,0.13],
+    [0.1,0.25],[0.3,0.2],[0.5,0.18],[0.7,0.22],[0.95,0.2]];
+  bokehPositions.forEach(function(b,i){
+    var bx=b[0]*W,by=b[1]*H,br=4+Math.random()*3;
+    var pulse=0.4+0.3*Math.sin(f*0.08+i*0.7);
+    var bg2=ctx.createRadialGradient(bx,by,0,bx,by,br*3);
+    bg2.addColorStop(0,'rgba(255,200,80,'+pulse+')');
+    bg2.addColorStop(0.4,'rgba(255,160,40,'+(pulse*0.4)+')');
+    bg2.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=bg2;ctx.beginPath();ctx.arc(bx,by,br*3,0,Math.PI*2);ctx.fill();
   });
 
-  // JACKPOT text — big and glowing
+  // Floor reflection
+  var flrG=ctx.createLinearGradient(0,H*0.85,0,H);
+  flrG.addColorStop(0,'rgba(180,100,20,0.15)');flrG.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=flrG;ctx.fillRect(0,H*0.85,W,H*0.15);
+
+  // ── MACHINE BODY ──
+  // Cabinet shape: trapezoid wider at top
+  var cabX=Math.round(W*0.04),cabW=W-cabX*2;
+  var cabY=Math.round(H*0.05),cabH=H-cabY-Math.round(H*0.04);
+
+  // Deep shadow behind machine
+  ctx.fillStyle='rgba(0,0,0,0.6)';
+  rRect(ctx,cabX+4,cabY+4,cabW,cabH,16);ctx.fill();
+
+  // Chrome outer case - warm gold gradient
+  var chromG=ctx.createLinearGradient(cabX,cabY,cabX+cabW,cabY+cabH);
+  chromG.addColorStop(0,'#c8960a');chromG.addColorStop(0.15,'#f0c040');
+  chromG.addColorStop(0.3,'#d4a020');chromG.addColorStop(0.5,'#b88010');
+  chromG.addColorStop(0.7,'#e8b830');chromG.addColorStop(0.85,'#c09010');
+  chromG.addColorStop(1,'#986808');
+  ctx.fillStyle=chromG;
+  rRect(ctx,cabX,cabY,cabW,cabH,14);ctx.fill();
+
+  // Dark inner body
+  var bodyG=ctx.createLinearGradient(cabX,cabY,cabX+cabW,cabY+cabH);
+  bodyG.addColorStop(0,'#2a1a08');bodyG.addColorStop(0.4,'#1e1208');
+  bodyG.addColorStop(1,'#150d04');
+  ctx.fillStyle=bodyG;
+  rRect(ctx,cabX+5,cabY+5,cabW-10,cabH-10,10);ctx.fill();
+
+  // ── ARCHED TOPPER ──
+  var TH=Math.round(H*0.2);
+  // Gold arch shape
   ctx.save();
-  ctx.shadowColor='#ffb700';ctx.shadowBlur=20;
-  ctx.fillStyle='#ffe844';
-  ctx.font='bold '+Math.round(W*0.09)+'px "Arial Black",Impact,sans-serif';
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('JACKPOT',mx,TH*0.32);
+  ctx.beginPath();
+  ctx.moveTo(cabX+5,cabY+5+TH);
+  ctx.lineTo(cabX+5,cabY+5+Math.round(TH*0.5));
+  ctx.quadraticCurveTo(mx,cabY-Math.round(TH*0.15),cabX+cabW-5,cabY+5+Math.round(TH*0.5));
+  ctx.lineTo(cabX+cabW-5,cabY+5+TH);
+  ctx.closePath();
+  var archG=ctx.createLinearGradient(cabX,cabY,cabX+cabW,cabY+TH);
+  archG.addColorStop(0,'#3a2010');archG.addColorStop(0.3,'#5a3018');
+  archG.addColorStop(0.7,'#4a2812');archG.addColorStop(1,'#2a1608');
+  ctx.fillStyle=archG;ctx.fill();
+  // Arch gold border
+  ctx.strokeStyle='#c8960a';ctx.lineWidth=3;ctx.stroke();
   ctx.restore();
 
-  // ANAL SLOTS subtitle
-  ctx.save();
-  ctx.shadowColor='#00ffcc';ctx.shadowBlur=12;
-  ctx.fillStyle='#00ffdd';
-  ctx.font='bold '+Math.round(W*0.062)+'px sans-serif';
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('ANAL  SLOTS',mx,TH*0.64);
-  ctx.restore();
-
-  // Top light strip
-  var NL=9,LS=(W-40)/(NL-1);
-  var LC=['#ff2d78','#ffb700','#00ffcc','#7b61ff','#ff2d78','#00ffcc','#ffb700','#ff2d78','#00ffcc'];
-  for(var li=0;li<NL;li++){
-    var lx=20+li*LS,ly=TH-8;
-    var on=Math.sin(f*0.2+li*0.8)>0;
-    ctx.fillStyle=on?LC[li]:'rgba(255,255,255,0.06)';
-    if(on){ctx.shadowColor=LC[li];ctx.shadowBlur=8;}
-    ctx.beginPath();ctx.arc(lx,ly,5,0,Math.PI*2);ctx.fill();
-    ctx.shadowBlur=0;
+  // Decorative ornament lines on arch
+  ctx.strokeStyle='rgba(200,150,10,0.4)';ctx.lineWidth=1;
+  for(var li=0;li<3;li++){
+    var inset=(li+1)*4;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cabX+5+inset,cabY+5+TH-inset);
+    ctx.lineTo(cabX+5+inset,cabY+5+Math.round(TH*0.5)+inset*0.5);
+    ctx.quadraticCurveTo(mx,cabY-Math.round(TH*0.15)+inset*1.5,cabX+cabW-5-inset,cabY+5+Math.round(TH*0.5)+inset*0.5);
+    ctx.lineTo(cabX+cabW-5-inset,cabY+5+TH-inset);
+    ctx.stroke();
+    ctx.restore();
   }
 
-  // ── SIDE PANELS ──
-  var SP=Math.round(W*0.1),SY=TH+10,SH=Math.round(H*0.42);
-  // Left panel
-  var lpg=ctx.createLinearGradient(6,SY,6+SP,SY+SH);
-  lpg.addColorStop(0,'rgba(90,25,180,0.6)');lpg.addColorStop(1,'rgba(40,8,100,0.4)');
-  ctx.fillStyle=lpg;rRect(ctx,6,SY,SP,SH,5);ctx.fill();
-  ctx.strokeStyle='rgba(130,60,220,0.5)';ctx.lineWidth=1;
-  rRect(ctx,6,SY,SP,SH,5);ctx.stroke();
-  ctx.fillStyle='rgba(255,183,0,0.6)';
-  ctx.font='bold '+Math.round(SP*0.8)+'px serif';
+  // JACKPOT text on arch
+  ctx.save();
+  ctx.shadowColor='rgba(255,200,0,0.8)';ctx.shadowBlur=12;
+  var jFont=Math.round(W*0.075)+'px';
+  ctx.font='bold '+jFont+' "Times New Roman",Georgia,serif';
   ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('$',6+SP/2,SY+SH/2);
+  // Gold gradient text
+  var jg=ctx.createLinearGradient(mx-60,0,mx+60,0);
+  jg.addColorStop(0,'#c8960a');jg.addColorStop(0.3,'#fce060');
+  jg.addColorStop(0.5,'#fff8c0');jg.addColorStop(0.7,'#fce060');
+  jg.addColorStop(1,'#c8960a');
+  ctx.fillStyle=jg;
+  ctx.fillText('JACKPOT',mx,cabY+TH*0.42);
+  ctx.shadowBlur=0;
+  ctx.restore();
 
-  // Right panel
-  var rpg=ctx.createLinearGradient(W-SP-6,SY,W-6,SY+SH);
-  rpg.addColorStop(0,'rgba(40,8,100,0.4)');rpg.addColorStop(1,'rgba(90,25,180,0.6)');
-  ctx.fillStyle=rpg;rRect(ctx,W-SP-6,SY,SP,SH,5);ctx.fill();
-  ctx.strokeStyle='rgba(130,60,220,0.5)';ctx.lineWidth=1;
-  rRect(ctx,W-SP-6,SY,SP,SH,5);ctx.stroke();
-  ctx.fillStyle='rgba(255,183,0,0.6)';
-  ctx.fillText('$',W-SP/2-6,SY+SH/2);
+  // Small decorative stars around JACKPOT
+  ['★','★','★'].forEach(function(s,i){
+    var sx=[mx-Math.round(W*0.28),mx,mx+Math.round(W*0.28)][i];
+    var sy=cabY+TH*0.68;
+    ctx.fillStyle='rgba(255,210,50,0.7)';
+    ctx.font=Math.round(W*0.03)+'px serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(s,sx,sy);
+  });
 
-  // ── REEL WINDOW ──
-  var RX=6+SP+4,RW=W-2*(SP+10),RY=TH+8,RH=Math.round(H*0.36);
+  // ── REEL WINDOW FRAME ──
+  var RFX=cabX+Math.round(cabW*0.08),RFY=cabY+TH+Math.round(H*0.01);
+  var RFW=cabW-Math.round(cabW*0.16),RFH=Math.round(H*0.37);
 
-  // Chrome bezel
-  ctx.fillStyle='rgba(180,120,255,0.8)';
-  rRect(ctx,RX-4,RY-4,RW+8,RH+8,12);ctx.fill();
+  // Outer gold frame
+  var rfG=ctx.createLinearGradient(RFX,RFY,RFX+RFW,RFY+RFH);
+  rfG.addColorStop(0,'#d4a020');rfG.addColorStop(0.25,'#f8e060');
+  rfG.addColorStop(0.5,'#c89010');rfG.addColorStop(0.75,'#f0c840');
+  rfG.addColorStop(1,'#a07008');
+  ctx.fillStyle=rfG;
+  rRect(ctx,RFX,RFY,RFW,RFH,10);ctx.fill();
 
-  // Glass reflection on bezel
-  ctx.fillStyle='rgba(255,255,255,0.1)';
-  rRect(ctx,RX-4,RY-4,RW+8,8,4);ctx.fill();
+  // Chrome bevel inner
+  ctx.fillStyle='rgba(0,0,0,0.85)';
+  rRect(ctx,RFX+6,RFY+6,RFW-12,RFH-12,7);ctx.fill();
 
-  // Black window
-  ctx.fillStyle='#00000a';
-  rRect(ctx,RX,RY,RW,RH,9);ctx.fill();
+  // White reel background
+  ctx.fillStyle='#f5f0e8';
+  rRect(ctx,RFX+8,RFY+8,RFW-16,RFH-16,5);ctx.fill();
 
   // ── 3 REELS ──
-  var RP=5,RG=4;
-  var RW3=Math.floor((RW-RP*2-RG*2)/3),RH3=RH-RP*2;
+  var RP=10,RG=6;
+  var RW3=Math.floor((RFW-16-RP*2-RG*2)/3),RH3=RFH-16-RP*2;
+  var rx0=RFX+8+RP;
+
   var syms=spinning?
     [SLOT_SYMS[Math.floor(Math.random()*SLOT_SYMS.length)],
      SLOT_SYMS[Math.floor(Math.random()*SLOT_SYMS.length)],
@@ -5348,160 +5372,205 @@ function drawCasinoMachine(ctx,W,H,reels,spinning,f){
   var allMatch=!spinning&&syms[0]===syms[1]&&syms[1]===syms[2];
 
   for(var ri=0;ri<3;ri++){
-    var rx=RX+RP+ri*(RW3+RG),ry=RY+RP;
+    var rx=rx0+ri*(RW3+RG),ry=RFY+8+RP;
 
-    // Reel background - dark gradient
-    var rbg=ctx.createLinearGradient(rx,ry,rx+RW3,ry+RH3);
-    rbg.addColorStop(0,'#080220');rbg.addColorStop(1,'#040110');
-    ctx.fillStyle=rbg;
-    rRect(ctx,rx,ry,RW3,RH3,6);ctx.fill();
+    // Reel drum - white/cream
+    var rdG=ctx.createLinearGradient(rx,ry,rx+RW3,ry);
+    rdG.addColorStop(0,'rgba(0,0,0,0.08)');rdG.addColorStop(0.1,'rgba(255,255,255,0)');
+    rdG.addColorStop(0.9,'rgba(255,255,255,0)');rdG.addColorStop(1,'rgba(0,0,0,0.08)');
+    ctx.fillStyle='#faf6ee';
+    rRect(ctx,rx,ry,RW3,RH3,4);ctx.fill();
+    ctx.fillStyle=rdG;
+    rRect(ctx,rx,ry,RW3,RH3,4);ctx.fill();
 
-    // Reel border
-    ctx.strokeStyle='rgba(80,40,160,0.5)';ctx.lineWidth=1;
-    rRect(ctx,rx,ry,RW3,RH3,6);ctx.stroke();
+    // Reel separator lines (horizontal - like real reel)
+    ctx.strokeStyle='rgba(150,120,60,0.3)';ctx.lineWidth=1;
+    var lineH=RH3/3;
+    for(var li2=1;li2<3;li2++){
+      ctx.beginPath();ctx.moveTo(rx,ry+li2*lineH);ctx.lineTo(rx+RW3,ry+li2*lineH);ctx.stroke();
+    }
 
-    // Above/below symbol shadow strips (reel effect)
-    ctx.fillStyle='rgba(0,0,0,0.4)';
-    ctx.fillRect(rx,ry,RW3,Math.round(RH3*0.18));
-    ctx.fillRect(rx,ry+Math.round(RH3*0.82),RW3,Math.round(RH3*0.18));
-
-    // SYMBOL — large and centered
+    // Symbol
     var sym=syms[ri];
-    var yOff=spinning?Math.sin(f*0.35+ri*1.2)*12:0;
+    var yOff=spinning?Math.sin(f*0.4+ri*1.3)*15:0;
     var cx3=rx+RW3/2,cy3=ry+RH3/2+yOff;
 
     if(sym==='🏆'&&gLogoImg&&gLogoImg.complete&&gLogoImg.naturalWidth>0){
       ctx.save();
-      rRect(ctx,rx+4,ry+4,RW3-8,RH3-8,4);ctx.clip();
+      rRect(ctx,rx+4,ry+4,RW3-8,RH3-8,3);ctx.clip();
       ctx.drawImage(gLogoImg,rx+4,ry+4,RW3-8,RH3-8);
       ctx.restore();
     } else {
-      // BIG emoji — font size is key
-      var efs=Math.min(Math.round(RH3*0.68),Math.round(RW3*0.75));
+      // BIG symbol - no shadow (white bg = visible)
+      var efs=Math.min(Math.round(RH3*0.62),Math.round(RW3*0.72));
       ctx.font=efs+'px serif';
       ctx.textAlign='center';ctx.textBaseline='middle';
-      // Multiple shadows for visibility
-      ctx.shadowColor='rgba(0,0,50,0.9)';ctx.shadowBlur=8;
-      ctx.fillText(sym,cx3,cy3);
-      ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=4;
-      ctx.fillText(sym,cx3,cy3);
-      ctx.shadowBlur=0;
       ctx.fillText(sym,cx3,cy3);
     }
 
-    // Winner frame
+    // Winner: red outline on reel
     if(allMatch){
       ctx.save();
-      ctx.shadowColor='#ffb700';ctx.shadowBlur=25;
-      ctx.strokeStyle='#ffe844';ctx.lineWidth=3;
-      rRect(ctx,rx,ry,RW3,RH3,6);ctx.stroke();
+      ctx.shadowColor='#ff2200';ctx.shadowBlur=20;
+      ctx.strokeStyle='#ff3300';ctx.lineWidth=4;
+      rRect(ctx,rx,ry,RW3,RH3,4);ctx.stroke();
       ctx.restore();
     }
+
+    // Reel border (thin gold)
+    ctx.strokeStyle='rgba(180,130,20,0.6)';ctx.lineWidth=1.5;
+    rRect(ctx,rx,ry,RW3,RH3,4);ctx.stroke();
+
+    // Side gradient overlays (top/bottom shadow = depth effect)
+    var topFade=ctx.createLinearGradient(0,ry,0,ry+RH3*0.22);
+    topFade.addColorStop(0,'rgba(0,0,0,0.35)');topFade.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=topFade;rRect(ctx,rx,ry,RW3,RH3*0.22,4);ctx.fill();
+    var botFade=ctx.createLinearGradient(0,ry+RH3*0.78,0,ry+RH3);
+    botFade.addColorStop(0,'rgba(0,0,0,0)');botFade.addColorStop(1,'rgba(0,0,0,0.35)');
+    ctx.fillStyle=botFade;rRect(ctx,rx,ry+RH3*0.78,RW3,RH3*0.22,4);ctx.fill();
   }
 
-  // Payline (middle line across reels)
-  ctx.strokeStyle='rgba(255,45,120,0.65)';ctx.lineWidth=2;ctx.setLineDash([5,3]);
-  ctx.beginPath();ctx.moveTo(RX,RY+RH/2);ctx.lineTo(RX+RW,RY+RH/2);ctx.stroke();
-  ctx.setLineDash([]);
+  // Payline - red line across middle
+  var plY=RFY+8+RP+RH3/2;
+  ctx.strokeStyle='rgba(220,30,10,0.85)';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(RFX+4,plY);ctx.lineTo(RFX+RFW-4,plY);ctx.stroke();
+  // Small arrows at payline ends
+  ctx.fillStyle='rgba(220,30,10,0.85)';
+  ctx.beginPath();ctx.moveTo(RFX+4,plY-5);ctx.lineTo(RFX+4,plY+5);ctx.lineTo(RFX+14,plY);ctx.fill();
+  ctx.beginPath();ctx.moveTo(RFX+RFW-4,plY-5);ctx.lineTo(RFX+RFW-4,plY+5);ctx.lineTo(RFX+RFW-14,plY);ctx.fill();
 
-  // Window gloss overlay
-  var gloss=ctx.createLinearGradient(RX,RY,RX,RY+RH*0.4);
-  gloss.addColorStop(0,'rgba(255,255,255,0.06)');gloss.addColorStop(1,'rgba(255,255,255,0)');
-  ctx.fillStyle=gloss;rRect(ctx,RX,RY,RW,RH,9);ctx.fill();
+  // Reel window outer shine
+  var shine2=ctx.createLinearGradient(RFX,RFY,RFX,RFY+RFH*0.3);
+  shine2.addColorStop(0,'rgba(255,255,255,0.15)');shine2.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=shine2;rRect(ctx,RFX,RFY,RFW,RFH*0.3,10);ctx.fill();
 
-  // ── CREDITS BAR ──
-  var CY=RY+RH+8,CH=Math.round(H*0.07);
-  ctx.fillStyle='rgba(0,0,0,0.7)';
-  rRect(ctx,RX,CY,RW,CH,5);ctx.fill();
-  ctx.strokeStyle='rgba(0,220,120,0.3)';ctx.lineWidth=1;
-  rRect(ctx,RX,CY,RW,CH,5);ctx.stroke();
+  // ── CREDITS DISPLAY ──
+  var CDY=RFY+RFH+Math.round(H*0.02),CDH=Math.round(H*0.065);
+  // Dark LCD panel
+  ctx.fillStyle='rgba(0,0,0,0.8)';
+  rRect(ctx,RFX,CDY,RFW,CDH,5);ctx.fill();
+  // Gold border
+  ctx.strokeStyle='#a07810';ctx.lineWidth=2;
+  rRect(ctx,RFX,CDY,RFW,CDH,5);ctx.stroke();
   // Green LED text
-  ctx.fillStyle='#00ee88';
-  ctx.font='bold '+Math.round(CH*0.46)+'px "Courier New",monospace';
+  ctx.fillStyle='#40ff80';
+  ctx.shadowColor='#40ff80';ctx.shadowBlur=6;
+  ctx.font='bold '+Math.round(CDH*0.44)+'px "Courier New",monospace';
   ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('CREDITS: '+getCredits().toLocaleString(),mx,CY+CH/2);
+  ctx.fillText('CREDITS  '+getCredits().toLocaleString(),mx,CDY+CDH/2);
+  ctx.shadowBlur=0;
 
   // ── SPIN BUTTON ──
-  var BY=CY+CH+8,BH=Math.round(H*0.1),BW=Math.round(RW*0.7),BX=mx-BW/2;
-
-  // Button shadow
-  ctx.fillStyle='rgba(0,0,0,0.5)';
-  rRect(ctx,BX+4,BY+5,BW,BH,BH/2);ctx.fill();
-
-  // Button gradient (shiny red)
-  var bg2=ctx.createLinearGradient(BX,BY,BX,BY+BH);
-  bg2.addColorStop(0,'#ff7777');bg2.addColorStop(0.15,'#ff4444');
-  bg2.addColorStop(0.5,'#cc1111');bg2.addColorStop(1,'#880808');
-  ctx.fillStyle=bg2;
-  rRect(ctx,BX,BY,BW,BH,BH/2);ctx.fill();
-
-  // Top shine
-  var shine=ctx.createLinearGradient(0,BY,0,BY+BH*0.45);
-  shine.addColorStop(0,'rgba(255,255,255,0.3)');shine.addColorStop(1,'rgba(255,255,255,0)');
-  ctx.fillStyle=shine;
-  rRect(ctx,BX+8,BY+5,BW-16,BH/2-3,BH/4);ctx.fill();
-
-  // Button border
-  ctx.strokeStyle='#ff9999';ctx.lineWidth=1.5;
-  rRect(ctx,BX,BY,BW,BH,BH/2);ctx.stroke();
-
-  // SPIN text
-  ctx.save();
-  ctx.shadowColor='rgba(0,0,0,0.7)';ctx.shadowBlur=5;
-  ctx.fillStyle='#ffffff';
-  ctx.font='bold '+Math.round(BH*0.4)+'px sans-serif';
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(spinning?'● ● ●':'SPIN',mx,BY+BH/2);
-  ctx.restore();
-
-  // ── LEVER ──
-  var LX=W-6,LBase=BY+BH-6;
-  var LLen=Math.round(H*0.18);
-  var LBallY=LBase-LLen*(1-(gLeverPulled?0.72:0));
-
-  // Base block
-  var lbg2=ctx.createLinearGradient(LX-14,LBase-8,LX+6,LBase+8);
-  lbg2.addColorStop(0,'#aaa');lbg2.addColorStop(1,'#444');
-  ctx.fillStyle=lbg2;
-  rRect(ctx,LX-14,LBase-7,20,14,4);ctx.fill();
-  ctx.strokeStyle='#777';ctx.lineWidth=1;
-  rRect(ctx,LX-14,LBase-7,20,14,4);ctx.stroke();
-
-  // Rod
-  var rrg2=ctx.createLinearGradient(LX-4,0,LX+2,0);
-  rrg2.addColorStop(0,'#ddd');rrg2.addColorStop(0.5,'#888');rrg2.addColorStop(1,'#bbb');
-  ctx.fillStyle=rrg2;
-  rRect(ctx,LX-3,LBallY+16,6,LBase-LBallY-16,3);ctx.fill();
-
-  // Ball
-  var ball2=ctx.createRadialGradient(LX-5,LBallY+5,1,LX-2,LBallY+13,17);
-  ball2.addColorStop(0,'#ffbbbb');ball2.addColorStop(0.3,'#ff4444');
-  ball2.addColorStop(0.7,'#cc1111');ball2.addColorStop(1,'#660000');
-  ctx.fillStyle=ball2;
-  ctx.beginPath();ctx.arc(LX-2,LBallY+13,17,0,Math.PI*2);ctx.fill();
-  ctx.shadowColor='#ff2d78';ctx.shadowBlur=12;
-  ctx.strokeStyle='#ff8888';ctx.lineWidth=1.5;
-  ctx.beginPath();ctx.arc(LX-2,LBallY+13,17,0,Math.PI*2);ctx.stroke();
-  ctx.shadowBlur=0;
-  // PULL label
-  ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='bold 8px sans-serif';
-  ctx.textAlign='center';ctx.textBaseline='top';
-  ctx.fillText('PULL',LX-2,LBase+6);
-
-  // ── COIN TRAY ──
-  var TrY=H-16,TrH=14;
+  var BY=CDY+CDH+Math.round(H*0.015),BH=Math.round(H*0.095),BW=Math.round(RFW*0.65),BX=mx-BW/2;
+  // Deep shadow
   ctx.fillStyle='rgba(0,0,0,0.6)';
-  ctx.beginPath();ctx.moveTo(6,TrY);ctx.lineTo(W-6,TrY);
-  ctx.lineTo(W-18,TrY+TrH);ctx.lineTo(18,TrY+TrH);ctx.closePath();ctx.fill();
-  ctx.strokeStyle='rgba(255,183,0,0.3)';ctx.lineWidth=1;ctx.stroke();
+  rRect(ctx,BX+5,BY+6,BW,BH,BH/2);ctx.fill();
+  // Button chrome
+  var btnChr=ctx.createLinearGradient(BX,BY,BX,BY+BH);
+  btnChr.addColorStop(0,'#c8960a');btnChr.addColorStop(0.1,'#e8b020');
+  btnChr.addColorStop(0.5,'#a07010');btnChr.addColorStop(1,'#805808');
+  ctx.fillStyle=btnChr;
+  rRect(ctx,BX-2,BY-2,BW+4,BH+4,BH/2+2);ctx.fill();
+  // Red button body
+  var redG=ctx.createLinearGradient(BX,BY,BX,BY+BH);
+  redG.addColorStop(0,'#ff8888');redG.addColorStop(0.2,'#ff3333');
+  redG.addColorStop(0.6,'#cc1111');redG.addColorStop(1,'#881010');
+  ctx.fillStyle=redG;
+  rRect(ctx,BX,BY,BW,BH,BH/2);ctx.fill();
+  // Shine
+  var btnShine=ctx.createLinearGradient(BX,BY,BX,BY+BH*0.45);
+  btnShine.addColorStop(0,'rgba(255,255,255,0.35)');btnShine.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=btnShine;rRect(ctx,BX+6,BY+5,BW-12,BH/2-4,BH/3);ctx.fill();
+  // SPIN / PRESS
+  ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=4;
+  ctx.font='bold '+Math.round(BH*0.38)+'px sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(spinning?'◆ ◆ ◆':'SPIN',mx,BY+BH/2);
+  ctx.shadowBlur=0;
 
-  // ── FEET ──
-  [[W*0.18,H-3],[W*0.82,H-3]].forEach(function(ft){
-    ctx.fillStyle='#3a3a3a';
-    rRect(ctx,ft[0]-12,ft[1]-7,24,9,3);ctx.fill();
-    ctx.strokeStyle='#555';ctx.lineWidth=1;
-    rRect(ctx,ft[0]-12,ft[1]-7,24,9,3);ctx.stroke();
+  // ── GOLD LEVER (right side, prominent) ──
+  var LX=cabX+cabW-Math.round(cabW*0.06);
+  var LBaseY=BY+BH*0.5;
+  var LLen=Math.round(H*0.28);
+  var LBallY=LBaseY-LLen*(1-(gLeverPulled?0.75:0));
+
+  // Lever base plate
+  var lbG=ctx.createLinearGradient(LX-16,LBaseY,LX+16,LBaseY);
+  lbG.addColorStop(0,'#a07010');lbG.addColorStop(0.4,'#e0b030');
+  lbG.addColorStop(0.6,'#f8d060');lbG.addColorStop(1,'#c09020');
+  ctx.fillStyle=lbG;
+  rRect(ctx,LX-16,LBaseY-8,32,16,6);ctx.fill();
+  ctx.strokeStyle='#806010';ctx.lineWidth=1;
+  rRect(ctx,LX-16,LBaseY-8,32,16,6);ctx.stroke();
+
+  // Rod - chrome
+  var rodG2=ctx.createLinearGradient(LX-4,0,LX+4,0);
+  rodG2.addColorStop(0,'#c0c0c0');rodG2.addColorStop(0.3,'#f0f0f0');
+  rodG2.addColorStop(0.7,'#d0d0d0');rodG2.addColorStop(1,'#a0a0a0');
+  ctx.fillStyle=rodG2;
+  rRect(ctx,LX-4,LBallY+20,8,LBaseY-LBallY-20,4);ctx.fill();
+
+  // Ball joint at base
+  var bjG=ctx.createRadialGradient(LX-3,LBaseY-6,1,LX,LBaseY-4,12);
+  bjG.addColorStop(0,'#f0d060');bjG.addColorStop(0.5,'#c09020');bjG.addColorStop(1,'#806010');
+  ctx.fillStyle=bjG;
+  ctx.beginPath();ctx.arc(LX,LBaseY-4,12,0,Math.PI*2);ctx.fill();
+
+  // Big red ball at top
+  var ballG2=ctx.createRadialGradient(LX-6,LBallY+8,2,LX,LBallY+16,22);
+  ballG2.addColorStop(0,'#ffcccc');ballG2.addColorStop(0.2,'#ff5555');
+  ballG2.addColorStop(0.5,'#cc1111');ballG2.addColorStop(0.8,'#880808');ballG2.addColorStop(1,'#550505');
+  ctx.fillStyle=ballG2;
+  ctx.beginPath();ctx.arc(LX,LBallY+16,22,0,Math.PI*2);ctx.fill();
+  // Ball shine
+  ctx.fillStyle='rgba(255,255,255,0.35)';
+  ctx.beginPath();ctx.arc(LX-7,LBallY+9,8,0,Math.PI*2);ctx.fill();
+  // Ball chrome ring
+  var ballRing=ctx.createLinearGradient(LX-22,LBallY,LX+22,LBallY+32);
+  ballRing.addColorStop(0,'rgba(255,200,50,0.6)');ballRing.addColorStop(1,'rgba(180,120,10,0.3)');
+  ctx.strokeStyle=ballRing;ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(LX,LBallY+16,22,0,Math.PI*2);ctx.stroke();
+
+  // ── COIN SLOT ──
+  var slotY=CDY+Math.round(H*0.01);
+  var slotW=Math.round(W*0.12),slotH=Math.round(H*0.025);
+  var slotX=cabX+Math.round(cabW*0.72);
+  ctx.fillStyle='rgba(0,0,0,0.7)';
+  rRect(ctx,slotX,slotY,slotW,slotH,slotH/2);ctx.fill();
+  ctx.strokeStyle='#c09020';ctx.lineWidth=1.5;
+  rRect(ctx,slotX,slotY,slotW,slotH,slotH/2);ctx.stroke();
+
+  // ── BOTTOM CHROME BASE ──
+  var baseY=cabY+cabH-Math.round(H*0.06);
+  var baseH=Math.round(H*0.055);
+  var baseG=ctx.createLinearGradient(cabX,baseY,cabX+cabW,baseY+baseH);
+  baseG.addColorStop(0,'#a07010');baseG.addColorStop(0.2,'#e0b030');
+  baseG.addColorStop(0.5,'#f8d060');baseG.addColorStop(0.8,'#c09020');
+  baseG.addColorStop(1,'#806010');
+  ctx.fillStyle=baseG;
+  rRect(ctx,cabX+5,baseY,cabW-10,baseH,6);ctx.fill();
+  // Base horizontal lines (chrome detail)
+  ctx.strokeStyle='rgba(255,220,80,0.3)';ctx.lineWidth=1;
+  for(var bl=1;bl<4;bl++){
+    ctx.beginPath();ctx.moveTo(cabX+10,baseY+bl*(baseH/4));ctx.lineTo(cabX+cabW-10,baseY+bl*(baseH/4));ctx.stroke();
+  }
+
+  // ── MACHINE FEET ──
+  [[cabX+Math.round(cabW*0.15),cabY+cabH-4],[cabX+Math.round(cabW*0.85),cabY+cabH-4]].forEach(function(ft){
+    var fg2=ctx.createLinearGradient(ft[0]-14,ft[1]-8,ft[0]+14,ft[1]+6);
+    fg2.addColorStop(0,'#a07010');fg2.addColorStop(0.5,'#e0b020');fg2.addColorStop(1,'#606008');
+    ctx.fillStyle=fg2;rRect(ctx,ft[0]-14,ft[1]-8,28,12,4);ctx.fill();
+    ctx.strokeStyle='#906010';ctx.lineWidth=1;rRect(ctx,ft[0]-14,ft[1]-8,28,12,4);ctx.stroke();
   });
+
+  // ── MACHINE REFLECTION ON FLOOR ──
+  ctx.save();
+  ctx.globalAlpha=0.08;
+  ctx.transform(1,0,0,-0.3,0,H*2.05);
+  rRect(ctx,cabX,cabY,cabW,cabH,14);
+  ctx.fillStyle=ctx.createLinearGradient(0,cabY,0,cabY+cabH);
+  ctx.fillStyle='#c8960a';ctx.fill();
+  ctx.restore();
 }
 
 function rRect(ctx,x,y,w,h,r){
