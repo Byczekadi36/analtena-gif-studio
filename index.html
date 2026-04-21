@@ -101,6 +101,8 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 
 /* ── MAIN LAYOUT ── */
 .app-body{display:flex;flex:1;overflow:visible;min-height:calc(100vh - 54px);}
+#games-center-overlay{flex:1;min-width:0;min-height:0;}
+#games-center-overlay.active{display:flex!important;}
 
 /* ── LEFT PANEL ── */
 .left-panel{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
@@ -3425,9 +3427,13 @@ function switchPanel(name, el) {
       var overlay=document.getElementById('games-center-overlay');
       var canvasArea=document.querySelector('.canvas-area');
       var rightPanel=document.querySelector('.right-panel');
-      if(overlay){overlay.style.display='flex';}
-      if(canvasArea){canvasArea.style.display='none';}
+      if(overlay){overlay.style.display='flex';overlay.style.flex='1';}
+      if(canvasArea){canvasArea.style.display='none';canvasArea.style.flex='0';}
       if(rightPanel){rightPanel.style.display='none';}
+      // Force layout recalc
+      document.querySelector('.app-body').style.display='none';
+      document.querySelector('.app-body').offsetHeight;
+      document.querySelector('.app-body').style.display='';
       var firstBtn=document.querySelector('.game-left-btn');
       selectGameCenter('mario', firstBtn);
     },80);
@@ -3436,8 +3442,8 @@ function switchPanel(name, el) {
     var overlay=document.getElementById('games-center-overlay');
     var canvasArea=document.querySelector('.canvas-area');
     var rightPanel=document.querySelector('.right-panel');
-    if(overlay){overlay.style.display='none';}
-    if(canvasArea){canvasArea.style.display='';}
+    if(overlay){overlay.style.display='none';overlay.style.flex='0';}
+    if(canvasArea){canvasArea.style.display='';canvasArea.style.flex='1';}
     if(rightPanel){rightPanel.style.display='';}
   }
 }
