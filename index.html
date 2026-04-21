@@ -107,7 +107,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
   display:flex;flex-direction:column;overflow:hidden;}
 .panel-tabs{display:flex;border-bottom:1px solid var(--border);}
 .ptab{flex:1;padding:10px 2px;background:transparent;border:none;font-family:var(--font-d);
-  font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;white-space:nowrap;text-align:center;}
+  font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;white-space:nowrap;text-align:center;min-width:0;}
 .ptab.active{color:var(--neon);border-bottom-color:var(--neon);}
 .panel-content{flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 
@@ -648,10 +648,9 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
       <div class="panel-tabs">
         <button class="ptab active" onclick="switchPanel('ai',this)">🦉 AI</button>
         <button class="ptab" onclick="switchPanel('tools',this)">🎨 Tools</button>
-        <button class="ptab" onclick="switchPanel('frames',this)">🎬 Frames</button>
-        <button class="ptab" onclick="switchPanel('credits',this)" style="color:var(--amber);">💰 Credits</button>
-        <button class="ptab" onclick="switchPanel('roast',this)" style="color:#ff2d78;">🔥 Roast</button>
-        <button class="ptab" onclick="switchPanel('games',this)" style="color:#7b61ff;">🎮 Games</button>
+        <button class="ptab" onclick="switchPanel('credits',this)" style="color:var(--amber);">💰</button>
+        <button class="ptab" onclick="switchPanel('roast',this)" style="color:#ff2d78;">🔥</button>
+        <button class="ptab" onclick="switchPanel('games',this)" style="color:#7b61ff;">🎮</button>
       </div>
 
       <!-- AI PANEL -->
@@ -845,22 +844,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
       </div>
 
       <!-- FRAMES PANEL -->
-      <div class="panel-content" id="panel-frames" style="display:none">
-        <div class="section-label">Frame sequence</div>
-        <div class="frame-strip" id="frame-strip">
-          <button class="add-frame-btn" onclick="addBlankFrame()">+</button>
-        </div>
-        <div style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.7">
-          Click a frame to edit it. Drag to reorder (coming soon). AI generates all frames at once.
-        </div>
-        <div class="section-label" style="margin-top:16px">Import</div>
-        <button class="add-layer-btn" onclick="document.getElementById('img-upload').click()">+ Upload image as frame</button>
-        <input type="file" id="img-upload" accept="image/*" multiple style="display:none" onchange="importImages(event)"/>
-      </div>
-    </div>
-
-    <!-- ANAL CREDITS PANEL -->
-    <div class="panel-content" id="panel-credits" style="display:none">
+      <div class="panel-content" id="panel-credits" style="display:none">
       <div style="text-align:center;padding:8px 0 16px;">
         <div style="font-size:22px;font-weight:800;background:linear-gradient(90deg,var(--amber),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">ANAL Credits</div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px;">Top up and spend in the app</div>
@@ -889,36 +873,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
       <!-- SHOP -->
       <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🛍️ Shop</div>
 
-      <div id="credits-shop">
-        <div class="shop-item" onclick="buyItem('card_common',10,'🟤 Common Card')">
-          <span>🟤 Common Card</span><span style="color:var(--amber)">10 ANAL</span>
-        </div>
-        <div class="shop-item" onclick="buyItem('card_rare',10,'💜 Rare Card')">
-          <span>💜 Rare Card</span><span style="color:var(--amber)">10 ANAL</span>
-        </div>
-        <div class="shop-item" onclick="buyItem('card_premium',10,'⭐ Premium Card')">
-          <span>⭐ Premium Card</span><span style="color:var(--amber)">10 ANAL</span>
-        </div>
-        <div class="shop-item" onclick="buyItem('card_gold',10,'🥇 Gold Rebel')">
-          <span>🥇 Gold Rebel</span><span style="color:var(--amber)">10 ANAL</span>
-        </div>
-        <div class="shop-item" onclick="buyItem('music',10,'🎵 Custom Music')">
-          <span>🎵 Custom Music</span><span style="color:var(--amber)">10 ANAL</span>
-        </div>
-        <div class="shop-item" onclick="buyItem('style_premium',10,'🎨 Premium styl GIF')">
-          <span>🎨 Premium styl GIF</span><span style="color:var(--amber)">10 ANAL</span>
-        </div>
-        <div class="shop-item" onclick="buyItem('verified',10,'✅ Verified badge')">
-          <span>✅ Verified badge</span><span style="color:var(--amber)">10 ANAL</span>
-        </div>
-      </div>
-
-      <!-- MY CARDS -->
-      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:14px 0 10px;">🎴 Moje karty</div>
-      <div id="my-cards-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div style="text-align:center;color:var(--muted);font-size:12px;grid-column:1/-1;padding:20px 0;">Brak kart — kup pierwszą!</div>
-      </div>
-    </div>
+          </div>
 
     <!-- 🔥 ROAST / FLEX PANEL -->
     <div class="panel-content" id="panel-roast" style="display:none;padding-bottom:30px;">
@@ -3449,7 +3404,7 @@ function shareHistoryX(i) {
 // PANEL / MISC
 // ════════════════════════════════
 function switchPanel(name, el) {
-  ['ai','tools','frames','credits','roast','games'].forEach(p=>{
+  ['ai','tools','credits','roast','games'].forEach(p=>{
     document.getElementById('panel-'+p).style.display = p===name?'block':'none';
   });
   document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
@@ -3769,7 +3724,7 @@ function updateShopUI(owned) {
       el.style.opacity = '0.5';
       el.style.cursor = 'default';
       const priceEl = el.querySelector('span:last-child');
-      if (priceEl) priceEl.textContent = '✅ Posiadasz';
+      if (priceEl) priceEl.textContent = '✅ Owned';
     }
   }
 }
@@ -3791,45 +3746,8 @@ function loadCustomMusic(event) {
   toast('🎵 Gra: ' + file.name);
 }
 
-function renderMyCards() {
-  const grid = document.getElementById('my-cards-grid');
-  if (!grid) return;
-  const cards = getCards();
-  if (!cards.length) {
-    grid.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;grid-column:1/-1;padding:20px 0;">Brak kart — kup pierwszą!</div>';
-    return;
-  }
-  const tierColor = {
-    card_common:'rgba(255,255,255,0.25)',
-    card_rare:'#7b61ff',
-    card_premium:'#00b4ff',
-    card_gold:'#ffb700',
-    music:'#00ffcc',
-    style_premium:'#ff2d78',
-    verified:'#00ffcc'
-  };
-  const tierGlow = {
-    card_rare:'0 0 12px rgba(123,97,255,0.4)',
-    card_premium:'0 0 12px rgba(0,180,255,0.4)',
-    card_gold:'0 0 16px rgba(255,183,0,0.5)',
-  };
-  const tierBg = {
-    card_common:'rgba(255,255,255,0.03)',
-    card_rare:'rgba(123,97,255,0.08)',
-    card_premium:'rgba(0,180,255,0.08)',
-    card_gold:'rgba(255,183,0,0.12)',
-    music:'rgba(0,255,204,0.08)',
-    style_premium:'rgba(255,45,120,0.08)',
-    verified:'rgba(0,255,204,0.08)',
-  };
-  grid.innerHTML = cards.map(c=>`
-    <div style="background:${tierBg[c.id]||'var(--card)'};border:1px solid ${tierColor[c.id]||'var(--border2)'};border-radius:12px;padding:12px;text-align:center;box-shadow:${tierGlow[c.id]||'none'};transition:transform .2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform=''">
-      <div style="font-size:24px;margin-bottom:6px">${c.name.split(' ')[0]}</div>
-      <div style="font-size:10px;font-weight:700;color:${tierColor[c.id]||'var(--muted)'};">${c.name.replace(c.name.split(' ')[0]+' ','')}</div>
-      ${c.num > 1 ? `<div style="font-size:9px;color:var(--muted);margin-top:2px;">#${c.num}</div>` : ''}
-    </div>
-  `).join('');
-}
+function renderMyCards(){}
+
 
 // Init credits on load
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -5281,289 +5199,280 @@ function slotsChangeBet(d){
 function initSlotsCanvas(){
   var canvas=document.getElementById('slots-canvas');
   if(!canvas) return;
-
-  // Size: tall machine that fills the height
   var container=document.getElementById('gcenter-slots');
-  var rect=container?container.getBoundingClientRect():{width:700,height:500};
-  var avail=Math.min(rect.width-32, 380);
-  var W=Math.max(avail,260);
-  var H=Math.round(W*1.55);
-  canvas.width=W; canvas.height=H;
-  canvas.style.width=W+'px'; canvas.style.height=H+'px';
-
+  var cRect=container?container.getBoundingClientRect():{width:500,height:600};
+  // On mobile use full width, on desktop cap at 320
+  var maxW=window.innerWidth<700?Math.min(cRect.width-16,360):320;
+  var W=Math.max(maxW,240);
+  var H=Math.round(W*1.6);
+  canvas.width=W;canvas.height=H;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
   drawCasinoMachine(canvas.getContext('2d'),W,H,gSlotResults,false,0);
-
-  canvas.onclick=function(){
-    if(!gSlotSpinning&&!gLeverPulled) pullLever();
-  };
+  canvas.onclick=function(){if(!gSlotSpinning&&!gLeverPulled)pullLever();};
 }
 
 function drawCasinoMachine(ctx,W,H,reels,spinning,f){
   ctx.clearRect(0,0,W,H);
   var mx=W/2;
 
-  // ── CABINET SHAPE ──
-  // Outer chrome border
-  var chromeBorder=ctx.createLinearGradient(0,0,W,H);
-  chromeBorder.addColorStop(0,'#c8a0ff');chromeBorder.addColorStop(0.3,'#6030c0');
-  chromeBorder.addColorStop(0.7,'#4020a0');chromeBorder.addColorStop(1,'#9060e0');
-  ctx.fillStyle=chromeBorder;
-  ctx.beginPath();
-  ctx.moveTo(20,0);ctx.lineTo(W-20,0);ctx.lineTo(W,20);
-  ctx.lineTo(W,H-20);ctx.lineTo(W-20,H);
-  ctx.lineTo(20,H);ctx.lineTo(0,H-20);ctx.lineTo(0,20);ctx.closePath();
-  ctx.fill();
+  // ── FLOOR SHADOW ──
+  ctx.fillStyle='rgba(80,0,180,0.18)';
+  ctx.beginPath();ctx.ellipse(mx,H-8,W*0.45,12,0,0,Math.PI*2);ctx.fill();
 
-  // Inner cabinet
+  // ── MAIN CABINET ──
+  // Outer chrome
+  ctx.fillStyle='#b090ff';
+  roundedShape(ctx,2,2,W-4,H-20,14);ctx.fill();
+  // Body gradient
   var cab=ctx.createLinearGradient(0,0,W,H);
-  cab.addColorStop(0,'#2a0e5a');cab.addColorStop(0.4,'#1a0840');
-  cab.addColorStop(0.7,'#130628');cab.addColorStop(1,'#0a0318');
+  cab.addColorStop(0,'#32147a');cab.addColorStop(0.35,'#1e0850');
+  cab.addColorStop(0.65,'#160638');cab.addColorStop(1,'#0c0220');
   ctx.fillStyle=cab;
-  ctx.beginPath();
-  ctx.moveTo(24,4);ctx.lineTo(W-24,4);ctx.lineTo(W-4,24);
-  ctx.lineTo(W-4,H-24);ctx.lineTo(W-24,H-4);
-  ctx.lineTo(24,H-4);ctx.lineTo(4,H-24);ctx.lineTo(4,24);ctx.closePath();
-  ctx.fill();
+  roundedShape(ctx,5,5,W-10,H-24,11);ctx.fill();
 
-  // ── TOPPER ──
-  var topH=Math.round(H*0.18);
-  var topG=ctx.createLinearGradient(0,4,0,topH);
-  topG.addColorStop(0,'#4a1a90');topG.addColorStop(1,'#2a0860');
-  ctx.fillStyle=topG;
-  ctx.beginPath();
-  ctx.moveTo(24,4);ctx.lineTo(W-24,4);ctx.lineTo(W-4,24);
-  ctx.lineTo(W-4,topH);ctx.lineTo(4,topH);ctx.lineTo(4,24);ctx.closePath();
-  ctx.fill();
+  // ── TOPPER SECTION ──
+  var topH=Math.round(H*0.2);
+  // Curved top
+  var tg=ctx.createLinearGradient(0,5,0,topH+5);
+  tg.addColorStop(0,'#5a22a8');tg.addColorStop(1,'#2e0e60');
+  ctx.fillStyle=tg;
+  roundedShape(ctx,5,5,W-10,topH,11);ctx.fill();
+  // Bottom line of topper
+  ctx.strokeStyle='rgba(180,120,255,0.6)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(5,topH+6);ctx.lineTo(W-5,topH+6);ctx.stroke();
 
-  // Topper border bottom
-  ctx.strokeStyle='rgba(180,100,255,0.5)';ctx.lineWidth=2;
-  ctx.beginPath();ctx.moveTo(4,topH);ctx.lineTo(W-4,topH);ctx.stroke();
+  // Jackpot starburst bg
+  ctx.fillStyle='rgba(255,183,0,0.08)';
+  ctx.beginPath();ctx.ellipse(mx,topH*0.38,W*0.38,topH*0.28,0,0,Math.PI*2);ctx.fill();
 
-  // JACKPOT text with glow
+  // JACKPOT text
+  ctx.save();
+  ctx.shadowColor='#ffb700';ctx.shadowBlur=16;
+  ctx.fillStyle='#ffdd44';
+  ctx.font='bold '+Math.round(W*0.072)+'px "Arial Black",serif';
   ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.shadowColor='#ffb700';ctx.shadowBlur=12;
-  ctx.fillStyle='#ffb700';ctx.font='bold '+Math.round(W*0.07)+'px serif';
-  ctx.fillText('★ JACKPOT ★',mx,topH*0.32);
+  ctx.fillText('★ JACKPOT ★',mx,topH*0.3);
   ctx.shadowBlur=0;
-
-  // ANAL SLOTS text
-  ctx.shadowColor='#00ffcc';ctx.shadowBlur=8;
-  ctx.fillStyle='#00ffcc';ctx.font='bold '+Math.round(W*0.055)+'px sans-serif';
-  ctx.fillText('ANAL  SLOTS',mx,topH*0.65);
+  // ANAL SLOTS
+  ctx.shadowColor='#00ffcc';ctx.shadowBlur=10;
+  ctx.fillStyle='#00ffdd';
+  ctx.font='bold '+Math.round(W*0.058)+'px sans-serif';
+  ctx.fillText('ANAL  SLOTS',mx,topH*0.62);
   ctx.shadowBlur=0;
+  ctx.restore();
 
-  // Topper lights row
-  var nLights=9,lSpacing=(W-40)/(nLights-1);
-  var lightColors=['#ff2d78','#ffb700','#00ffcc','#7b61ff','#ff2d78','#00ffcc','#ffb700','#ff2d78','#00ffcc'];
-  for(var i=0;i<nLights;i++){
-    var lx=20+i*lSpacing,ly=topH-12;
-    var blink=Math.sin(f*0.15+i*0.7)>0;
-    var col=lightColors[i%lightColors.length];
-    ctx.fillStyle=blink?col:'rgba(255,255,255,0.08)';
-    ctx.beginPath();ctx.arc(lx,ly,5,0,Math.PI*2);ctx.fill();
-    if(blink){
-      ctx.shadowColor=col;ctx.shadowBlur=8;
-      ctx.strokeStyle=col;ctx.lineWidth=1.5;
-      ctx.beginPath();ctx.arc(lx,ly,7,0,Math.PI*2);ctx.stroke();
-      ctx.shadowBlur=0;
+  // Top lights strip
+  var nl=11,lsp=(W-32)/(nl-1);
+  var lcols=['#ff2d78','#ffb700','#00ffcc','#7b61ff','#ff2d78','#00ffcc','#ffb700','#ff2d78','#00ffcc','#7b61ff','#ff2d78'];
+  for(var i=0;i<nl;i++){
+    var lx=16+i*lsp,ly=topH-10;
+    var on=Math.sin(f*0.18+i*0.65)>0;
+    if(on){
+      ctx.shadowColor=lcols[i];ctx.shadowBlur=10;
+      ctx.fillStyle=lcols[i];
+    } else {
+      ctx.shadowBlur=0;ctx.fillStyle='rgba(255,255,255,0.07)';
     }
+    ctx.beginPath();ctx.arc(lx,ly,5,0,Math.PI*2);ctx.fill();
+    ctx.shadowBlur=0;
   }
 
-  // ── DECORATIVE SIDE PANELS ──
-  var panW=Math.round(W*0.12),panY=topH+8,panH=Math.round(H*0.42);
-  // Left panel
-  var lpg=ctx.createLinearGradient(8,panY,8+panW,panY);
-  lpg.addColorStop(0,'rgba(80,20,160,0.5)');lpg.addColorStop(1,'rgba(40,10,100,0.3)');
-  ctx.fillStyle=lpg;
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(8,panY,panW,panH,6);else ctx.rect(8,panY,panW,panH);
-  ctx.fill();
-  ctx.strokeStyle='rgba(120,60,220,0.4)';ctx.lineWidth=1;
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(8,panY,panW,panH,6);else ctx.rect(8,panY,panW,panH);
-  ctx.stroke();
-  // $ symbol on left panel
-  ctx.fillStyle='rgba(255,183,0,0.5)';ctx.font='bold '+Math.round(panW*0.7)+'px serif';
+  // ── SIDE DECORATIONS ──
+  var sdW=Math.round(W*0.11),sdY=topH+14,sdH=Math.round(H*0.38);
+  // Left
+  var slg=ctx.createLinearGradient(8,sdY,8+sdW,sdY+sdH);
+  slg.addColorStop(0,'rgba(100,30,200,0.5)');slg.addColorStop(1,'rgba(50,10,120,0.3)');
+  ctx.fillStyle=slg;
+  roundedRect(ctx,8,sdY,sdW,sdH,5);ctx.fill();
+  ctx.strokeStyle='rgba(140,70,240,0.4)';ctx.lineWidth=1;
+  roundedRect(ctx,8,sdY,sdW,sdH,5);ctx.stroke();
+  // $ on left
+  ctx.fillStyle='rgba(255,183,0,0.55)';
+  ctx.font='bold '+Math.round(sdW*0.75)+'px serif';
   ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('$',8+panW/2,panY+panH/2);
-
-  // Right panel
-  var rpg=ctx.createLinearGradient(W-panW-8,panY,W-8,panY);
-  rpg.addColorStop(0,'rgba(40,10,100,0.3)');rpg.addColorStop(1,'rgba(80,20,160,0.5)');
-  ctx.fillStyle=rpg;
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(W-panW-8,panY,panW,panH,6);else ctx.rect(W-panW-8,panY,panW,panH);
-  ctx.fill();
-  ctx.strokeStyle='rgba(120,60,220,0.4)';ctx.lineWidth=1;
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(W-panW-8,panY,panW,panH,6);else ctx.rect(W-panW-8,panY,panW,panH);
-  ctx.stroke();
-  ctx.fillStyle='rgba(255,183,0,0.5)';
-  ctx.fillText('$',W-panW/2-8,panY+panH/2);
+  ctx.fillText('$',8+sdW/2,sdY+sdH/2);
+  // Right
+  var srg=ctx.createLinearGradient(W-sdW-8,sdY,W-8,sdY+sdH);
+  srg.addColorStop(0,'rgba(50,10,120,0.3)');srg.addColorStop(1,'rgba(100,30,200,0.5)');
+  ctx.fillStyle=srg;
+  roundedRect(ctx,W-sdW-8,sdY,sdW,sdH,5);ctx.fill();
+  ctx.strokeStyle='rgba(140,70,240,0.4)';ctx.lineWidth=1;
+  roundedRect(ctx,W-sdW-8,sdY,sdW,sdH,5);ctx.stroke();
+  ctx.fillStyle='rgba(255,183,0,0.55)';
+  ctx.fillText('$',W-sdW/2-8,sdY+sdH/2);
 
   // ── REEL WINDOW ──
-  var rwX=8+panW+6,rwW=W-2*(panW+14),rwY=topH+8,rwH=Math.round(H*0.3);
-  // Window depth shadow
-  ctx.fillStyle='rgba(0,0,0,0.8)';
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(rwX+3,rwY+3,rwW,rwH,10);else ctx.rect(rwX+3,rwY+3,rwW,rwH);
-  ctx.fill();
-
-  // Window bg
-  var wbg=ctx.createLinearGradient(rwX,rwY,rwX,rwY+rwH);
-  wbg.addColorStop(0,'#000508');wbg.addColorStop(1,'#000208');
+  var rwX=8+sdW+5,rwW=W-2*(sdW+13),rwY=topH+12,rwH=Math.round(H*0.33);
+  // Outer frame (chrome)
+  ctx.fillStyle='rgba(180,120,255,0.7)';
+  roundedRect(ctx,rwX-4,rwY-4,rwW+8,rwH+8,12);ctx.fill();
+  // Deep black window
+  ctx.fillStyle='#000';
+  roundedRect(ctx,rwX,rwY,rwW,rwH,9);ctx.fill();
+  // Inner glow bg
+  var wbg=ctx.createRadialGradient(mx,rwY+rwH/2,0,mx,rwY+rwH/2,rwW/2);
+  wbg.addColorStop(0,'rgba(30,10,70,0.8)');wbg.addColorStop(1,'rgba(0,0,0,0)');
   ctx.fillStyle=wbg;
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(rwX,rwY,rwW,rwH,10);else ctx.rect(rwX,rwY,rwW,rwH);
-  ctx.fill();
+  roundedRect(ctx,rwX,rwY,rwW,rwH,9);ctx.fill();
 
-  // 3 reels
-  var rw=Math.floor((rwW-16)/3),rh=rwH-12;
+  // ── 3 REELS ──
+  var rPad=6,rGap=5,rw=Math.floor((rwW-rPad*2-rGap*2)/3),rh=rwH-rPad*2;
   var syms=spinning?
     [SLOT_SYMS[Math.floor(Math.random()*SLOT_SYMS.length)],
      SLOT_SYMS[Math.floor(Math.random()*SLOT_SYMS.length)],
      SLOT_SYMS[Math.floor(Math.random()*SLOT_SYMS.length)]]:reels;
+  var allMatch=!spinning&&syms[0]===syms[1]&&syms[1]===syms[2];
 
   for(var ri=0;ri<3;ri++){
-    var rx=rwX+6+ri*(rw+4),ry=rwY+6;
-    // Reel background
+    var rx=rwX+rPad+ri*(rw+rGap),ry=rwY+rPad;
+    // Reel bg
     var rbg=ctx.createLinearGradient(rx,ry,rx,ry+rh);
-    rbg.addColorStop(0,'#050218');rbg.addColorStop(1,'#020110');
+    rbg.addColorStop(0,'#0c0428');rbg.addColorStop(0.5,'#060218');rbg.addColorStop(1,'#040110');
     ctx.fillStyle=rbg;
-    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(rx,ry,rw,rh,6);else ctx.rect(rx,ry,rw,rh);
-    ctx.fill();
-    ctx.strokeStyle='rgba(100,50,200,0.3)';ctx.lineWidth=1;
-    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(rx,ry,rw,rh,6);else ctx.rect(rx,ry,rw,rh);
-    ctx.stroke();
+    roundedRect(ctx,rx,ry,rw,rh,6);ctx.fill();
+    // Reel edge highlight
+    ctx.strokeStyle='rgba(100,50,200,0.4)';ctx.lineWidth=1;
+    roundedRect(ctx,rx,ry,rw,rh,6);ctx.stroke();
 
-    // Symbol
+    // Symbol — BIG and centered
     var sym=syms[ri];
-    var yOff=spinning?Math.sin(f*0.25+ri)*5:0;
-    if(sym==='🏆'&&gLogoImg.complete&&gLogoImg.naturalWidth>0){
+    var yOff=spinning?Math.sin(f*0.3+ri*1.1)*8:0;
+    var cx2=rx+rw/2,cy2=ry+rh/2+yOff;
+
+    if(sym==='🏆'&&gLogoImg&&gLogoImg.complete&&gLogoImg.naturalWidth>0){
+      // Analtena logo — clip to reel
       ctx.save();
-      ctx.beginPath();if(ctx.roundRect)ctx.roundRect(rx+3,ry+3,rw-6,rh-6,4);else ctx.rect(rx+3,ry+3,rw-6,rh-6);
-      ctx.clip();
+      roundedRect(ctx,rx+3,ry+3,rw-6,rh-6,4);ctx.clip();
       ctx.drawImage(gLogoImg,rx+3,ry+3,rw-6,rh-6);
       ctx.restore();
     } else {
-      var fs=Math.round(rh*0.55);
-      ctx.font=fs+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText(sym,rx+rw/2,ry+rh/2+yOff);
+      // Large emoji/symbol
+      var fs=Math.min(Math.round(rh*0.62),Math.round(rw*0.7));
+      ctx.font=fs+'px serif';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      // Drop shadow for emoji visibility
+      ctx.shadowColor='rgba(0,0,0,0.8)';ctx.shadowBlur=6;
+      ctx.fillText(sym,cx2,cy2);
+      ctx.shadowBlur=0;
     }
 
-    // Winner highlight
-    if(!spinning&&syms[0]===syms[1]&&syms[1]===syms[2]){
-      ctx.strokeStyle='rgba(255,183,0,0.7)';ctx.lineWidth=3;
-      ctx.shadowColor='#ffb700';ctx.shadowBlur=10;
-      ctx.beginPath();if(ctx.roundRect)ctx.roundRect(rx,ry,rw,rh,6);else ctx.rect(rx,ry,rw,rh);
-      ctx.stroke();ctx.shadowBlur=0;
+    // Winner glow
+    if(allMatch){
+      ctx.save();
+      ctx.shadowColor='#ffb700';ctx.shadowBlur=20;
+      ctx.strokeStyle='#ffdd44';ctx.lineWidth=3;
+      roundedRect(ctx,rx,ry,rw,rh,6);ctx.stroke();
+      ctx.restore();
     }
   }
 
   // Payline
-  ctx.strokeStyle='rgba(255,45,120,0.6)';ctx.lineWidth=2;ctx.setLineDash([5,3]);
+  ctx.save();
+  ctx.strokeStyle='rgba(255,45,120,0.7)';ctx.lineWidth=2;ctx.setLineDash([6,3]);
   ctx.beginPath();ctx.moveTo(rwX,rwY+rwH/2);ctx.lineTo(rwX+rwW,rwY+rwH/2);ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Window chrome frame
-  var wf=ctx.createLinearGradient(rwX,rwY,rwX,rwY+rwH);
-  wf.addColorStop(0,'rgba(200,150,255,0.6)');wf.addColorStop(0.5,'rgba(100,50,200,0.1)');
-  wf.addColorStop(1,'rgba(80,30,180,0.5)');
-  ctx.strokeStyle=wf;ctx.lineWidth=3;
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(rwX,rwY,rwW,rwH,10);else ctx.rect(rwX,rwY,rwW,rwH);
-  ctx.stroke();
+  ctx.setLineDash([]);ctx.restore();
 
   // ── CREDITS DISPLAY ──
-  var credY=rwY+rwH+8,credH=Math.round(H*0.06);
-  ctx.fillStyle='rgba(0,0,0,0.6)';
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(rwX,credY,rwW,credH,6);else ctx.rect(rwX,credY,rwW,credH);
-  ctx.fill();
-  ctx.strokeStyle='rgba(0,255,136,0.2)';ctx.lineWidth=1;
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(rwX,credY,rwW,credH,6);else ctx.rect(rwX,credY,rwW,credH);
-  ctx.stroke();
-  ctx.fillStyle='#00ff88';ctx.font='bold '+Math.round(credH*0.45)+'px monospace';
+  var cdY=rwY+rwH+8,cdH=Math.round(H*0.066);
+  ctx.fillStyle='rgba(0,0,0,0.7)';
+  roundedRect(ctx,rwX,cdY,rwW,cdH,5);ctx.fill();
+  ctx.strokeStyle='rgba(0,200,100,0.25)';ctx.lineWidth=1;
+  roundedRect(ctx,rwX,cdY,rwW,cdH,5);ctx.stroke();
+  ctx.fillStyle='#00ee88';
+  ctx.font='bold '+Math.round(cdH*0.44)+'px monospace';
   ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('CREDITS: '+getCredits().toLocaleString()+' ANAL',mx,credY+credH/2);
+  ctx.fillText('CREDITS: '+getCredits().toLocaleString(),mx,cdY+cdH/2);
 
   // ── SPIN BUTTON ──
-  var btnY=credY+credH+10,btnH=Math.round(H*0.1),btnW=Math.round(rwW*0.7);
-  var btnX=mx-btnW/2;
+  var spY=cdY+cdH+8,spH=Math.round(H*0.1),spW=Math.round(rwW*0.72),spX=mx-spW/2;
   // Shadow
-  ctx.fillStyle='rgba(0,0,0,0.5)';
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(btnX+3,btnY+4,btnW,btnH,btnH/2);else ctx.rect(btnX+3,btnY+4,btnW,btnH);
-  ctx.fill();
-  // Button body
-  var bbg=ctx.createLinearGradient(btnX,btnY,btnX,btnY+btnH);
-  bbg.addColorStop(0,'#ff6666');bbg.addColorStop(0.35,'#dd2222');bbg.addColorStop(1,'#881111');
-  ctx.fillStyle=bbg;
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(btnX,btnY,btnW,btnH,btnH/2);else ctx.rect(btnX,btnY,btnW,btnH);
-  ctx.fill();
-  // Shine
-  ctx.fillStyle='rgba(255,255,255,0.2)';
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(btnX+6,btnY+4,btnW-12,btnH/2-4,btnH/4);else ctx.rect(btnX+6,btnY+4,btnW-12,btnH/2-4);
-  ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,0.45)';
+  roundedRect(ctx,spX+3,spY+4,spW,spH,spH/2);ctx.fill();
+  // Gradient button
+  var spg=ctx.createLinearGradient(spX,spY,spX,spY+spH);
+  spg.addColorStop(0,'#ff7777');spg.addColorStop(0.4,'#dd1111');spg.addColorStop(1,'#880808');
+  ctx.fillStyle=spg;
+  roundedRect(ctx,spX,spY,spW,spH,spH/2);ctx.fill();
+  // Top shine
+  ctx.fillStyle='rgba(255,255,255,0.22)';
+  roundedRect(ctx,spX+8,spY+5,spW-16,spH/2-4,spH/4);ctx.fill();
+  // Border
   ctx.strokeStyle='#ff9999';ctx.lineWidth=1.5;
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(btnX,btnY,btnW,btnH,btnH/2);else ctx.rect(btnX,btnY,btnW,btnH);
-  ctx.stroke();
-  // SPIN text
-  ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=4;
-  ctx.fillStyle='#fff';ctx.font='bold '+Math.round(btnH*0.38)+'px sans-serif';
+  roundedRect(ctx,spX,spY,spW,spH,spH/2);ctx.stroke();
+  // Text
+  ctx.shadowColor='rgba(0,0,0,0.7)';ctx.shadowBlur=4;
+  ctx.fillStyle='#fff';
+  ctx.font='bold '+Math.round(spH*0.38)+'px sans-serif';
   ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(spinning?'● ● ●':'SPIN',mx,btnY+btnH/2);
+  ctx.fillText(spinning?'◆  ◆  ◆':'SPIN',mx,spY+spH/2);
   ctx.shadowBlur=0;
 
-  // ── LEVER ──
-  var levX=W-10,levBaseY=btnY+btnH+Math.round(H*0.04);
-  var leverPct=gLeverPulled?0.7:0;
-  var ballY=levBaseY-Math.round(H*0.15)*(1-leverPct);
-  var baseY=levBaseY;
+  // ── LEVER (right side, outside cabinet) ──
+  var lvX=W-8,lvBaseY=spY+spH-8;
+  var lvLen=Math.round(H*0.17);
+  var pullPct=gLeverPulled?0.72:0;
+  var lvBallY=lvBaseY-lvLen*(1-pullPct);
 
-  // Base block
-  var bkg=ctx.createLinearGradient(levX-14,baseY-8,levX+14,baseY+8);
-  bkg.addColorStop(0,'#888');bkg.addColorStop(0.5,'#555');bkg.addColorStop(1,'#333');
-  ctx.fillStyle=bkg;
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(levX-14,baseY-6,28,16,4);else ctx.rect(levX-14,baseY-6,28,16);
-  ctx.fill();
-  ctx.strokeStyle='#999';ctx.lineWidth=1;
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(levX-14,baseY-6,28,16,4);else ctx.rect(levX-14,baseY-6,28,16);
-  ctx.stroke();
+  // Base
+  var lbg=ctx.createLinearGradient(lvX-12,lvBaseY-8,lvX+12,lvBaseY+8);
+  lbg.addColorStop(0,'#aaa');lbg.addColorStop(0.5,'#666');lbg.addColorStop(1,'#444');
+  ctx.fillStyle=lbg;
+  roundedRect(ctx,lvX-12,lvBaseY-6,24,14,4);ctx.fill();
+  ctx.strokeStyle='#888';ctx.lineWidth=1;
+  roundedRect(ctx,lvX-12,lvBaseY-6,24,14,4);ctx.stroke();
 
-  // Rod
-  var rod=ctx.createLinearGradient(levX-4,ballY,levX+4,ballY);
-  rod.addColorStop(0,'#ddd');rod.addColorStop(0.5,'#999');rod.addColorStop(1,'#bbb');
-  ctx.fillStyle=rod;
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(levX-3,ballY+14,6,baseY-ballY-14,3);else ctx.rect(levX-3,ballY+14,6,baseY-ballY-14);
-  ctx.fill();
+  // Rod with gradient
+  var rrg=ctx.createLinearGradient(lvX-3,0,lvX+3,0);
+  rrg.addColorStop(0,'#ddd');rrg.addColorStop(0.5,'#999');rrg.addColorStop(1,'#bbb');
+  ctx.fillStyle=rrg;
+  roundedRect(ctx,lvX-3,lvBallY+15,6,lvBaseY-lvBallY-15,3);ctx.fill();
 
-  // Ball (big red sphere)
-  var ball=ctx.createRadialGradient(levX-4,ballY+4,2,levX,ballY+10,14);
-  ball.addColorStop(0,'#ff9999');ball.addColorStop(0.4,'#ff3333');ball.addColorStop(1,'#880000');
+  // Ball (shiny red sphere)
+  var ball=ctx.createRadialGradient(lvX-4,lvBallY+6,1,lvX,lvBallY+12,16);
+  ball.addColorStop(0,'#ffaaaa');ball.addColorStop(0.3,'#ff4444');ball.addColorStop(0.7,'#cc1111');ball.addColorStop(1,'#770000');
   ctx.fillStyle=ball;
-  ctx.beginPath();ctx.arc(levX,ballY+10,14,0,Math.PI*2);ctx.fill();
-  ctx.shadowColor='#ff2d78';ctx.shadowBlur=8;
-  ctx.strokeStyle='#ff6666';ctx.lineWidth=1.5;
-  ctx.beginPath();ctx.arc(levX,ballY+10,14,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(lvX,lvBallY+12,16,0,Math.PI*2);ctx.fill();
+  ctx.shadowColor='#ff2d78';ctx.shadowBlur=10;
+  ctx.strokeStyle='#ff8888';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.arc(lvX,lvBallY+12,16,0,Math.PI*2);ctx.stroke();
   ctx.shadowBlur=0;
+  // PULL label
+  ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='bold 8px sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.fillText('PULL',lvX,lvBaseY+8);
 
   // ── COIN TRAY ──
-  var trayY=H-Math.round(H*0.1),trayH=Math.round(H*0.07);
-  var tg=ctx.createLinearGradient(0,trayY,0,trayY+trayH);
-  tg.addColorStop(0,'rgba(0,0,0,0.7)');tg.addColorStop(1,'rgba(0,0,0,0.4)');
-  ctx.fillStyle=tg;
-  ctx.beginPath();
-  ctx.moveTo(4,trayY);ctx.lineTo(W-4,trayY);
-  ctx.lineTo(W-20,trayY+trayH);ctx.lineTo(20,trayY+trayH);ctx.closePath();
-  ctx.fill();
-  ctx.strokeStyle='rgba(255,183,0,0.2)';ctx.lineWidth=1;ctx.stroke();
-  ctx.fillStyle='rgba(255,183,0,0.4)';ctx.font=Math.round(trayH*0.38)+'px sans-serif';
+  var tY=H-22,tH=18;
+  ctx.fillStyle='rgba(0,0,0,0.6)';
+  ctx.beginPath();ctx.moveTo(8,tY);ctx.lineTo(W-8,tY);
+  ctx.lineTo(W-22,tY+tH);ctx.lineTo(22,tY+tH);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(255,183,0,0.25)';ctx.lineWidth=1;ctx.stroke();
+  ctx.fillStyle='rgba(255,183,0,0.5)';ctx.font='bold 8px sans-serif';
   ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('TAP TO SPIN',mx,trayY+trayH/2);
+  ctx.fillText('TAP TO SPIN',mx,tY+tH/2+1);
 
-  // ── CABINET FEET ──
-  [[W*0.15,H-4],[W*0.85,H-4]].forEach(function(f2){
-    var fg=ctx.createLinearGradient(f2[0]-12,f2[1]-8,f2[0]+12,f2[1]);
-    fg.addColorStop(0,'#444');fg.addColorStop(1,'#222');
-    ctx.fillStyle=fg;
-    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(f2[0]-12,f2[1]-8,24,10,3);else ctx.rect(f2[0]-12,f2[1]-8,24,10);
-    ctx.fill();
-    ctx.strokeStyle='#555';ctx.lineWidth=1;
-    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(f2[0]-12,f2[1]-8,24,10,3);else ctx.rect(f2[0]-12,f2[1]-8,24,10);
-    ctx.stroke();
+  // Feet
+  [[W*0.18,H-8],[W*0.82,H-8]].forEach(function(ft){
+    var fg=ctx.createLinearGradient(ft[0]-12,ft[1]-7,ft[0]+12,ft[1]);
+    fg.addColorStop(0,'#555');fg.addColorStop(1,'#2a2a2a');
+    ctx.fillStyle=fg;roundedRect(ctx,ft[0]-12,ft[1]-7,24,9,3);ctx.fill();
+    ctx.strokeStyle='#666';ctx.lineWidth=1;roundedRect(ctx,ft[0]-12,ft[1]-7,24,9,3);ctx.stroke();
   });
+}
+
+// Helper: rounded rectangle path (no fill/stroke)
+function roundedRect(ctx,x,y,w,h,r){
+  r=Math.min(r||0,w/2,h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+
+// Helper: 8-corner cabinet shape
+function roundedShape(ctx,x,y,w,h,r){
+  roundedRect(ctx,x,y,w,h,r);
 }
 
 function pullLever(){
