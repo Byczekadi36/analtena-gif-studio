@@ -107,10 +107,24 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 /* ── LEFT PANEL ── */
 .left-panel{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
   display:flex;flex-direction:column;overflow:hidden;}
-.panel-tabs{display:flex;border-bottom:1px solid var(--border);}
-.ptab{flex:1;padding:10px 2px;background:transparent;border:none;font-family:var(--font-d);
-  font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;white-space:nowrap;text-align:center;min-width:0;}
-.ptab.active{color:var(--neon);border-bottom-color:var(--neon);}
+.panel-tabs{display:flex;border-bottom:1px solid var(--border);background:rgba(0,0,0,.25);padding:2px 2px 0;gap:1px;}
+.ptab{
+  flex:1;padding:7px 2px 5px;background:transparent;border:none;
+  font-family:var(--font-d);font-size:9px;font-weight:800;
+  color:rgba(255,255,255,.38);cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:all .15s;white-space:nowrap;text-align:center;min-width:0;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  letter-spacing:.5px;text-transform:uppercase;opacity:.7;
+}
+.ptab span{line-height:1;}
+.ptab:hover{opacity:1;color:rgba(255,255,255,.7);}
+.ptab.active{
+  color:var(--neon) !important;border-bottom-color:var(--neon);
+  opacity:1;
+  text-shadow:0 0 10px var(--neon);
+}
+.ptab.active svg{filter:drop-shadow(0 0 5px currentColor);}
 .panel-content{flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 
 /* ── AI PROMPT ── */
@@ -562,70 +576,197 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 
 
 
-/* ═══ COMICS ═══ */
-#comics-overlay{display:none;flex:1;flex-direction:column;background:#0b0008;overflow:hidden;min-width:0;min-height:0;}
-.cmx-hdr{background:linear-gradient(180deg,#1e0010,#0b0008);border-bottom:3px solid #ffd700;padding:12px 16px 8px;text-align:center;flex-shrink:0;}
-.cmx-title{font-family:'Bangers','Impact',cursive;font-size:clamp(22px,4vw,40px);color:#ffd700;text-shadow:3px 3px 0 #cc1a00;letter-spacing:3px;line-height:1;}
-.cmx-sub{color:rgba(255,255,255,.35);font-size:10px;letter-spacing:2px;margin-top:3px;text-transform:uppercase;}
-#cmxLibView{flex:1;overflow-y:auto;}
-.cmx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:14px;}
-@media(max-width:520px){.cmx-grid{grid-template-columns:1fr 1fr;gap:8px;padding:10px;}}
-.cmx-card{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:7px;overflow:hidden;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s;}
-.cmx-card:hover{transform:translateY(-4px);border-color:#ffd700;box-shadow:0 8px 24px rgba(255,215,0,.15);}
-.cmx-card img{width:100%;aspect-ratio:.68;object-fit:cover;object-position:top;display:block;}
-.cmx-card-info{padding:8px 8px 10px;}
-.cmx-card-eps{font-size:9px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.3);margin-bottom:2px;text-transform:uppercase;}
-.cmx-card-name{font-family:'Bangers','Impact',cursive;font-size:14px;color:#ffd700;line-height:1.1;margin-bottom:2px;}
-.cmx-card-season{font-size:9px;color:rgba(255,255,255,.25);margin-bottom:6px;}
-.cmx-card-btn{width:100%;background:#cc1a00;color:#fff;font-weight:900;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:5px;border:none;border-radius:3px;cursor:pointer;box-shadow:2px 2px 0 #7b0000;}
-.cmx-card-btn:hover{filter:brightness(1.1);}
-#cmxReaderView{display:none;flex-direction:column;flex:1;overflow:hidden;}
-#cmxReaderView.open{display:flex;}
-.cmx-rdr-top{background:linear-gradient(180deg,#1e0010,#0b0008);border-bottom:2px solid #ffd700;padding:7px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.cmx-back{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);color:rgba(255,255,255,.8);font-size:10px;font-weight:700;padding:5px 10px;border-radius:3px;cursor:pointer;text-transform:uppercase;white-space:nowrap;}
-.cmx-back:hover{background:rgba(255,215,0,.1);border-color:#ffd700;color:#ffd700;}
-.cmx-rdr-name{font-family:'Bangers','Impact',cursive;font-size:17px;color:#ffd700;letter-spacing:1px;line-height:1;}
-.cmx-rdr-season{font-size:9px;color:rgba(255,255,255,.3);letter-spacing:1px;}
-.cmx-strip-wrap{flex-shrink:0;padding:8px 12px 0;}
-.cmx-strip-lbl{font-size:9px;font-weight:700;color:rgba(255,215,0,.45);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;}
-.cmx-strip{display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:#ffd70030 transparent;}
-.cmx-strip::-webkit-scrollbar{height:3px;}.cmx-strip::-webkit-scrollbar-thumb{background:#ffd70035;border-radius:2px;}
-.cmx-thumb{flex:0 0 62px;scroll-snap-align:start;cursor:pointer;border-radius:3px;overflow:hidden;border:2px solid transparent;transition:border-color .12s,transform .12s;position:relative;}
-.cmx-thumb:hover,.cmx-thumb.act{border-color:#ffd700;transform:translateY(-3px);}
-.cmx-thumb img{width:100%;aspect-ratio:.68;object-fit:cover;display:block;}
-.cmx-thumb span{position:absolute;top:2px;left:2px;background:#cc1a00;color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:2px;}
-.cmx-sep{border:none;border-top:1px dashed rgba(255,215,0,.1);margin:6px 12px;flex-shrink:0;}
-.cmx-feat-wrap{flex:1;min-height:0;padding:0 12px 12px;display:flex;flex-direction:column;gap:6px;}
-.cmx-feat-lbl{font-size:9px;font-weight:700;color:rgba(255,215,0,.45);letter-spacing:2px;text-transform:uppercase;flex-shrink:0;}
-.cmx-feat{display:flex;gap:12px;flex:1;min-height:0;}
-.cmx-feat-img{flex:0 0 auto;width:min(240px,40vw);cursor:zoom-in;position:relative;align-self:flex-start;}
-.cmx-feat-glow{position:absolute;inset:-2px;border-radius:5px;background:linear-gradient(135deg,#ffd700,#cc1a00,#7b21cc);z-index:0;animation:cmxG 3s ease-in-out infinite alternate;opacity:.7;}
-@keyframes cmxG{to{opacity:1;}}
-.cmx-feat-img img{position:relative;z-index:1;width:100%;display:block;border-radius:3px;}
-.cmx-feat-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;padding-top:2px;}
-.cmx-ep-badge{display:inline-block;background:#cc1a00;color:#fff;font-size:10px;font-weight:900;letter-spacing:1px;padding:3px 9px;box-shadow:2px 2px 0 #7b0000;border-radius:2px;width:fit-content;}
-.cmx-ep-title{font-family:'Bangers','Impact',cursive;color:#ffd700;font-size:clamp(14px,2.5vw,20px);line-height:1.2;text-shadow:1px 1px 0 #cc1a00;}
-.cmx-ep-desc{color:rgba(255,255,255,.55);font-size:11px;line-height:1.6;flex:1;overflow:hidden;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;}
-.cmx-nav{display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;}
-.cmx-nbtn{font-weight:900;font-size:10px;letter-spacing:.5px;padding:6px 11px;border:none;border-radius:3px;cursor:pointer;text-transform:uppercase;}
-.cmx-nbtn:hover{filter:brightness(1.1);}.cmx-nbtn:active{transform:translate(1px,1px);}
-.cmx-nbtn-p{background:#1a1a2e;color:#ffd700;border:1.5px solid rgba(255,215,0,.3);box-shadow:2px 2px 0 #000;}
-.cmx-nbtn-f{background:#ffd700;color:#1a0010;box-shadow:2px 2px 0 #a88000;}
-.cmx-nbtn-n{background:#cc1a00;color:#fff;box-shadow:2px 2px 0 #7b0000;}
-.cmx-dots{display:flex;gap:4px;flex-wrap:wrap;flex-shrink:0;}
-.cmx-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,215,0,.18);border:1.5px solid rgba(255,215,0,.28);cursor:pointer;transition:all .12s;}
-.cmx-dot.act{background:#ffd700;border-color:#ffd700;box-shadow:0 0 5px #ffd700;}
-@media(max-width:520px){.cmx-feat{flex-direction:column;overflow-y:auto;}.cmx-feat-img{width:100%!important;max-height:55vw;overflow:hidden;}.cmx-ep-desc{-webkit-line-clamp:3;}.cmx-thumb{flex:0 0 54px;}}
-.cmx-lb{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.97);backdrop-filter:blur(10px);flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:14px;}
-.cmx-lb.open{display:flex;animation:cmxLbIn .2s ease;}
+/* ═══════════════════════════════════════════════════
+   COMICS OVERLAY — full-width, sibling do canvas-area
+   ═══════════════════════════════════════════════════ */
+#comics-overlay {
+  display: none; flex: 1; flex-direction: column;
+  background: #0d0005; overflow: hidden;
+  min-width: 0; min-height: 0;
+}
+
+/* Header */
+.cmx-hdr {
+  background: linear-gradient(180deg,#1e0010,#0d0005);
+  border-bottom: 3px solid #ffd700;
+  padding: 14px 18px 10px; text-align: center; flex-shrink: 0;
+  position: relative;
+}
+.cmx-hdr::before {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(circle,rgba(255,200,0,.04) 1px,transparent 1px) 0 0/18px 18px;
+  pointer-events:none;
+}
+.cmx-hdr-title {
+  font-family:'Bangers','Impact',cursive;
+  font-size: clamp(26px,5vw,44px); color:#ffd700;
+  text-shadow: 3px 3px 0 #cc1a00, 5px 5px 0 rgba(0,0,0,.4);
+  letter-spacing: 3px; line-height:1;
+}
+.cmx-hdr-sub { color:rgba(255,255,255,.35); font-size:10px; letter-spacing:2px; margin-top:4px; text-transform:uppercase; }
+
+/* ── LIBRARY (grid of series) ── */
+#cmxLibView { flex:1; overflow-y:auto; display:flex; flex-direction:column; }
+.cmx-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px; padding: 16px; flex: 1;
+}
+@media(max-width:600px){ .cmx-grid{grid-template-columns:1fr 1fr;gap:10px;padding:10px;} }
+
+.cmx-card {
+  background: rgba(255,255,255,.04); border: 1.5px solid rgba(255,255,255,.08);
+  border-radius: 8px; overflow:hidden; cursor:pointer;
+  transition: transform .15s, border-color .15s, box-shadow .15s;
+}
+.cmx-card:hover { transform:translateY(-5px); border-color:#ffd700; box-shadow:0 10px 30px rgba(255,215,0,.15); }
+.cmx-card-cover { width:100%; aspect-ratio:.68; object-fit:cover; object-position:top; display:block; }
+.cmx-card-info { padding:10px 10px 12px; }
+.cmx-card-eps { font-size:9px; font-weight:700; letter-spacing:2px; color:rgba(255,255,255,.3); margin-bottom:3px; text-transform:uppercase; }
+.cmx-card-name { font-family:'Bangers','Impact',cursive; font-size:16px; color:#ffd700; letter-spacing:.5px; line-height:1.1; margin-bottom:2px; }
+.cmx-card-season { font-size:9px; color:rgba(255,255,255,.25); margin-bottom:7px; }
+.cmx-card-btn {
+  width:100%; background:#cc1a00; color:#fff;
+  font-weight:900; font-size:11px; letter-spacing:1px; text-transform:uppercase;
+  padding:6px; border:none; border-radius:4px; cursor:pointer;
+  box-shadow:2px 2px 0 #7b0000; transition:filter .12s;
+}
+.cmx-card-btn:hover { filter:brightness(1.12); }
+
+/* ── READER ── */
+#cmxReaderView { display:none; flex-direction:column; flex:1; overflow:hidden; }
+#cmxReaderView.open { display:flex; }
+
+.cmx-rdr-top {
+  background:linear-gradient(180deg,#1e0010,#0d0005);
+  border-bottom:2px solid #ffd700;
+  padding:9px 14px; display:flex; align-items:center; gap:10px; flex-shrink:0;
+}
+.cmx-back-btn {
+  background:rgba(255,255,255,.07); border:1.5px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.8); font-size:11px; font-weight:700; letter-spacing:1px;
+  padding:6px 12px; border-radius:4px; cursor:pointer; text-transform:uppercase;
+  transition:all .12s; white-space:nowrap;
+}
+.cmx-back-btn:hover { background:rgba(255,215,0,.1); border-color:#ffd700; color:#ffd700; }
+.cmx-rdr-info { flex:1; min-width:0; }
+.cmx-rdr-name { font-family:'Bangers','Impact',cursive; font-size:20px; color:#ffd700; letter-spacing:1px; line-height:1; }
+.cmx-rdr-season { font-size:9px; color:rgba(255,255,255,.3); letter-spacing:1px; margin-top:1px; }
+
+/* Episode strip */
+.cmx-strip-section { flex-shrink:0; padding:10px 14px 0; }
+.cmx-strip-label { font-size:9px; font-weight:800; color:rgba(255,215,0,.45); letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; }
+.cmx-strip {
+  display:flex; gap:8px; overflow-x:auto; padding-bottom:8px;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:thin; scrollbar-color:#ffd70030 transparent;
+}
+.cmx-strip::-webkit-scrollbar{height:3px;}
+.cmx-strip::-webkit-scrollbar-thumb{background:#ffd70035;border-radius:2px;}
+.cmx-thumb {
+  flex:0 0 68px; scroll-snap-align:start; cursor:pointer;
+  border-radius:3px; overflow:hidden; border:2px solid transparent;
+  transition:border-color .12s, transform .12s; position:relative;
+}
+.cmx-thumb:hover,.cmx-thumb.cmx-act { border-color:#ffd700; transform:translateY(-3px); }
+.cmx-thumb img { width:100%; aspect-ratio:.68; object-fit:cover; display:block; }
+.cmx-thumb-num {
+  position:absolute; top:2px; left:2px;
+  background:#cc1a00; color:#fff; font-size:8px; font-weight:900;
+  padding:1px 4px; border-radius:2px;
+}
+
+.cmx-sep { border:none; border-top:1px dashed rgba(255,215,0,.1); margin:7px 14px; flex-shrink:0; }
+
+/* Featured */
+.cmx-feat-section { flex:1; min-height:0; padding:0 14px 14px; display:flex; flex-direction:column; gap:8px; overflow:hidden; }
+.cmx-feat-label { font-size:9px; font-weight:800; color:rgba(255,215,0,.45); letter-spacing:2px; text-transform:uppercase; flex-shrink:0; }
+.cmx-feat-body { display:flex; gap:14px; flex:1; min-height:0; }
+
+/* Image */
+.cmx-feat-img-col { flex:0 0 auto; width:min(260px,38vw); cursor:zoom-in; position:relative; align-self:flex-start; }
+@media(max-width:600px){ .cmx-feat-img-col{width:100% !important;} }
+.cmx-feat-glow {
+  position:absolute; inset:-2px; border-radius:5px;
+  background:linear-gradient(135deg,#ffd700,#cc1a00,#7b21cc);
+  z-index:0; animation:cmxGlw 3s ease-in-out infinite alternate; opacity:.7;
+}
+@keyframes cmxGlw{to{opacity:1;}}
+.cmx-feat-img-col img { position:relative; z-index:1; width:100%; display:block; border-radius:4px; }
+
+/* Info */
+.cmx-feat-info { flex:1; min-width:0; display:flex; flex-direction:column; gap:8px; padding-top:2px; }
+.cmx-ep-tag {
+  display:inline-block; background:#cc1a00; color:#fff;
+  font-size:11px; font-weight:900; letter-spacing:1px;
+  padding:3px 10px; box-shadow:2px 2px 0 #7b0000; border-radius:2px; width:fit-content;
+}
+.cmx-ep-name {
+  font-family:'Bangers','Impact',cursive; color:#ffd700;
+  font-size:clamp(16px,2.5vw,22px); line-height:1.2; text-shadow:1px 1px 0 #cc1a00;
+}
+.cmx-ep-text {
+  color:rgba(255,255,255,.55); font-size:12px; line-height:1.65; flex:1;
+  overflow:hidden; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical;
+}
+.cmx-feat-nav { display:flex; gap:7px; flex-wrap:wrap; flex-shrink:0; }
+.cmx-btn {
+  font-weight:900; font-size:11px; letter-spacing:.5px;
+  padding:7px 13px; border:none; border-radius:3px; cursor:pointer;
+  text-transform:uppercase; transition:filter .12s;
+}
+.cmx-btn:active{transform:translate(1px,1px);}
+.cmx-btn:hover{filter:brightness(1.12);}
+.cmx-btn-p { background:#1a1a2e; color:#ffd700; border:1.5px solid rgba(255,215,0,.3); box-shadow:2px 2px 0 #000; }
+.cmx-btn-f { background:#ffd700; color:#1a0010; box-shadow:2px 2px 0 #a88000; }
+.cmx-btn-n { background:#cc1a00; color:#fff; box-shadow:2px 2px 0 #7b0000; }
+
+/* Dots */
+.cmx-dots { display:flex; gap:5px; flex-wrap:wrap; flex-shrink:0; }
+.cmx-dot {
+  width:8px; height:8px; border-radius:50%;
+  background:rgba(255,215,0,.18); border:1.5px solid rgba(255,215,0,.28);
+  cursor:pointer; transition:all .12s;
+}
+.cmx-dot.cmx-act { background:#ffd700; border-color:#ffd700; box-shadow:0 0 6px #ffd700; }
+
+/* Mobile: stack vertically */
+@media(max-width:520px){
+  .cmx-feat-body { flex-direction:column; overflow-y:auto; }
+  .cmx-feat-img-col { width:100% !important; max-height:55vw; overflow:hidden; }
+  .cmx-ep-text { -webkit-line-clamp:3; }
+  .cmx-thumb { flex:0 0 58px; }
+}
+
+/* ── LIGHTBOX ── */
+.cmx-lb {
+  display:none; position:fixed; inset:0; z-index:99999;
+  background:rgba(0,0,0,.97); backdrop-filter:blur(10px);
+  flex-direction:column; align-items:center; justify-content:center;
+  gap:12px; padding:14px;
+}
+.cmx-lb.open { display:flex; animation:cmxLbIn .2s ease; }
 @keyframes cmxLbIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
-.cmx-lb-img{max-height:80vh;max-width:min(95vw,580px);object-fit:contain;border:3px solid #ffd700;border-radius:6px;box-shadow:0 0 50px rgba(255,215,0,.18);}
-.cmx-lb-sub{color:rgba(255,255,255,.4);font-size:10px;letter-spacing:2px;text-align:center;text-transform:uppercase;}
-.cmx-lb-ctrl{display:flex;align-items:center;gap:10px;}
-.cmx-lb-btn{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.18);color:#fff;font-weight:900;font-size:13px;padding:7px 16px;border-radius:4px;cursor:pointer;letter-spacing:1px;}
+.cmx-lb-img {
+  max-height:80vh; max-width:min(95vw,600px); object-fit:contain;
+  border:3px solid #ffd700; border-radius:6px;
+  box-shadow:0 0 60px rgba(255,215,0,.18);
+}
+.cmx-lb-sub { color:rgba(255,255,255,.4); font-size:10px; letter-spacing:2px; text-align:center; text-transform:uppercase; }
+.cmx-lb-ctrl { display:flex; align-items:center; gap:12px; }
+.cmx-lb-btn {
+  background:rgba(255,255,255,.08); border:1.5px solid rgba(255,255,255,.18);
+  color:#fff; font-weight:900; font-size:13px; padding:7px 18px;
+  border-radius:4px; cursor:pointer; letter-spacing:1px;
+  transition:background .12s, border-color .12s;
+}
 .cmx-lb-btn:hover{background:rgba(255,215,0,.15);border-color:#ffd700;}
-.cmx-lb-ctr{font-family:'Bangers','Impact',cursive;color:#ffd700;font-size:18px;letter-spacing:2px;min-width:55px;text-align:center;}
-.cmx-lb-x{position:absolute;top:14px;right:18px;background:none;border:none;color:rgba(255,255,255,.45);font-size:28px;cursor:pointer;line-height:1;z-index:2;}
+.cmx-lb-ctr { font-family:'Bangers','Impact',cursive; color:#ffd700; font-size:18px; letter-spacing:2px; min-width:60px; text-align:center; }
+.cmx-lb-x {
+  position:absolute; top:14px; right:18px; background:none; border:none;
+  color:rgba(255,255,255,.45); font-size:28px; cursor:pointer; line-height:1;
+  transition:color .12s; z-index:2;
+}
 .cmx-lb-x:hover{color:#fff;}
 .cmx-lb-dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;}
 
@@ -716,12 +857,66 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
     <!-- LEFT: AI + Controls -->
     <div class="left-panel">
       <div class="panel-tabs">
-        <button class="ptab active" onclick="switchPanel('ai',this)">🦉 AI</button>
-        <button class="ptab" onclick="switchPanel('tools',this)">🎨 Tools</button>
-        <button class="ptab" onclick="switchPanel('credits',this)" style="color:var(--amber);">💰</button>
-        <button class="ptab" onclick="switchPanel('roast',this)" style="color:#ff2d78;">🔥</button>
-        <button class="ptab" onclick="switchPanel('comics',this)" style="color:#ffd700;">📚 Comics</button>
-        <button class="ptab" onclick="switchPanel('games',this)" style="color:#7b61ff;">🎮</button>
+        <button class="ptab active" onclick="switchPanel('ai',this)">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none" style="display:block;margin:0 auto 2px">
+            <ellipse cx="16" cy="19" rx="9" ry="10" fill="currentColor" opacity=".8"/>
+            <circle cx="16" cy="11" r="7" fill="currentColor"/>
+            <path d="M10 6 L12 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M22 6 L20 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="12.5" cy="11" r="2.8" fill="white" opacity=".95"/>
+            <circle cx="19.5" cy="11" r="2.8" fill="white" opacity=".95"/>
+            <circle cx="13.2" cy="11.5" r="1.4" fill="#1a0033"/>
+            <circle cx="20.2" cy="11.5" r="1.4" fill="#1a0033"/>
+            <ellipse cx="16" cy="15" rx="1.5" ry="1" fill="#ffb700"/>
+          </svg>
+          <span>AI</span>
+        </button>
+        <button class="ptab" onclick="switchPanel('tools',this)">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none" style="display:block;margin:0 auto 2px">
+            <path d="M20 4 L28 12 L14 26 L6 26 L6 18 Z" fill="currentColor" opacity=".85"/>
+            <path d="M17 7 L25 15" stroke="white" stroke-width="1.5" opacity=".4"/>
+            <circle cx="9" cy="9" r="3" fill="#ff2d78" opacity=".9"/>
+            <circle cx="16" cy="6" r="2" fill="#ffd700" opacity=".9"/>
+            <circle cx="23" cy="23" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M21 23h4M23 21v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span>Tools</span>
+        </button>
+        <button class="ptab" onclick="switchPanel('credits',this)" style="color:#ffd700;">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none" style="display:block;margin:0 auto 2px">
+            <circle cx="16" cy="16" r="13" fill="currentColor" opacity=".2"/>
+            <circle cx="16" cy="16" r="13" stroke="currentColor" stroke-width="2"/>
+            <text x="16" y="21" text-anchor="middle" fill="currentColor" font-size="14" font-weight="900" font-family="Arial">$</text>
+          </svg>
+          <span>Credits</span>
+        </button>
+        <button class="ptab" onclick="switchPanel('roast',this)" style="color:#ff4060;">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none" style="display:block;margin:0 auto 2px">
+            <path d="M16 3 C16 3 8 10 8 18 C8 23.5 11.6 28 16 28 C20.4 28 24 23.5 24 18 C24 14 22 11 20 9 C20 12 18 14 16 14 C14 14 13 12 13 10 C13 7.5 14.5 5 16 3Z" fill="currentColor" opacity=".9"/>
+            <path d="M14 20 C14 20 13 18 14 16 C15 17.5 16 18 17 17.5 C17 19 16.5 21 16 22 C15 21.5 14 20 14 20Z" fill="white" opacity=".5"/>
+          </svg>
+          <span>Roast</span>
+        </button>
+        <button class="ptab" onclick="switchPanel('comics',this)" style="color:#ffd700;">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none" style="display:block;margin:0 auto 2px">
+            <rect x="4" y="2" width="17" height="22" rx="2.5" fill="currentColor" opacity=".9"/>
+            <rect x="11" y="8" width="17" height="22" rx="2.5" fill="none" stroke="currentColor" stroke-width="2" opacity=".4"/>
+            <path d="M8 9 H17 M8 13 H17 M8 17 H14" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span>Comics</span>
+        </button>
+        <button class="ptab" onclick="switchPanel('games',this)" style="color:#7b61ff;">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none" style="display:block;margin:0 auto 2px">
+            <rect x="2" y="9" width="28" height="16" rx="6" fill="currentColor" opacity=".25"/>
+            <rect x="2" y="9" width="28" height="16" rx="6" stroke="currentColor" stroke-width="2"/>
+            <path d="M10 15 H14 M12 13 V17" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="20" cy="14" r="1.6" fill="currentColor"/>
+            <circle cx="23" cy="17" r="1.6" fill="#ff2d78"/>
+            <circle cx="20" cy="20" r="1.6" fill="#ffd700"/>
+            <circle cx="17" cy="17" r="1.6" fill="#00cc66"/>
+          </svg>
+          <span>Games</span>
+        </button>
       </div>
 
       <!-- AI PANEL -->
@@ -1062,38 +1257,47 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
     </div>
 
     
-    <!-- ══ COMICS OVERLAY ══ -->
+    <!-- ══ COMICS OVERLAY (full-width, sibling to canvas) ══ -->
     <div id="comics-overlay">
       <div class="cmx-hdr">
-        <div class="cmx-title">$ANAL COMICS</div>
-        <div class="cmx-sub">Choose a series</div>
+        <div class="cmx-hdr-title">$ANAL COMICS</div>
+        <div class="cmx-hdr-sub">Choose a series</div>
       </div>
-      <div id="cmxLibView"><div class="cmx-grid" id="cmxGrid"></div></div>
+
+      <!-- LIBRARY VIEW -->
+      <div id="cmxLibView">
+        <div class="cmx-grid" id="cmxGrid"></div>
+      </div>
+
+      <!-- READER VIEW -->
       <div id="cmxReaderView">
         <div class="cmx-rdr-top">
-          <button class="cmx-back" onclick="cmxShowLib()">← Series</button>
-          <div><div class="cmx-rdr-name" id="cmxRdrName"></div><div class="cmx-rdr-season" id="cmxRdrSeason"></div></div>
+          <button class="cmx-back-btn" onclick="cmxShowLib()">← Series</button>
+          <div class="cmx-rdr-info">
+            <div class="cmx-rdr-name" id="cmxRdrName"></div>
+            <div class="cmx-rdr-season" id="cmxRdrSeason"></div>
+          </div>
         </div>
-        <div class="cmx-strip-wrap">
-          <div class="cmx-strip-lbl">Episodes</div>
+        <div class="cmx-strip-section">
+          <div class="cmx-strip-label">Episodes</div>
           <div class="cmx-strip" id="cmxStrip"></div>
         </div>
         <div class="cmx-sep"></div>
-        <div class="cmx-feat-wrap">
-          <div class="cmx-feat-lbl">Now Reading</div>
-          <div class="cmx-feat">
-            <div class="cmx-feat-img" onclick="cmxOpenLb(cmxEp)">
+        <div class="cmx-feat-section">
+          <div class="cmx-feat-label">Now Reading</div>
+          <div class="cmx-feat-body">
+            <div class="cmx-feat-img-col" onclick="cmxOpenLb(cmxEp)">
               <div class="cmx-feat-glow"></div>
               <img id="cmxFeatImg" src="" alt="">
             </div>
             <div class="cmx-feat-info">
-              <div class="cmx-ep-badge" id="cmxEpBadge"></div>
-              <div class="cmx-ep-title" id="cmxEpTitle"></div>
-              <div class="cmx-ep-desc" id="cmxEpDesc"></div>
-              <div class="cmx-nav">
-                <button class="cmx-nbtn cmx-nbtn-p" onclick="cmxGoEp(cmxEp-1)">◀ Prev</button>
-                <button class="cmx-nbtn cmx-nbtn-f" onclick="cmxOpenLb(cmxEp)">🔍 Full</button>
-                <button class="cmx-nbtn cmx-nbtn-n" onclick="cmxGoEp(cmxEp+1)">Next ▶</button>
+              <div class="cmx-ep-tag" id="cmxEpTag"></div>
+              <div class="cmx-ep-name" id="cmxEpName"></div>
+              <div class="cmx-ep-text" id="cmxEpText"></div>
+              <div class="cmx-feat-nav">
+                <button class="cmx-btn cmx-btn-p" onclick="cmxGoEp(cmxEp-1)">◀ Prev</button>
+                <button class="cmx-btn cmx-btn-f" onclick="cmxOpenLb(cmxEp)">🔍 Full</button>
+                <button class="cmx-btn cmx-btn-n" onclick="cmxGoEp(cmxEp+1)">Next ▶</button>
               </div>
               <div class="cmx-dots" id="cmxDots"></div>
             </div>
@@ -1101,6 +1305,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
         </div>
       </div>
     </div>
+
     <!-- ══ LIGHTBOX ══ -->
     <div class="cmx-lb" id="cmxLb" onclick="cmxCloseLb(event)">
       <button class="cmx-lb-x" onclick="cmxCloseLb()">✕</button>
@@ -3537,20 +3742,25 @@ function shareHistoryX(i) {
 // PANEL / MISC
 // ════════════════════════════════
 function switchPanel(name, el) {
-  ['ai','tools','credits','roast','games','comics'].forEach(p=>{
-    document.getElementById('panel-'+p).style.display = p===name?(p==='comics'?'flex':'block'):'none';
+  ['ai','tools','credits','roast','games'].forEach(p=>{
+    document.getElementById('panel-'+p).style.display = p===name?'block':'none';
   });
   document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   if(name==='roast') updateRoastBalanceDisplay();
-  // Comics
-  var _co=document.getElementById('comics-overlay');
-  if(_co){_co.style.display=name==='comics'?'flex':'none';_co.style.flex=name==='comics'?'1':'0';}
-  if(name==='comics'){
-    var _ca=document.querySelector('.canvas-area');var _rp=document.querySelector('.right-panel');
-    var _go=document.getElementById('games-center-overlay');
-    if(_ca){_ca.style.display='none';} if(_rp){_rp.style.display='none';} if(_go){_go.style.display='none';}
+  if(name==='comics') {
+    var cmxOv=document.getElementById('comics-overlay');
+    var canvasArea=document.querySelector('.canvas-area');
+    var rightPanel=document.querySelector('.right-panel');
+    var gamesOv=document.getElementById('games-center-overlay');
+    if(cmxOv){cmxOv.style.display='flex';cmxOv.style.flex='1';}
+    if(canvasArea){canvasArea.style.display='none';canvasArea.style.flex='0';}
+    if(rightPanel){rightPanel.style.display='none';}
+    if(gamesOv){gamesOv.style.display='none';}
     cmxInit();
+  } else if(name==='games') {
+    var cmxOv2=document.getElementById('comics-overlay');
+    if(cmxOv2){cmxOv2.style.display='none';}
   }
   if(name==='games') {
     setTimeout(function(){
@@ -3570,15 +3780,15 @@ function switchPanel(name, el) {
       selectGameCenter('mario', firstBtn);
     },80);
   } else {
-    // Restore canvas-area when switching away from games
+    // Restore canvas-area and hide all overlays when switching away
+    var cmxOv3=document.getElementById('comics-overlay');
+    if(cmxOv3){cmxOv3.style.display='none';cmxOv3.style.flex='0';}
     var overlay=document.getElementById('games-center-overlay');
     var canvasArea=document.querySelector('.canvas-area');
     var rightPanel=document.querySelector('.right-panel');
     if(overlay){overlay.style.display='none';overlay.style.flex='0';}
     if(canvasArea){canvasArea.style.display='';canvasArea.style.flex='1';}
     if(rightPanel){rightPanel.style.display='';}
-    var _co2=document.getElementById('comics-overlay');
-    if(_co2){_co2.style.display='none';_co2.style.flex='0';}
   }
 }
 
@@ -5892,89 +6102,161 @@ if(!CanvasRenderingContext2D.prototype.roundRect){
 
 
 
-// ══ COMICS ══
+// ════════════════════════════════════════════════════════════
+//  $ANAL COMIC LIBRARY
+//
+//  JAK DODAĆ NOWĄ SERIĘ:
+//  Dodaj nowy blok { id, title, ... } do COMIC_LIBRARY.
+//  Wgraj pliki na GitHub i wpisz nazwy plików w src.
+//
+//  JAK DODAĆ ODCINEK do istniejącej serii:
+//  Dodaj { title, src, desc } do episodes[] danej serii.
+// ════════════════════════════════════════════════════════════
 const COMIC_LIBRARY = [
+
+  // ── SERIA 1: $ANAL Chronicles ─────────────────────────
   {
-    id:"chronicles",title:"$ANAL Chronicles",subtitle:"Season 1 — The Reckoning",
-    cover:"./We will Find You1.jpg",
-    description:"Zombie analyst, sowa $ANAL i fury polskiej społeczności krypto.",
-    episodes:[
-      {title:"The Hunt Begins",            src:"./We will Find You1.jpg", desc:"The community rises. Angry Polish investors chase the zombie analyst through a burning market."},
-      {title:"The Capture",                src:"./We will Find You2.jpg", desc:"Caught! The zombie analyst is bound to a stake. The fire grows. The owl watches in horror."},
-      {title:"The Fire Trial",             src:"./We will Find You3.jpg", desc:"Three acts: The Accusation, The Capture, The Fire. Community justice in glorious comic art."},
-      {title:"Judgment Day in the Depths", src:"./We will Find You4.jpg", desc:"Descending into HELL-CRASH. The Devil's court charges them with ultimate betrayal."},
-      {title:"The Reconciliation",         src:"./We will Find You5.jpg", desc:"The Devil is confused — $ANAL keeps winning everywhere. It's about the coin, not revenge."},
-      {title:"Penitent Drudgery",          src:"./We will Find You6.jpg", desc:"Sentenced to moderate dead coin chats for eternity. The owl pushes XEN carts through hellfire."},
-      {title:"Analogy Ascendant",          src:"./We will Find You7.jpg", desc:"FINAL VERDICT. $ANAL rises to the heavens. The community's legacy is eternal."}
+    id: "chronicles",
+    title: "$ANAL Chronicles",
+    subtitle: "Season 1 — The Reckoning",
+    cover: "./chronicles_ep1.jpg",
+    description: "Zombie analyst, sowa $ANAL i fury polskiej społeczności krypto. Największa saga w historii blockchaina.",
+    episodes: [
+      { title: "The Hunt Begins",            src: "./chronicles_ep1.jpg", desc: "The community rises. Angry Polish investors chase the zombie analyst through a burning market. The $ANAL owl runs for its life." },
+      { title: "The Capture",                src: "./chronicles_ep2.jpg", desc: "Caught! The zombie analyst is bound to a stake. The fire grows. The owl watches in horror as the community demands justice." },
+      { title: "The Fire Trial",             src: "./chronicles_ep3.jpg", desc: "Three acts: The Accusation, The Capture, The Fire. Full community justice played out in glorious multi-panel comic art." },
+      { title: "Judgment Day in the Depths", src: "./chronicles_ep4.jpg", desc: "Descending into HELL-CRASH. The Devil's court charges them with ultimate betrayal of the Polish community." },
+      { title: "The Reconciliation",         src: "./chronicles_ep5.jpg", desc: "The Devil is confused — $ANAL keeps winning everywhere. A community member explains: this is about the coin, not revenge." },
+      { title: "Penitent Drudgery",          src: "./chronicles_ep6.jpg", desc: "Sentenced to moderate dead coin chats for eternity. The zombie weeps. The owl pushes XEN data carts through hellfire." },
+      { title: "Analogy Ascendant",          src: "./chronicles_ep7.jpg", desc: "FINAL VERDICT. $ANAL rises to the heavens. Community strength purifies even the court of judgment. The legacy is eternal." }
     ]
-  }
-  // Nowa seria: skopiuj blok powyżej i dodaj tutaj
+  },
+
+  // ── SERIA 2 — odkomentuj po wgraniu plików na GitHub ──
+  // {
+  //   id: "seria2",
+  //   title: "Tytuł Nowej Serii",
+  //   subtitle: "Season 1",
+  //   cover: "./seria2_ep1.jpg",
+  //   description: "Opis serii...",
+  //   episodes: [
+  //     { title: "Epizod 1", src: "./seria2_ep1.jpg", desc: "Opis..." },
+  //     { title: "Epizod 2", src: "./seria2_ep2.jpg", desc: "Opis..." },
+  //   ]
+  // },
+
 ];
-var cmxS=null,cmxEp=0,cmxLbEp=0,cmxOK=false;
-function cmxInit(){if(!cmxOK){cmxOK=true;cmxBuildLib();}cmxShowLib();}
-function cmxBuildLib(){
-  var g=document.getElementById('cmxGrid');if(!g)return;g.innerHTML='';
-  COMIC_LIBRARY.forEach(function(s,si){
-    var c=document.createElement('div');c.className='cmx-card';
-    c.innerHTML='<img src="'+s.cover+'" alt="'+s.title+'" loading="lazy">'+
-      '<div class="cmx-card-info"><div class="cmx-card-eps">'+s.episodes.length+' Episodes</div>'+
-      '<div class="cmx-card-name">'+s.title+'</div><div class="cmx-card-season">'+s.subtitle+'</div>'+
-      '<button class="cmx-card-btn" onclick="cmxOpen('+si+');event.stopPropagation()">Read ▶</button></div>';
-    c.onclick=function(){cmxOpen(si);};g.appendChild(c);
+
+// ── State
+var cmxCurSeries = null, cmxEp = 0, cmxLbEp = 0, cmxInited = false;
+
+function cmxInit() {
+  if (!cmxInited) { cmxInited = true; cmxBuildLib(); }
+  // Always show library on tab open
+  cmxShowLib();
+}
+
+// ── Library
+function cmxBuildLib() {
+  var g = document.getElementById('cmxGrid');
+  if (!g) return;
+  g.innerHTML = '';
+  COMIC_LIBRARY.forEach(function(s, si) {
+    var c = document.createElement('div');
+    c.className = 'cmx-card';
+    c.innerHTML =
+      '<img class="cmx-card-cover" src="' + s.cover + '" alt="' + s.title + '" loading="lazy">' +
+      '<div class="cmx-card-info">' +
+        '<div class="cmx-card-eps">' + s.episodes.length + ' Episode' + (s.episodes.length !== 1 ? 's' : '') + '</div>' +
+        '<div class="cmx-card-name">' + s.title + '</div>' +
+        '<div class="cmx-card-season">' + s.subtitle + '</div>' +
+        '<button class="cmx-card-btn" onclick="cmxOpenSeries(' + si + ');event.stopPropagation()">Read Now ▶</button>' +
+      '</div>';
+    c.onclick = function() { cmxOpenSeries(si); };
+    g.appendChild(c);
   });
 }
-function cmxShowLib(){
-  var l=document.getElementById('cmxLibView'),r=document.getElementById('cmxReaderView');
-  if(l)l.style.display='block';if(r)r.classList.remove('open');
+
+function cmxShowLib() {
+  var lib = document.getElementById('cmxLibView');
+  var rdr = document.getElementById('cmxReaderView');
+  if (lib) lib.style.display = 'flex';
+  if (rdr) rdr.classList.remove('open');
 }
-function cmxOpen(si){
-  cmxS=COMIC_LIBRARY[si];cmxEp=0;
-  document.getElementById('cmxLibView').style.display='none';
-  document.getElementById('cmxReaderView').classList.add('open');
-  document.getElementById('cmxRdrName').textContent=cmxS.title;
-  document.getElementById('cmxRdrSeason').textContent=cmxS.subtitle;
-  var s=document.getElementById('cmxStrip');s.innerHTML='';
-  cmxS.episodes.forEach(function(ep,i){
-    var d=document.createElement('div');d.className='cmx-thumb'+(i===0?' act':'');
-    d.innerHTML='<img src="'+ep.src+'" loading="lazy"><span>EP '+(i+1)+'</span>';
-    d.onclick=function(){cmxGoEp(i);};s.appendChild(d);
-  });
+
+// ── Open series
+function cmxOpenSeries(si) {
+  cmxCurSeries = COMIC_LIBRARY[si];
+  cmxEp = 0;
+  var lib = document.getElementById('cmxLibView');
+  var rdr = document.getElementById('cmxReaderView');
+  if (lib) lib.style.display = 'none';
+  if (rdr) rdr.classList.add('open');
+  document.getElementById('cmxRdrName').textContent = cmxCurSeries.title;
+  document.getElementById('cmxRdrSeason').textContent = cmxCurSeries.subtitle;
+  cmxBuildStrip();
   cmxGoEp(0);
 }
-function cmxGoEp(i){
-  if(!cmxS||i<0||i>=cmxS.episodes.length)return;cmxEp=i;
-  var ep=cmxS.episodes[i];
-  document.getElementById('cmxFeatImg').src=ep.src;
-  document.getElementById('cmxEpBadge').textContent='EP '+(i+1)+' / '+cmxS.episodes.length;
-  document.getElementById('cmxEpTitle').textContent=ep.title;
-  document.getElementById('cmxEpDesc').textContent=ep.desc;
-  var dc=document.getElementById('cmxDots');dc.innerHTML='';
-  cmxS.episodes.forEach(function(_,j){
-    var d=document.createElement('div');d.className='cmx-dot'+(j===i?' act':'');
-    d.onclick=function(e){e.stopPropagation();cmxGoEp(j);};dc.appendChild(d);
-  });
-  document.querySelectorAll('.cmx-thumb').forEach(function(el,j){el.classList.toggle('act',j===i);});
-  var strip=document.getElementById('cmxStrip');
-  if(strip&&strip.children[i])strip.children[i].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-}
-function cmxOpenLb(i){cmxLbEp=i;document.getElementById('cmxLb').classList.add('open');cmxUpdLb();}
-function cmxCloseLb(e){if(!e||e.target===document.getElementById('cmxLb'))document.getElementById('cmxLb').classList.remove('open');}
-function cmxLbNav(d){cmxLbEp=(cmxLbEp+d+cmxS.episodes.length)%cmxS.episodes.length;cmxUpdLb();}
-function cmxUpdLb(){
-  var ep=cmxS.episodes[cmxLbEp];
-  document.getElementById('cmxLbImg').src=ep.src;
-  document.getElementById('cmxLbSub').textContent=cmxS.title+' — '+ep.title;
-  document.getElementById('cmxLbCtr').textContent=(cmxLbEp+1)+' / '+cmxS.episodes.length;
-  var dl=document.getElementById('cmxLbDots');dl.innerHTML='';
-  cmxS.episodes.forEach(function(_,i){
-    var d=document.createElement('div');d.className='cmx-dot'+(i===cmxLbEp?' act':'');
-    d.onclick=function(e){e.stopPropagation();cmxLbEp=i;cmxUpdLb();};dl.appendChild(d);
+
+// ── Strip
+function cmxBuildStrip() {
+  var s = document.getElementById('cmxStrip');
+  if (!s) return;
+  s.innerHTML = '';
+  cmxCurSeries.episodes.forEach(function(ep, i) {
+    var d = document.createElement('div');
+    d.className = 'cmx-thumb' + (i === 0 ? ' cmx-act' : '');
+    d.innerHTML = '<img src="' + ep.src + '" loading="lazy"><div class="cmx-thumb-num">EP ' + (i + 1) + '</div>';
+    d.onclick = function() { cmxGoEp(i); };
+    s.appendChild(d);
   });
 }
-document.addEventListener('keydown',function(e){
-  if(!document.getElementById('cmxLb').classList.contains('open'))return;
-  if(e.key==='ArrowRight')cmxLbNav(1);if(e.key==='ArrowLeft')cmxLbNav(-1);
-  if(e.key==='Escape')cmxCloseLb();
+
+// ── Episode nav
+function cmxGoEp(i) {
+  if (!cmxCurSeries || i < 0 || i >= cmxCurSeries.episodes.length) return;
+  cmxEp = i;
+  var ep = cmxCurSeries.episodes[i];
+  document.getElementById('cmxFeatImg').src = ep.src;
+  document.getElementById('cmxEpTag').textContent = 'EP ' + (i + 1) + ' / ' + cmxCurSeries.episodes.length;
+  document.getElementById('cmxEpName').textContent = ep.title;
+  document.getElementById('cmxEpText').textContent = ep.desc;
+  cmxBuildDots('cmxDots', i, false);
+  document.querySelectorAll('.cmx-thumb').forEach(function(el, j) { el.classList.toggle('cmx-act', j === i); });
+  var strip = document.getElementById('cmxStrip');
+  if (strip && strip.children[i]) strip.children[i].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+// ── Dots
+function cmxBuildDots(id, cur, isLb) {
+  var c = document.getElementById(id);
+  if (!c || !cmxCurSeries) return;
+  c.innerHTML = '';
+  cmxCurSeries.episodes.forEach(function(_, i) {
+    var d = document.createElement('div');
+    d.className = 'cmx-dot' + (i === cur ? ' cmx-act' : '');
+    d.onclick = function(e) { e.stopPropagation(); isLb ? cmxLbGoTo(i) : cmxGoEp(i); };
+    c.appendChild(d);
+  });
+}
+
+// ── Lightbox
+function cmxOpenLb(i) { cmxLbEp = i; document.getElementById('cmxLb').classList.add('open'); cmxUpdLb(); }
+function cmxCloseLb(e) { if (!e || e.target === document.getElementById('cmxLb')) document.getElementById('cmxLb').classList.remove('open'); }
+function cmxLbNav(d) { cmxLbEp = (cmxLbEp + d + cmxCurSeries.episodes.length) % cmxCurSeries.episodes.length; cmxUpdLb(); }
+function cmxLbGoTo(i) { cmxLbEp = i; cmxUpdLb(); }
+function cmxUpdLb() {
+  var ep = cmxCurSeries.episodes[cmxLbEp];
+  document.getElementById('cmxLbImg').src = ep.src;
+  document.getElementById('cmxLbSub').textContent = cmxCurSeries.title + ' — ' + ep.title;
+  document.getElementById('cmxLbCtr').textContent = (cmxLbEp + 1) + ' / ' + cmxCurSeries.episodes.length;
+  cmxBuildDots('cmxLbDots', cmxLbEp, true);
+}
+document.addEventListener('keydown', function(e) {
+  if (!document.getElementById('cmxLb').classList.contains('open')) return;
+  if (e.key === 'ArrowRight') cmxLbNav(1);
+  if (e.key === 'ArrowLeft')  cmxLbNav(-1);
+  if (e.key === 'Escape')     cmxCloseLb();
 });
 
 </script>
