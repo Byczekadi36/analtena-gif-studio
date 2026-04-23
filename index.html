@@ -104,20 +104,12 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 #games-center-overlay{flex:1;min-width:0;min-height:0;}
 #games-center-overlay.active{display:flex!important;}
 /* When games tab is active, hide canvas-area */
-.app-body.games-mode .canvas-area{display:none!important;}
-.app-body.games-mode #games-center-overlay{display:flex!important;flex:1;}
-.app-body.games-mode .right-panel{display:none!important;}
-/* Mobile: games overlay is fixed to cover screen below game buttons */
+/* games-mode managed by JS inline styles now */
+/* Mobile: games overlay takes full width */
 @media(max-width:768px){
-  .app-body.games-mode #games-center-overlay{
-    position:fixed;
-    top:0;
-    left:0;
+  #games-center-overlay{
     width:100%;
-    height:100%;
-    z-index:9999;
-    background:#080810;
-    overflow-y:auto;
+    min-height:70vh;
   }
   .mobile-games-back{display:flex!important;}
 }
@@ -1790,8 +1782,9 @@ function updateFrameStrip() {
 
 function renderCurrentFrame() {
   if (!state.frames.length) return;
-  // Don't render if games mode is active (canvas is hidden)
-  if(document.querySelector('.app-body.games-mode')) return;
+  // Don't render if games overlay is visible
+  var overlay = document.getElementById('games-center-overlay');
+  if(overlay && overlay.style.display !== 'none' && overlay.style.display !== '') return;
   const c = getCanvas();
   const f = state.frames[state.currentFrame];
   if (c.width !== f.width || c.height !== f.height) {
@@ -1815,8 +1808,9 @@ function togglePlay() {
   if (state.playing) {
     const delay = parseInt(document.getElementById('frame-delay').value) || 100;
     state.playTimer = setInterval(() => {
-      // Don't update frames while games mode is active
-      if(document.querySelector('.app-body.games-mode')) return;
+      // Don't update frames while games overlay is visible
+      var _ov = document.getElementById('games-center-overlay');
+      if(_ov && _ov.style.display !== 'none' && _ov.style.display !== '') return;
       state.currentFrame = (state.currentFrame+1) % state.frames.length;
       renderCurrentFrame();
       document.getElementById('frame-counter').textContent = `Frame ${state.currentFrame+1} / ${state.frames.length}`;
@@ -3440,55 +3434,42 @@ function shareHistoryX(i) {
 // PANEL / MISC
 // ════════════════════════════════
 function switchPanel(name, el) {
+  // Show/hide panel content in left panel
   ['ai','tools','credits','roast','games'].forEach(p=>{
     document.getElementById('panel-'+p).style.display = p===name?'block':'none';
   });
   document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   if(name==='roast') updateRoastBalanceDisplay();
+
+  var overlay = document.getElementById('games-center-overlay');
+  var canvasArea = document.querySelector('.canvas-area');
+  var rightPanel = document.querySelector('.right-panel');
+
   if(name==='games') {
-    // Add games-mode class IMMEDIATELY before setTimeout to prevent race condition
-    document.querySelector('.app-body').classList.add('games-mode');
-    // Also hide canvas-area immediately
-    var _ca=document.querySelector('.canvas-area');
-    if(_ca){_ca.style.display='none';_ca.style.flex='0';}
+    // Show games overlay, hide canvas
+    if(canvasArea) { canvasArea.style.display='none'; canvasArea.style.flex='0'; }
+    if(rightPanel) rightPanel.style.display='none';
+    if(overlay) { overlay.style.display='flex'; overlay.style.flex='1'; overlay.style.flexDirection='column'; }
+    // Stop GIF playback timer
+    if(state.playTimer) { clearInterval(state.playTimer); state.playTimer=null; state.playing=false; }
+    var playBtn = document.getElementById('play-pause-btn');
+    if(playBtn) playBtn.textContent='▶';
+    // Init games panel
+    initGamesPanel();
+    // Auto-select first game after short delay
     setTimeout(function(){
-      initGamesPanel();
-      // Add games-mode class to app-body (CSS handles hiding/showing)
-      document.querySelector('.app-body').classList.add('games-mode');
-      // Also set inline styles for extra reliability
-      var overlay=document.getElementById('games-center-overlay');
-      var canvasArea=document.querySelector('.canvas-area');
-      var rightPanel=document.querySelector('.right-panel');
-      if(overlay){overlay.style.display='flex';overlay.style.flex='1';}
-      if(canvasArea){canvasArea.style.display='none';canvasArea.style.flex='0';}
-      if(rightPanel){rightPanel.style.display='none';}
-      var firstBtn=document.querySelector('.game-left-btn');
-      selectGameCenter('mario', firstBtn);
-      // Keep canvas hidden - re-apply every 300ms in case anything restores it
-      if(window._gamesModeInterval) clearInterval(window._gamesModeInterval);
-      window._gamesModeInterval = setInterval(function(){
-        if(!document.querySelector('.app-body.games-mode')) {
-          clearInterval(window._gamesModeInterval);
-          return;
-        }
-        var ca=document.querySelector('.canvas-area');
-        if(ca && ca.style.display !== 'none') {
-          ca.style.display='none';
-          ca.style.flex='0';
-        }
-      }, 200);
-    },80);
+      var firstBtn = document.querySelector('.game-left-btn');
+      if(firstBtn) selectGameCenter('mario', firstBtn);
+    }, 50);
   } else {
-    // Restore canvas-area when switching away from games
-    var overlay=document.getElementById('games-center-overlay');
-    var canvasArea=document.querySelector('.canvas-area');
-    var rightPanel=document.querySelector('.right-panel');
-    document.querySelector('.app-body').classList.remove('games-mode');
+    // Restore normal layout
+    if(overlay) { overlay.style.display='none'; overlay.style.flex='0'; }
+    if(canvasArea) { canvasArea.style.display=''; canvasArea.style.flex='1'; }
+    if(rightPanel && window.innerWidth > 768) rightPanel.style.display='';
+    // Stop any running game loops
+    if(window.gMarioAnimId) { cancelAnimationFrame(window.gMarioAnimId); window.gMarioAnimId=null; }
     if(window._gamesModeInterval) { clearInterval(window._gamesModeInterval); window._gamesModeInterval=null; }
-    if(overlay){overlay.style.display='none';overlay.style.flex='0';}
-    if(canvasArea){canvasArea.style.display='';canvasArea.style.flex='1';}
-    if(rightPanel){rightPanel.style.display='';}
   }
 }
 
@@ -3864,8 +3845,9 @@ function toast(msg){
 
 // ── CANVAS SCALING — desktop + mobile ─────────────────────────────
 function fitCanvasToScreen() {
-  // Don't run when games tab is active
-  if(document.querySelector('.app-body.games-mode')) return;
+  // Don't run when games overlay is visible
+  var overlay = document.getElementById('games-center-overlay');
+  if(overlay && overlay.style.display !== 'none' && overlay.style.display !== '') return;
   const canvas = document.getElementById('main-canvas');
   if (!canvas || !canvas.width) return;
   const wrap = canvas.parentElement;
