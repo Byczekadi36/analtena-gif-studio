@@ -107,10 +107,16 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 /* ── LEFT PANEL ── */
 .left-panel{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
   display:flex;flex-direction:column;overflow:hidden;}
-.panel-tabs{display:flex;border-bottom:1px solid var(--border);}
-.ptab{flex:1;padding:10px 2px;background:transparent;border:none;font-family:var(--font-d);
-  font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;white-space:nowrap;text-align:center;min-width:0;}
-.ptab.active{color:var(--neon);border-bottom-color:var(--neon);}
+.panel-tabs{display:flex;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.15);gap:2px;padding:2px 4px 0;}
+.ptab{flex:1;padding:8px 4px 6px;background:transparent;border:none;font-family:var(--font-d);
+  font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;
+  transition:all .15s;white-space:nowrap;text-align:center;min-width:0;
+  display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.2;
+  opacity:.65;}
+.ptab:hover{opacity:1;color:var(--neon3);}
+.ptab.active{color:var(--neon);border-bottom-color:var(--neon);opacity:1;
+  text-shadow:0 0 12px var(--neon);}
+.ptab.active svg{filter:drop-shadow(0 0 4px currentColor);}
 .panel-content{flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 
 /* ── AI PROMPT ── */
@@ -648,11 +654,75 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
     <!-- LEFT: AI + Controls -->
     <div class="left-panel">
       <div class="panel-tabs">
-        <button class="ptab active" onclick="switchPanel('ai',this)">🦉 AI</button>
-        <button class="ptab" onclick="switchPanel('tools',this)">🎨 Tools</button>
-        <button class="ptab" onclick="switchPanel('credits',this)" style="color:var(--amber);">💰</button>
-        <button class="ptab" onclick="switchPanel('roast',this)" style="color:#ff2d78;">🔥</button>
-        <button class="ptab" onclick="switchPanel('games',this)" style="color:#7b61ff;">🎮</button>
+        <button class="ptab active" onclick="switchPanel('ai',this)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:block;margin:0 auto 2px;">
+            <!-- Owl body -->
+            <ellipse cx="12" cy="14" rx="6" ry="7" fill="currentColor" opacity=".8"/>
+            <!-- Owl head -->
+            <circle cx="12" cy="8" r="5" fill="currentColor" opacity=".9"/>
+            <!-- Ears/tufts -->
+            <path d="M8 4L9.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M16 4L14.5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <!-- Eyes -->
+            <circle cx="9.5" cy="8" r="2.2" fill="#fff" opacity=".95"/>
+            <circle cx="14.5" cy="8" r="2.2" fill="#fff" opacity=".95"/>
+            <circle cx="9.8" cy="8.2" r="1.1" fill="#1a0033"/>
+            <circle cx="14.8" cy="8.2" r="1.1" fill="#1a0033"/>
+            <!-- Beak -->
+            <path d="M11 10.5l1 1.5 1-1.5z" fill="#ffb700"/>
+            <!-- Wings hint -->
+            <path d="M6.5 14q-2 0-2 3" stroke="currentColor" stroke-width="1.5" fill="none" opacity=".5"/>
+            <path d="M17.5 14q2 0 2 3" stroke="currentColor" stroke-width="1.5" fill="none" opacity=".5"/>
+          </svg>
+          AI
+        </button>
+        <button class="ptab" onclick="switchPanel('tools',this)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:block;margin:0 auto 2px;">
+            <!-- Brush handle -->
+            <path d="M16 3l5 5-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" opacity=".9"/>
+            <!-- Brush tip -->
+            <path d="M7 17c-1 1-3 2-4 4 2-1 3-3 4-4z" fill="currentColor" opacity=".8"/>
+            <path d="M12 12l-5 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity=".85"/>
+            <!-- Palette dots -->
+            <circle cx="5" cy="8" r="1.5" fill="currentColor" opacity=".7"/>
+            <circle cx="9" cy="5" r="1.5" fill="#ff2d78" opacity=".8"/>
+            <circle cx="5" cy="12" r="1.5" fill="#ffb700" opacity=".8"/>
+            <circle cx="3" cy="9.5" r="1" fill="#7b61ff" opacity=".7"/>
+          </svg>
+          Tools
+        </button>
+        <button class="ptab" onclick="switchPanel('credits',this)" style="color:#ffb700;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:block;margin:0 auto 2px;">
+            <circle cx="12" cy="12" r="9" fill="currentColor" opacity=".2" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M12 6v2M12 16v2M8.5 9.5C8.5 8 10 7 12 7s3.5 1 3.5 2.5c0 2-2 2.5-3.5 3-1.5.5-3.5 1-3.5 3C8.5 17 10 18 12 18s3.5-1 3.5-2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          Credits
+        </button>
+        <button class="ptab" onclick="switchPanel('roast',this)" style="color:#ff4d6d;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:block;margin:0 auto 2px;">
+            <path d="M12 3c0 0-5 4-5 9a5 5 0 0010 0c0-2-1-4-2-5 0 2-1 3-3 3-2 0-2-2-2-3 0-1.5.5-2.5 2-4z" fill="currentColor" opacity=".9"/>
+            <path d="M12 14c0 0-2-1-2-3 1 1 2 1.5 3 1 0 .5-.3 1.5-1 2z" fill="#fff" opacity=".6"/>
+          </svg>
+          Roast
+        </button>
+        <button class="ptab" onclick="switchPanel('games',this)" style="color:#7b61ff;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:block;margin:0 auto 2px;">
+            <rect x="2" y="6" width="20" height="13" rx="5" fill="currentColor" opacity=".25" stroke="currentColor" stroke-width="1.5"/>
+            <!-- D-pad left-right -->
+            <path d="M7 12.5h4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            <!-- D-pad up-down -->
+            <path d="M9 10.5v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            <!-- Action buttons -->
+            <circle cx="16" cy="10.5" r="1.2" fill="currentColor" opacity=".9"/>
+            <circle cx="18" cy="12.5" r="1.2" fill="#ff2d78" opacity=".9"/>
+            <circle cx="16" cy="14.5" r="1.2" fill="#ffb700" opacity=".9"/>
+            <circle cx="14" cy="12.5" r="1.2" fill="#7b61ff" opacity=".9"/>
+            <!-- Joystick hint bumps -->
+            <ellipse cx="8" cy="19" rx="3" ry="1.2" fill="currentColor" opacity=".3"/>
+            <ellipse cx="16" cy="19" rx="3" ry="1.2" fill="currentColor" opacity=".3"/>
+          </svg>
+          Games
+        </button>
       </div>
 
       <!-- AI PANEL -->
