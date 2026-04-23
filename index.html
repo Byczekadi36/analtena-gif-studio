@@ -299,6 +299,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
     align-items:center;
     justify-content:center;
     width:100%;
+    min-height:300px;
   }
   .canvas-wrap{
     display:flex;
@@ -552,7 +553,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 @media(max-width:768px){
   #mario-canvas{height:240px!important;}
   .canvas-toolbar{display:none;}
-  .canvas-stage{display:none;}
   #games-center-overlay{min-height:50vh;}
 }
 
@@ -3309,7 +3309,15 @@ async function generateWithAI() {
     setProgress(100, 'Done!', '');
     await sleep(400);
     document.getElementById('progress-overlay').classList.remove('show');
-    toast('🎉 GIF ready — ' + state.frames.length + ' frames!'); setTimeout(fitCanvasToScreen, 200); showCelebration();
+    toast('🎉 GIF ready — ' + state.frames.length + ' frames!');
+    setTimeout(fitCanvasToScreen, 200);
+    // Na mobile: scroll do canvas żeby użytkownik widział wynik
+    setTimeout(function(){
+      var canvasArea = document.querySelector('.canvas-area');
+      if (canvasArea && window.innerWidth <= 768) {
+        canvasArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 400); showCelebration();
     // Show save original button in toolbar
     const saveOrigToolbar = document.getElementById('save-orig-toolbar');
     if (saveOrigToolbar) saveOrigToolbar.style.display = '';
@@ -6456,34 +6464,105 @@ function cmxInit(){ if(!cmxInited){ cmxInited=true; cmxBuildLib(); } }
 // JAK DODAĆ SERIĘ: skopiuj blok {} i wklej na końcu tablicy
 // JAK DODAĆ ODCINEK: dodaj {} do episodes[] wybranej serii
 // NAZWY PLIKÓW: wgraj na GitHub i wpisz ./nazwaPliku.jpg
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║           $ANAL COMICS — ZARZĄDZANIE TREŚCIĄ                    ║
+// ║                                                                  ║
+// ║  JAK DODAĆ NOWY ODCINEK do istniejącej serii:                   ║
+// ║  1. Wgraj plik JPG na GitHub (główny folder projektu)           ║
+// ║  2. Skopiuj linię { title, src, desc } i wklej na końcu         ║
+// ║     tablicy episodes[] wybranej serii                            ║
+// ║  3. Wgraj index.html na GitHub → gotowe!                        ║
+// ║                                                                  ║
+// ║  JAK DODAĆ NOWĄ SERIĘ:                                          ║
+// ║  1. Skopiuj cały blok { id, title, ... } i wklej na końcu       ║
+// ║     CP_LIBRARY (przed ostatnim nawiasem ])                       ║
+// ║  2. Zmień id, title, subtitle, cover, description               ║
+// ║  3. Dodaj odcinki do episodes[]                                  ║
+// ║  4. Wgraj pliki + index.html na GitHub → gotowe!                ║
+// ╚══════════════════════════════════════════════════════════════════╝
+
 const CP_LIBRARY = [
+
+  // ════════════════════════════════════════════════════════════
+  //  SERIA 1: $ANAL Chronicles — Season 1
+  //  Dodaj nowe odcinki na końcu tablicy episodes[]
+  // ════════════════════════════════════════════════════════════
   {
-    id: "chronicles",
+    id: "chronicles-s1",
     title: "$ANAL Chronicles",
     subtitle: "Season 1 — The Reckoning",
     cover: "./We will Find You1.jpg",
     description: "Zombie analyst, sowa $ANAL i fury polskiej społeczności krypto. Największa saga w historii blockchaina.",
     episodes: [
-      { title: "The Hunt Begins",            src: "./We will Find You1.jpg", desc: "The community rises. Angry Polish investors chase the zombie analyst through a burning market. The $ANAL owl runs for its life." },
-      { title: "The Capture",                src: "./We will Find You2.jpg", desc: "Caught! The zombie analyst is bound to a stake. The fire grows. The owl watches in horror as the community demands justice." },
-      { title: "The Fire Trial",             src: "./We will Find You3.jpg", desc: "Three acts: The Accusation, The Capture, The Fire. Full community justice in glorious multi-panel comic art." },
-      { title: "Judgment Day in the Depths", src: "./We will Find You4.jpg", desc: "Descending into HELL-CRASH. The Devil's court charges them with ultimate betrayal of the Polish community." },
-      { title: "The Reconciliation",         src: "./We will Find You5.jpg", desc: "The Devil is confused — $ANAL keeps winning everywhere. It's about the coin, not revenge." },
-      { title: "Penitent Drudgery",          src: "./We will Find You6.jpg", desc: "Sentenced to moderate dead coin chats for eternity. The zombie weeps. The owl pushes XEN data carts through hellfire." },
-      { title: "Analogy Ascendant",          src: "./We will Find You7.jpg", desc: "FINAL VERDICT. $ANAL rises to the heavens. Community strength purifies even the court of judgment. The legacy is eternal." }
+
+      // ── Opublikowane odcinki ──────────────────────────────────
+      {
+        title: "The Hunt Begins",
+        src: "./We will Find You1.jpg",
+        desc: "The community rises. Angry Polish investors chase the zombie analyst through a burning market. The $ANAL owl runs for its life."
+      },
+      {
+        title: "The Capture",
+        src: "./We will Find You2.jpg",
+        desc: "Caught! The zombie analyst is bound to a stake. The fire grows. The owl watches in horror as the community demands justice."
+      },
+      {
+        title: "The Fire Trial",
+        src: "./We will Find You3.jpg",
+        desc: "Three acts: The Accusation, The Capture, The Fire. Full community justice played out in glorious multi-panel comic art."
+      },
+      {
+        title: "Judgment Day in the Depths",
+        src: "./We will Find You4.jpg",
+        desc: "Descending into HELL-CRASH. The Devil's court charges them with ultimate betrayal of the Polish community."
+      },
+      {
+        title: "The Reconciliation",
+        src: "./We will Find You5.jpg",
+        desc: "The Devil is confused — $ANAL keeps winning everywhere. It's about the coin, not revenge."
+      },
+      {
+        title: "Penitent Drudgery",
+        src: "./We will Find You6.jpg",
+        desc: "Sentenced to moderate dead coin chats for eternity. The zombie weeps. The owl pushes XEN data carts through hellfire."
+      },
+      {
+        title: "Analogy Ascendant",
+        src: "./We will Find You7.jpg",
+        desc: "FINAL VERDICT. $ANAL rises to the heavens. Community strength purifies even the court of judgment. The legacy is eternal."
+      },
+
+      // ── TUTAJ DODAJ NOWE ODCINKI ─────────────────────────────
+      // Skopiuj blok poniżej, odkomentuj i wypełnij:
+      //
+      // {
+      //   title: "Tytuł odcinka",
+      //   src: "./We will Find You8.jpg",   ← nazwa pliku na GitHub
+      //   desc: "Krótki opis odcinka..."
+      // },
+
     ]
   },
-  // ── DODAJ NOWĄ SERIĘ TUTAJ — skopiuj blok powyżej:
+
+  // ════════════════════════════════════════════════════════════
+  //  NOWA SERIA — odkomentuj i wypełnij gdy będziesz gotowy
+  //  Skopiuj cały blok i wklej tutaj
+  // ════════════════════════════════════════════════════════════
   // {
-  //   id: "seria2",
-  //   title: "Nowy Tytuł",
+  //   id: "nowa-seria",                       ← unikalne ID
+  //   title: "Tytuł Nowej Serii",
   //   subtitle: "Season 1",
-  //   cover: "./newSeries_ep1.jpg",
+  //   cover: "./newSeries_ep1.jpg",            ← okładka serii
   //   description: "Opis serii...",
   //   episodes: [
-  //     { title: "Ep 1", src: "./newSeries_ep1.jpg", desc: "Opis..." },
+  //     {
+  //       title: "Ep 1",
+  //       src: "./newSeries_ep1.jpg",
+  //       desc: "Opis odcinka..."
+  //     },
   //   ]
   // },
+
 ];
 
 // ─── State ────────────────────────────────────────────────────
