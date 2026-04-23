@@ -107,14 +107,19 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 .app-body.games-mode .canvas-area{display:none!important;}
 .app-body.games-mode #games-center-overlay{display:flex!important;flex:1;}
 .app-body.games-mode .right-panel{display:none!important;}
-/* Mobile: games overlay covers screen */
+/* Mobile: games overlay is fixed to cover screen below game buttons */
 @media(max-width:768px){
-  .app-body.games-mode{flex-direction:column;}
   .app-body.games-mode #games-center-overlay{
+    position:fixed;
+    top:0;
+    left:0;
     width:100%;
-    min-height:60vh;
-    flex:1;
+    height:100%;
+    z-index:9999;
+    background:#080810;
+    overflow-y:auto;
   }
+  .mobile-games-back{display:flex!important;}
 }
 
 /* ── LEFT PANEL ── */
@@ -1006,6 +1011,10 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 
     <!-- 🎮 GAMES OVERLAY - sibling to canvas-area -->
     <div id="games-center-overlay" style="display:none;flex:1;flex-direction:column;overflow:hidden;background:#080810;">
+      <!-- Mobile back button -->
+      <div class="mobile-games-back" style="display:none;padding:8px 12px;background:rgba(0,0,0,0.5);flex-shrink:0;">
+        <button onclick="closeMobileGame()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">← Back to Games</button>
+      </div>
 
       <!-- MARIO RUNNER -->
       <div id="gcenter-mario" style="display:none;width:100%;height:100%;flex-direction:column;">
@@ -4783,6 +4792,18 @@ function initGamesPanel(){
     var el=document.getElementById(id);
     if(el) el.textContent=bal.toLocaleString()+' ANAL';
   });
+}
+
+
+function closeMobileGame(){
+  // Hide games overlay, go back to game list
+  var overlay = document.getElementById('games-center-overlay');
+  if(overlay){overlay.style.display='none';}
+  document.querySelector('.app-body').classList.remove('games-mode');
+  if(window._gamesModeInterval){clearInterval(window._gamesModeInterval);window._gamesModeInterval=null;}
+  // Show canvas-area again (non-games state)
+  var ca = document.querySelector('.canvas-area');
+  if(ca){ca.style.display='';ca.style.flex='1';}
 }
 
 function selectGameCenter(id,btn){
