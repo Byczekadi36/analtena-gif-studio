@@ -612,600 +612,184 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 /* Library view = grid of series cards */
 #panel-comics { padding:0; display:none; flex-direction:column; height:100%; overflow:hidden; }
 
-
-/* ════════════════════════════════════════════════════════════
-   $ANAL COMICS — PREMIUM READER v3.0
-   Cyber-meme comic book, fullscreen, page-flip, neon glow
-   ════════════════════════════════════════════════════════════ */
-
-/* ── PANEL WRAPPER ── */
-#comics-panel {
-  position: fixed;
-  inset: 0;
-  z-index: 300;
-  display: none;
-  flex-direction: column;
-  background: #06060e;
-  overflow: hidden;
-  font-family: var(--font-d, 'Share Tech Mono', monospace);
-}
-#comics-panel.open { display: flex; }
-
-/* ── COMICS HEADER ── */
-.cp-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  height: 52px;
-  background: rgba(6,6,14,.95);
-  border-bottom: 1px solid rgba(168,85,247,.18);
-  flex-shrink: 0;
-  backdrop-filter: blur(12px);
-  position: relative;
-  z-index: 10;
-}
-.cp-header-logo {
-  font-size: 15px;
-  font-weight: 900;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  background: linear-gradient(90deg, #a855f7, #00f5ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.cp-header-close {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,.1);
-  background: rgba(255,255,255,.05);
-  color: rgba(255,255,255,.6);
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  letter-spacing: .05em;
-  transition: all .15s;
-}
-.cp-header-close:hover {
-  border-color: rgba(255,45,120,.4);
-  color: #ff2d78;
-  background: rgba(255,45,120,.08);
-}
-
-/* ── VIEWS ── */
-.cp-view { display: none; flex: 1; overflow: hidden; flex-direction: column; }
-.cp-view.active { display: flex; }
-
-/* ════════════════════════════════════════════════════════
-   LIBRARY VIEW
-   ════════════════════════════════════════════════════════ */
-.cp-lib-view {
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(168,85,247,.3) transparent;
-}
-
-/* Hero banner */
-.cp-lib-hero {
-  position: relative;
-  padding: 28px 20px 20px;
+.cmx-lib-header {
+  background: linear-gradient(180deg,#1e0010 0%,#0d0005 100%);
+  border-bottom: 3px solid #ffd700;
+  padding: 14px 14px 10px;
   text-align: center;
-  background: linear-gradient(180deg,
-    rgba(168,85,247,.15) 0%,
-    rgba(123,97,255,.08) 50%,
-    transparent 100%);
-  border-bottom: 1px solid rgba(168,85,247,.1);
-  overflow: hidden;
+  flex-shrink: 0;
 }
-.cp-lib-hero::before {
-  content: '';
-  position: absolute;
-  top: -60px; left: 50%;
-  transform: translateX(-50%);
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(168,85,247,.15) 0%, transparent 70%);
-  pointer-events: none;
+.cmx-lib-title {
+  font-family: 'Bangers', 'Impact', cursive;
+  font-size: 28px; color: #ffd700;
+  text-shadow: 2px 2px 0 #cc1a00, 4px 4px 0 rgba(0,0,0,.5);
+  letter-spacing: 3px; line-height: 1;
 }
-.cp-lib-hero-title {
-  font-size: 26px;
-  font-weight: 900;
-  letter-spacing: .15em;
-  text-transform: uppercase;
-  background: linear-gradient(135deg, #a855f7 0%, #00f5ff 50%, #22ff88 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 6px;
-  position: relative;
-  z-index: 1;
-  text-shadow: none;
-}
-.cp-lib-hero-sub {
-  font-size: 11px;
-  color: rgba(255,255,255,.4);
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  position: relative;
-  z-index: 1;
-}
+.cmx-lib-sub { color: rgba(255,255,255,.4); font-size: 10px; letter-spacing: 2px; margin-top: 4px; }
 
-/* Series grid */
-.cp-series-grid {
+/* Grid of series */
+.cmx-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 14px;
-  padding: 20px 16px;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px; padding: 12px; flex: 1; overflow-y: auto;
 }
-@media (min-width: 600px) {
-  .cp-series-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+.cmx-series-card {
+  background: rgba(255,255,255,.04);
+  border: 1.5px solid rgba(255,255,255,.08);
+  border-radius: 6px; overflow: hidden; cursor: pointer;
+  transition: transform .15s, border-color .15s, box-shadow .15s;
+  display: flex; flex-direction: column;
+}
+.cmx-series-card:hover {
+  transform: translateY(-4px); border-color: #ffd700;
+  box-shadow: 0 8px 28px rgba(255,215,0,.15);
+}
+.cmx-series-cover { width:100%; aspect-ratio:.68; object-fit:cover; object-position:top; display:block; }
+.cmx-series-info { padding: 8px 8px 10px; }
+.cmx-series-ep-count { font-size:9px; font-weight:700; letter-spacing:2px; color:rgba(255,255,255,.35); margin-bottom:3px; text-transform:uppercase; }
+.cmx-series-name { font-family:'Bangers','Impact',cursive; font-size:14px; color:#ffd700; letter-spacing:.5px; line-height:1.1; margin-bottom:2px; }
+.cmx-series-sub { font-size:9px; color:rgba(255,255,255,.3); margin-bottom:5px; }
+.cmx-series-btn {
+  width:100%; background:#cc1a00; color:#fff;
+  font-weight:900; font-size:10px; letter-spacing:1px; text-transform:uppercase;
+  padding:5px; border:none; border-radius:3px; cursor:pointer;
+  box-shadow:2px 2px 0 #7b0000; transition:filter .12s;
+}
+.cmx-series-btn:hover { filter:brightness(1.12); }
+
+/* ── READER (episode view) ── */
+.cmx-reader { display:none; flex-direction:column; height:100%; overflow:hidden; }
+.cmx-reader.open { display:flex; }
+
+.cmx-rdr-header {
+  background: linear-gradient(180deg,#1e0010,#0d0005);
+  border-bottom: 2px solid #ffd700;
+  padding: 8px 12px; display:flex; align-items:center; gap:8px; flex-shrink:0;
+}
+.cmx-back {
+  background: rgba(255,255,255,.07); border: 1.5px solid rgba(255,255,255,.15);
+  color: rgba(255,255,255,.8); font-size:10px; font-weight:700; letter-spacing:1px;
+  padding: 5px 10px; border-radius:3px; cursor:pointer; text-transform:uppercase;
+  transition: background .12s, border-color .12s; white-space:nowrap;
+}
+.cmx-back:hover { background:rgba(255,215,0,.1); border-color:#ffd700; color:#ffd700; }
+.cmx-rdr-title-wrap { flex:1; min-width:0; }
+.cmx-rdr-series { font-family:'Bangers','Impact',cursive; font-size:17px; color:#ffd700; letter-spacing:1px; line-height:1; }
+.cmx-rdr-season { font-size:9px; color:rgba(255,255,255,.35); letter-spacing:1px; margin-top:1px; }
+
+/* Episode strip */
+.cmx-strip-wrap { flex-shrink:0; padding:8px 12px 0; }
+.cmx-strip-lbl { font-size:9px; font-weight:700; color:rgba(255,215,0,.45); letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; }
+.cmx-strip {
+  display:flex; gap:7px; overflow-x:auto; padding-bottom:8px;
+  scroll-snap-type:x mandatory; scrollbar-width:thin; scrollbar-color:#ffd70030 transparent;
+}
+.cmx-strip::-webkit-scrollbar { height:3px; }
+.cmx-strip::-webkit-scrollbar-thumb { background:#ffd70035; border-radius:2px; }
+.cmx-thumb {
+  flex:0 0 62px; scroll-snap-align:start; cursor:pointer;
+  border-radius:3px; overflow:hidden; border:2px solid transparent;
+  transition:border-color .12s, transform .12s; position:relative;
+}
+.cmx-thumb:hover, .cmx-thumb.act { border-color:#ffd700; transform:translateY(-3px); }
+.cmx-thumb img { width:100%; aspect-ratio:.68; object-fit:cover; display:block; }
+.cmx-thumb-ep {
+  position:absolute; top:2px; left:2px;
+  background:#cc1a00; color:#fff; font-size:8px; font-weight:900;
+  padding:1px 4px; border-radius:2px;
 }
 
-/* Series card */
-.cp-series-card {
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1.5px solid rgba(168,85,247,.15);
-  background: linear-gradient(145deg, rgba(255,255,255,.04), rgba(0,0,0,.3));
-  cursor: pointer;
-  transition: all .22s cubic-bezier(.22,1,.36,1);
-  group: true;
+/* Divider */
+.cmx-divider { border:none; border-top:1px dashed rgba(255,215,0,.1); margin:6px 12px; flex-shrink:0; }
+
+/* Featured reader */
+.cmx-featured-wrap { flex:1; min-height:0; padding:0 12px 12px; display:flex; flex-direction:column; gap:6px; }
+.cmx-feat-lbl { font-size:9px; font-weight:700; color:rgba(255,215,0,.45); letter-spacing:2px; text-transform:uppercase; flex-shrink:0; }
+.cmx-featured { display:flex; gap:10px; flex:1; min-height:0; }
+
+.cmx-img-col { flex:0 0 auto; width:min(200px,42vw); cursor:zoom-in; position:relative; }
+.cmx-img-glow {
+  position:absolute; inset:-2px; border-radius:5px;
+  background:linear-gradient(135deg,#ffd700,#cc1a00,#7b21cc);
+  z-index:0; animation:cmxGlow 3s ease-in-out infinite alternate; opacity:.7;
 }
-.cp-series-card:hover {
-  transform: translateY(-4px) scale(1.02);
-  border-color: rgba(168,85,247,.5);
-  box-shadow: 0 8px 30px rgba(0,0,0,.5),
-              0 0 20px rgba(168,85,247,.2);
+@keyframes cmxGlow { to { opacity:1; } }
+.cmx-img-col img { position:relative; z-index:1; width:100%; display:block; border-radius:3px; }
+
+.cmx-info-col { flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; padding-top:2px; }
+.cmx-ep-badge {
+  display:inline-block; background:#cc1a00; color:#fff;
+  font-size:10px; font-weight:900; letter-spacing:1px;
+  padding:2px 8px; box-shadow:2px 2px 0 #7b0000; border-radius:2px; width:fit-content;
 }
-.cp-series-cover {
-  width: 100%;
-  aspect-ratio: .68;
-  object-fit: cover;
-  object-position: top;
-  display: block;
-  transition: transform .3s;
+.cmx-ep-title {
+  font-family:'Bangers','Impact',cursive; color:#ffd700;
+  font-size:clamp(14px,3vw,18px); line-height:1.2;
+  text-shadow:1px 1px 0 #cc1a00;
 }
-.cp-series-card:hover .cp-series-cover {
-  transform: scale(1.04);
+.cmx-ep-desc {
+  color:rgba(255,255,255,.55); font-size:11px; line-height:1.6; flex:1;
+  overflow:hidden; display:-webkit-box;
+  -webkit-line-clamp:5; -webkit-box-orient:vertical;
 }
-.cp-series-overlay {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  background: linear-gradient(0deg, rgba(0,0,0,.95) 0%, rgba(0,0,0,.6) 60%, transparent 100%);
-  padding: 40px 12px 12px;
+.cmx-nav { display:flex; gap:5px; flex-wrap:wrap; flex-shrink:0; }
+.cmx-nbtn {
+  font-weight:900; font-size:10px; letter-spacing:.5px;
+  padding:5px 10px; border:none; border-radius:3px; cursor:pointer;
+  text-transform:uppercase; transition:filter .12s;
 }
-.cp-series-ep-count {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  color: rgba(168,85,247,.8);
-  text-transform: uppercase;
-  margin-bottom: 3px;
+.cmx-nbtn:active { transform:translate(1px,1px); }
+.cmx-nbtn:hover { filter:brightness(1.12); }
+.cmx-nbtn-p { background:#1a1a2e; color:#ffd700; border:1.5px solid rgba(255,215,0,.3); box-shadow:2px 2px 0 #000; }
+.cmx-nbtn-f { background:#ffd700; color:#1a0010; box-shadow:2px 2px 0 #a88000; }
+.cmx-nbtn-n { background:#cc1a00; color:#fff; box-shadow:2px 2px 0 #7b0000; }
+.cmx-dots { display:flex; gap:4px; flex-wrap:wrap; flex-shrink:0; }
+.cmx-dot {
+  width:7px; height:7px; border-radius:50%;
+  background:rgba(255,215,0,.18); border:1.5px solid rgba(255,215,0,.28);
+  cursor:pointer; transition:all .12s;
 }
-.cp-series-name {
-  font-size: 14px;
-  font-weight: 900;
-  color: #fff;
-  letter-spacing: .04em;
-  line-height: 1.2;
-  margin-bottom: 8px;
-  text-shadow: 0 1px 4px rgba(0,0,0,.8);
-}
-.cp-series-btn {
-  width: 100%;
-  padding: 7px;
-  border-radius: 7px;
-  border: none;
-  background: linear-gradient(135deg, #a855f7, #7b61ff);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all .15s;
-  box-shadow: 0 2px 12px rgba(168,85,247,.4);
-}
-.cp-series-btn:hover {
-  filter: brightness(1.15);
-  box-shadow: 0 4px 18px rgba(168,85,247,.6);
+.cmx-dot.act { background:#ffd700; border-color:#ffd700; box-shadow:0 0 5px #ffd700; }
+
+/* Mobile */
+@media(max-width:480px) {
+  .cmx-featured { flex-direction:column; }
+  .cmx-img-col { width:100% !important; max-height:52vw; overflow:hidden; }
+  .cmx-grid { grid-template-columns:1fr 1fr; gap:8px; padding:8px; }
+  .cmx-ep-desc { -webkit-line-clamp:3; }
+  .cmx-thumb { flex:0 0 56px; }
 }
 
-/* ════════════════════════════════════════════════════════
-   READER VIEW — page flip, fullscreen
-   ════════════════════════════════════════════════════════ */
-.cp-reader-view {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: #06060e;
+/* ── LIGHTBOX ── */
+.cmx-lb {
+  display:none; position:fixed; inset:0; z-index:99999;
+  background:rgba(0,0,0,.97); backdrop-filter:blur(10px);
+  flex-direction:column; align-items:center; justify-content:center;
+  gap:12px; padding:14px;
 }
-
-/* Reader toolbar */
-.cp-reader-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 14px;
-  height: 44px;
-  background: rgba(6,6,14,.9);
-  border-bottom: 1px solid rgba(168,85,247,.1);
-  flex-shrink: 0;
-  gap: 10px;
+.cmx-lb.open { display:flex; animation:cmxLbIn .2s ease; }
+@keyframes cmxLbIn { from{opacity:0;transform:scale(.97)} to{opacity:1;transform:scale(1)} }
+.cmx-lb-img {
+  max-height:78vh; max-width:min(94vw,560px); object-fit:contain;
+  border:3px solid #ffd700; border-radius:6px;
+  box-shadow:0 0 50px rgba(255,215,0,.15);
 }
-.cp-reader-back {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  border-radius: 7px;
-  border: 1px solid rgba(168,85,247,.25);
-  background: rgba(168,85,247,.07);
-  color: #a855f7;
-  font-size: 10px;
-  font-weight: 800;
-  cursor: pointer;
-  letter-spacing: .06em;
-  transition: all .15s;
-  flex-shrink: 0;
+.cmx-lb-sub { color:rgba(255,255,255,.45); font-size:10px; letter-spacing:2px; text-align:center; text-transform:uppercase; }
+.cmx-lb-ctrl { display:flex; align-items:center; gap:10px; }
+.cmx-lb-btn {
+  background:rgba(255,255,255,.08); border:1.5px solid rgba(255,255,255,.18);
+  color:#fff; font-weight:900; font-size:13px; padding:7px 16px;
+  border-radius:4px; cursor:pointer; letter-spacing:1px;
+  transition:background .12s, border-color .12s;
 }
-.cp-reader-back:hover { background: rgba(168,85,247,.15); }
-.cp-reader-title-bar {
-  flex: 1;
-  min-width: 0;
-  text-align: center;
+.cmx-lb-btn:hover { background:rgba(255,215,0,.15); border-color:#ffd700; }
+.cmx-lb-ctr { font-family:'Bangers','Impact',cursive; color:#ffd700; font-size:18px; letter-spacing:2px; min-width:55px; text-align:center; }
+.cmx-lb-x {
+  position:absolute; top:14px; right:18px; background:none; border:none;
+  color:rgba(255,255,255,.45); font-size:26px; cursor:pointer;
+  transition:color .12s; line-height:1; z-index:2;
 }
-.cp-reader-series-name {
-  font-size: 11px;
-  font-weight: 800;
-  color: rgba(255,255,255,.6);
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.cp-reader-page-counter {
-  font-size: 9px;
-  color: rgba(168,85,247,.7);
-  letter-spacing: .06em;
-  margin-top: 1px;
-}
-
-/* ── PAGE FLIP STAGE ── */
-.cp-stage {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  background: #06060e;
-  /* subtle vignette */
-  box-shadow: inset 0 0 80px rgba(0,0,0,.7);
-}
-
-/* paper texture overlay */
-.cp-stage::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 1;
-  opacity: .4;
-}
-
-/* Page flip book */
-.cp-book {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  max-width: min(90vw, 500px);
-  max-height: calc(100% - 20px);
-  perspective: 1200px;
-}
-@media (min-width: 900px) {
-  .cp-book { max-width: min(85vw, 900px); }
-}
-
-/* Single page container */
-.cp-page {
-  position: relative;
-  width: 100%;
-  max-height: 100%;
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow:
-    0 20px 60px rgba(0,0,0,.8),
-    0 0 0 1px rgba(168,85,247,.15),
-    0 0 30px rgba(168,85,247,.06);
-  transform-origin: center;
-  transition: box-shadow .3s;
-}
-.cp-page.flip-in  { animation: cpFlipIn  .4s cubic-bezier(.22,1,.36,1) both; }
-.cp-page.flip-out { animation: cpFlipOut .35s cubic-bezier(.55,0,.45,1) both; }
-
-@keyframes cpFlipIn {
-  0%   { opacity:0; transform: perspective(800px) rotateY(-25deg) scale(.96); }
-  100% { opacity:1; transform: perspective(800px) rotateY(0deg)   scale(1);   }
-}
-@keyframes cpFlipOut {
-  0%   { opacity:1; transform: perspective(800px) rotateY(0deg)   scale(1);   }
-  100% { opacity:0; transform: perspective(800px) rotateY(25deg)  scale(.96); }
-}
-
-/* Prev/next flip directions */
-.cp-page.flip-in-prev  { animation: cpFlipInPrev  .4s cubic-bezier(.22,1,.36,1) both; }
-.cp-page.flip-out-prev { animation: cpFlipOutPrev .35s cubic-bezier(.55,0,.45,1) both; }
-@keyframes cpFlipInPrev {
-  0%   { opacity:0; transform: perspective(800px) rotateY(25deg)  scale(.96); }
-  100% { opacity:1; transform: perspective(800px) rotateY(0deg)   scale(1);   }
-}
-@keyframes cpFlipOutPrev {
-  0%   { opacity:1; transform: perspective(800px) rotateY(0deg)   scale(1);   }
-  100% { opacity:0; transform: perspective(800px) rotateY(-25deg) scale(.96); }
-}
-
-.cp-page-img {
-  width: 100%;
-  height: auto;
-  display: block;
-  max-height: calc(100vh - 200px);
-  object-fit: contain;
-}
-
-/* Neon glow border on page */
-.cp-page::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 4px;
-  background: linear-gradient(135deg,
-    rgba(168,85,247,.08) 0%,
-    transparent 40%,
-    transparent 60%,
-    rgba(0,245,255,.04) 100%);
-  pointer-events: none;
-}
-
-/* Corner fold effect */
-.cp-corner-fold {
-  position: absolute;
-  bottom: 0; right: 0;
-  width: 24px; height: 24px;
-  background: linear-gradient(225deg, rgba(168,85,247,.3) 0%, transparent 60%);
-  pointer-events: none;
-}
-
-/* Nav arrows */
-.cp-nav-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(168,85,247,.3);
-  background: rgba(6,6,14,.85);
-  backdrop-filter: blur(8px);
-  color: #a855f7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all .18s;
-  z-index: 5;
-  font-size: 16px;
-  -webkit-tap-highlight-color: transparent;
-}
-.cp-nav-arrow:hover {
-  border-color: rgba(168,85,247,.6);
-  background: rgba(168,85,247,.1);
-  box-shadow: 0 0 14px rgba(168,85,247,.3);
-}
-.cp-nav-arrow:disabled {
-  opacity: .2;
-  cursor: not-allowed;
-}
-.cp-nav-prev { left: 6px; }
-.cp-nav-next { right: 6px; }
-
-@media (min-width: 600px) {
-  .cp-nav-arrow { width: 44px; height: 44px; }
-  .cp-nav-prev { left: 16px; }
-  .cp-nav-next { right: 16px; }
-}
-
-/* ── THUMBNAIL STRIP ── */
-.cp-thumbs-bar {
-  flex-shrink: 0;
-  padding: 8px 14px;
-  background: rgba(6,6,14,.95);
-  border-top: 1px solid rgba(168,85,247,.1);
-}
-.cp-thumbs-scroll {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(168,85,247,.3) transparent;
-  padding-bottom: 4px;
-}
-.cp-thumbs-scroll::-webkit-scrollbar { height: 3px; }
-.cp-thumbs-scroll::-webkit-scrollbar-thumb {
-  background: rgba(168,85,247,.3);
-  border-radius: 2px;
-}
-.cp-thumb-item {
-  flex: 0 0 44px;
-  scroll-snap-align: start;
-  cursor: pointer;
-  border-radius: 5px;
-  overflow: hidden;
-  border: 2px solid transparent;
-  transition: all .15s;
-  position: relative;
-}
-.cp-thumb-item:hover {
-  border-color: rgba(168,85,247,.5);
-  transform: translateY(-2px);
-}
-.cp-thumb-item.active {
-  border-color: #a855f7;
-  box-shadow: 0 0 8px rgba(168,85,247,.5);
-}
-.cp-thumb-item img {
-  width: 100%;
-  aspect-ratio: .68;
-  object-fit: cover;
-  display: block;
-}
-.cp-thumb-num {
-  position: absolute;
-  bottom: 1px; left: 0; right: 0;
-  text-align: center;
-  font-size: 7px;
-  font-weight: 800;
-  color: rgba(255,255,255,.7);
-  background: rgba(0,0,0,.7);
-  padding: 1px 0;
-}
-
-/* ── DOUBLE PAGE (desktop) ── */
-@media (min-width: 900px) {
-  .cp-book.double-page {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2px;
-    max-width: min(88vw, 960px);
-  }
-  .cp-book.double-page .cp-page:first-child {
-    border-radius: 4px 0 0 4px;
-    box-shadow: -4px 0 20px rgba(0,0,0,.6), 0 20px 60px rgba(0,0,0,.8);
-  }
-  .cp-book.double-page .cp-page:last-child {
-    border-radius: 0 4px 4px 0;
-    box-shadow: 4px 0 20px rgba(0,0,0,.6), 0 20px 60px rgba(0,0,0,.8);
-  }
-  /* spine effect */
-  .cp-book.double-page::after {
-    content: '';
-    position: absolute;
-    top: 0; bottom: 0;
-    left: 50%;
-    width: 4px;
-    transform: translateX(-50%);
-    background: linear-gradient(0deg, rgba(0,0,0,.9), rgba(168,85,247,.15), rgba(0,0,0,.9));
-    box-shadow: 0 0 12px rgba(168,85,247,.2);
-    z-index: 3;
-    pointer-events: none;
-  }
-}
-
-/* ── LIGHTBOX (enlarged view) ── */
-.cp-lb {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  background: rgba(0,0,0,.96);
-  backdrop-filter: blur(12px);
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 20px;
-}
-.cp-lb.open { display: flex; animation: cpLbIn .2s ease both; }
-@keyframes cpLbIn {
-  from { opacity:0; transform: scale(.96); }
-  to   { opacity:1; transform: scale(1); }
-}
-.cp-lb-img {
-  max-height: 80vh;
-  max-width: min(95vw, 680px);
-  object-fit: contain;
-  border-radius: 6px;
-  border: 2px solid rgba(168,85,247,.3);
-  box-shadow: 0 0 50px rgba(168,85,247,.15), 0 20px 60px rgba(0,0,0,.8);
-}
-.cp-lb-ctrl {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.cp-lb-btn {
-  padding: 7px 16px;
-  border-radius: 8px;
-  border: 1.5px solid rgba(168,85,247,.3);
-  background: rgba(168,85,247,.08);
-  color: #a855f7;
-  font-size: 14px;
-  font-weight: 900;
-  cursor: pointer;
-  transition: all .15s;
-}
-.cp-lb-btn:hover {
-  border-color: rgba(168,85,247,.6);
-  background: rgba(168,85,247,.15);
-  box-shadow: 0 0 12px rgba(168,85,247,.2);
-}
-.cp-lb-ctr {
-  font-size: 16px;
-  font-weight: 900;
-  color: #a855f7;
-  min-width: 60px;
-  text-align: center;
-  letter-spacing: .08em;
-}
-.cp-lb-sub {
-  font-size: 10px;
-  color: rgba(255,255,255,.35);
-  letter-spacing: .1em;
-  text-transform: uppercase;
-}
-.cp-lb-dots {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-.cp-lb-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: rgba(168,85,247,.25);
-  border: 1.5px solid rgba(168,85,247,.35);
-  cursor: pointer;
-  transition: all .15s;
-}
-.cp-lb-dot.act {
-  background: #a855f7;
-  border-color: #a855f7;
-  box-shadow: 0 0 6px rgba(168,85,247,.7);
-}
-.cp-lb-x {
-  position: absolute;
-  top: 14px; right: 18px;
-  background: none;
-  border: none;
-  color: rgba(255,255,255,.4);
-  font-size: 26px;
-  cursor: pointer;
-  transition: color .15s;
-  line-height: 1;
-  padding: 6px;
-}
-.cp-lb-x:hover { color: #ff2d78; }
-
+.cmx-lb-x:hover { color:#fff; }
 .cmx-lb-dots { display:flex; gap:5px; flex-wrap:wrap; justify-content:center; }
 
 
@@ -9103,21 +8687,38 @@ function cmxInit(){ if(!cmxInited){ cmxInited=true; cmxBuildLib(); } }
 
 
 
-// ════════════════════════════════════════════════════════════
-//  $ANAL COMICS SYSTEM v3.0 — Premium Reader with Page Flip
-//
-//  HOW TO ADD A NEW SERIES:
-//  1. Copy one of the objects below inside CP_LIBRARY = [...]
-//  2. Give it a unique id, title, subtitle, cover path
-//  3. Add episodes (each has title, src, desc)
-//  4. Upload images to GitHub, use ./filename.jpg paths
-//
-//  HOW TO ADD AN EPISODE to existing series:
-//  Find the series in CP_LIBRARY, add to its episodes[] array
-//  Example: { title: "Ep 8", src: "./We will Find You8.jpg", desc: "..." }
-// ════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  $ANAL COMICS SYSTEM — jak Community Gallery
+//  openComics() otwiera fullscreen panel
+// ══════════════════════════════════════════════════════════════
 
-var CP_LIBRARY = [
+// ─── COMIC LIBRARY — edytuj żeby dodać serie i odcinki ───────
+// JAK DODAĆ SERIĘ: skopiuj blok {} i wklej na końcu tablicy
+// JAK DODAĆ ODCINEK: dodaj {} do episodes[] wybranej serii
+// NAZWY PLIKÓW: wgraj na GitHub i wpisz ./nazwaPliku.jpg
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║           $ANAL COMICS — ZARZĄDZANIE TREŚCIĄ                    ║
+// ║                                                                  ║
+// ║  JAK DODAĆ NOWY ODCINEK do istniejącej serii:                   ║
+// ║  1. Wgraj plik JPG na GitHub (główny folder projektu)           ║
+// ║  2. Skopiuj linię { title, src, desc } i wklej na końcu         ║
+// ║     tablicy episodes[] wybranej serii                            ║
+// ║  3. Wgraj index.html na GitHub → gotowe!                        ║
+// ║                                                                  ║
+// ║  JAK DODAĆ NOWĄ SERIĘ:                                          ║
+// ║  1. Skopiuj cały blok { id, title, ... } i wklej na końcu       ║
+// ║     CP_LIBRARY (przed ostatnim nawiasem ])                       ║
+// ║  2. Zmień id, title, subtitle, cover, description               ║
+// ║  3. Dodaj odcinki do episodes[]                                  ║
+// ║  4. Wgraj pliki + index.html na GitHub → gotowe!                ║
+// ╚══════════════════════════════════════════════════════════════════╝
+
+const CP_LIBRARY = [
+
+  // ════════════════════════════════════════════════════════════
+  //  SERIA 1: $ANAL Chronicles — Season 1
+  //  Dodaj nowe odcinki na końcu tablicy episodes[]
+  // ════════════════════════════════════════════════════════════
   {
     id: "chronicles-s1",
     title: "$ANAL Chronicles",
@@ -9125,98 +8726,110 @@ var CP_LIBRARY = [
     cover: "./We will Find You1.jpg",
     description: "Zombie analyst, sowa $ANAL i fury polskiej społeczności krypto. Największa saga w historii blockchaina.",
     episodes: [
-      { title: "The Hunt Begins",         src: "./We will Find You1.jpg", desc: "The community rises. Angry Polish investors chase the zombie analyst through a burning market." },
-      { title: "The Capture",             src: "./We will Find You2.jpg", desc: "Caught! The zombie analyst is bound to a stake. The fire grows." },
-      { title: "The Fire Trial",          src: "./We will Find You3.jpg", desc: "Three acts: The Accusation, The Capture, The Fire." },
-      { title: "Judgment Day in Depths",  src: "./We will Find You4.jpg", desc: "Descending into HELL-CRASH. The Devil's court charges them." },
-      { title: "The Reconciliation",      src: "./We will Find You5.jpg", desc: "The Devil is confused — $ANAL keeps winning everywhere." },
-      { title: "Penitent Drudgery",       src: "./We will Find You6.jpg", desc: "Sentenced to moderate dead coin chats for eternity." },
-      { title: "Analogy Ascendant",       src: "./We will Find You7.jpg", desc: "FINAL VERDICT. $ANAL rises to the heavens." }
+
+      // ── Opublikowane odcinki ──────────────────────────────────
+      {
+        title: "The Hunt Begins",
+        src: "./We will Find You1.jpg",
+        desc: "The community rises. Angry Polish investors chase the zombie analyst through a burning market. The $ANAL owl runs for its life."
+      },
+      {
+        title: "The Capture",
+        src: "./We will Find You2.jpg",
+        desc: "Caught! The zombie analyst is bound to a stake. The fire grows. The owl watches in horror as the community demands justice."
+      },
+      {
+        title: "The Fire Trial",
+        src: "./We will Find You3.jpg",
+        desc: "Three acts: The Accusation, The Capture, The Fire. Full community justice played out in glorious multi-panel comic art."
+      },
+      {
+        title: "Judgment Day in the Depths",
+        src: "./We will Find You4.jpg",
+        desc: "Descending into HELL-CRASH. The Devil's court charges them with ultimate betrayal of the Polish community."
+      },
+      {
+        title: "The Reconciliation",
+        src: "./We will Find You5.jpg",
+        desc: "The Devil is confused — $ANAL keeps winning everywhere. It's about the coin, not revenge."
+      },
+      {
+        title: "Penitent Drudgery",
+        src: "./We will Find You6.jpg",
+        desc: "Sentenced to moderate dead coin chats for eternity. The zombie weeps. The owl pushes XEN data carts through hellfire."
+      },
+      {
+        title: "Analogy Ascendant",
+        src: "./We will Find You7.jpg",
+        desc: "FINAL VERDICT. $ANAL rises to the heavens. Community strength purifies even the court of judgment. The legacy is eternal."
+      },
+
+      // ── TUTAJ DODAJ NOWE ODCINKI ─────────────────────────────
+      // Skopiuj blok poniżej, odkomentuj i wypełnij:
+      //
+      // {
+      //   title: "Tytuł odcinka",
+      //   src: "./We will Find You8.jpg",   ← nazwa pliku na GitHub
+      //   desc: "Krótki opis odcinka..."
+      // },
+
     ]
-  }
-  // ← ADD NEW SERIES HERE (copy the block above)
+  },
+
+  // ════════════════════════════════════════════════════════════
+  //  NOWA SERIA — odkomentuj i wypełnij gdy będziesz gotowy
+  //  Skopiuj cały blok i wklej tutaj
+  // ════════════════════════════════════════════════════════════
+  // {
+  //   id: "nowa-seria",                       ← unikalne ID
+  //   title: "Tytuł Nowej Serii",
+  //   subtitle: "Season 1",
+  //   cover: "./newSeries_ep1.jpg",            ← okładka serii
+  //   description: "Opis serii...",
+  //   episodes: [
+  //     {
+  //       title: "Ep 1",
+  //       src: "./newSeries_ep1.jpg",
+  //       desc: "Opis odcinka..."
+  //     },
+  //   ]
+  // },
+
 ];
 
-// ── State ────────────────────────────────────────────────────
-var cpBuilt = false;
+// ─── State ────────────────────────────────────────────────────
 var cpCurSeries = null;
-var cpEpisodes = [];
-var cpPage = 0;   // current page index
-var cpInited = false;
+var cpCurEp = 0;
+var cpLbEp = 0;
+var cpBuilt = false;
 
-// ── Page flip audio ──────────────────────────────────────────
-// Using HTML Audio with base64-encoded short sounds
-// Cycle through variants for natural feel
-var cpFlipIdx = 0;
-var cpFlipSounds = [];
-(function(){
-  // Two-tone paper whoosh generated via Web Audio API
-  // We create them on first use to avoid startup cost
-})();
-
-function cpPlayFlip() {
-  try {
-    var ctx = window._cpAudioCtx;
-    if (!ctx) {
-      ctx = new (window.AudioContext || window.webkitAudioContext)();
-      window._cpAudioCtx = ctx;
-    }
-    // Variant 0: soft high whoosh, Variant 1: lower thud
-    var which = cpFlipIdx % 2;
-    cpFlipIdx++;
-    var osc = ctx.createOscillator();
-    var gain = ctx.createGain();
-    var filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = which === 0 ? 1800 : 900;
-    filter.Q.value = 0.8;
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = 'sawtooth';
-    var t = ctx.currentTime;
-    osc.frequency.setValueAtTime(which === 0 ? 800 : 400, t);
-    osc.frequency.exponentialRampToValueAtTime(which === 0 ? 200 : 120, t + 0.12);
-    gain.gain.setValueAtTime(0.18, t);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
-    osc.start(t);
-    osc.stop(t + 0.16);
-  } catch(e) {
-    // Audio not supported - silent fail
-  }
-}
-
-// ── Open/Close comics ─────────────────────────────────────────
+// ─── Open / Close ─────────────────────────────────────────────
 function openComics() {
-  var panel = document.getElementById('comics-panel');
-  if (!panel) return;
-  panel.classList.add('open');
+  document.getElementById('comics-panel').style.display = 'block';
   document.body.style.overflow = 'hidden';
-  var appEl = document.getElementById('app');
-  if (appEl) appEl.classList.add('comics-mode');
-  // Mark tab active
-  document.querySelectorAll('.ptab').forEach(function(b){ b.classList.remove('active'); });
-  var tab = document.querySelector('.ptab[data-panel="comics"]');
-  if (!tab) tab = document.querySelector('.ptab-comics');
-  if (tab) tab.classList.add('active');
+  // Mark tab as active
+  document.querySelectorAll('.ptab').forEach(function(b) { b.classList.remove('active'); });
+  var comicsTab = document.querySelector('.ptab[onclick*="openComics"]');
+  if (comicsTab) comicsTab.classList.add('active');
   // Build library on first open
   if (!cpBuilt) { cpBuilt = true; cpBuildLib(); }
   cpShowLib();
 }
 
 function closeComics() {
-  var panel = document.getElementById('comics-panel');
-  if (panel) panel.classList.remove('open');
+  document.getElementById('comics-panel').style.display = 'none';
   document.body.style.overflow = '';
+  // Restore mobile toolbar
   var appEl = document.getElementById('app');
   if (appEl) appEl.classList.remove('comics-mode');
-  // Restore AI tab active
-  document.querySelectorAll('.ptab').forEach(function(b){ b.classList.remove('active'); });
-  var aiTab = document.querySelector('.ptab[data-panel="ai"]');
+  // Restore AI tab as active
+  document.querySelectorAll('.ptab').forEach(function(b) { b.classList.remove('active'); });
+  var aiTab = document.querySelector('.ptab[onclick*="switchPanel(\'ai\'"]');
+  if (!aiTab) aiTab = document.querySelectorAll('.ptab')[0];
   if (aiTab) aiTab.classList.add('active');
 }
 
-// ── Library ───────────────────────────────────────────────────
+// ─── Library ──────────────────────────────────────────────────
 function cpBuildLib() {
   var grid = document.getElementById('cpSeriesGrid');
   if (!grid) return;
@@ -9225,216 +8838,132 @@ function cpBuildLib() {
     var card = document.createElement('div');
     card.className = 'cp-series-card';
     card.innerHTML =
-      '<img class="cp-series-cover" src="' + s.cover + '" alt="' + s.title + '" loading="lazy">' +
-      '<div class="cp-series-overlay">' +
-        '<div class="cp-series-ep-count">' + s.episodes.length + ' Episodes</div>' +
+      '<img src="' + s.cover + '" alt="' + s.title + '" loading="lazy">' +
+      '<div class="cp-series-info">' +
+        '<div class="cp-series-eps">' + s.episodes.length + ' Episode' + (s.episodes.length !== 1 ? 's' : '') + '</div>' +
         '<div class="cp-series-name">' + s.title + '</div>' +
-        '<button class="cp-series-btn" onclick="cpOpenSeries(' + si + ');event.stopPropagation()">▶ Read Now</button>' +
+        '<div class="cp-series-sub">' + s.subtitle + '</div>' +
+        '<button class="cp-series-btn" onclick="cpOpenSeries(' + si + ');event.stopPropagation()">Read Now ▶</button>' +
       '</div>';
-    card.onclick = function(){ cpOpenSeries(si); };
+    card.onclick = function() { cpOpenSeries(si); };
     grid.appendChild(card);
   });
 }
 
 function cpShowLib() {
-  document.getElementById('cpLibView').classList.add('active');
-  document.getElementById('cpReaderView').classList.remove('active');
+  document.getElementById('cpLibView').style.display = 'block';
+  document.getElementById('cpEpView').style.display = 'none';
+  document.getElementById('cpReaderView').style.display = 'none';
+  cpSetBreadcrumb(['All Series']);
 }
 
-// ── Open series → start reading ──────────────────────────────
+// ─── Series → Episode List ────────────────────────────────────
 function cpOpenSeries(si) {
   cpCurSeries = CP_LIBRARY[si];
-  cpEpisodes  = cpCurSeries.episodes;
-  cpPage = 0;
-  // Switch views
-  document.getElementById('cpLibView').classList.remove('active');
-  document.getElementById('cpReaderView').classList.add('active');
-  // Set title
-  document.getElementById('cpRdrName').textContent = cpCurSeries.title;
-  // Build thumbnails
-  cpBuildThumbs();
-  // Show first page
-  cpRenderPage(0, 'none');
-  // Keyboard listener
-  document.removeEventListener('keydown', cpKeyHandler);
-  document.addEventListener('keydown', cpKeyHandler);
-  // Swipe listener
-  cpInitSwipe();
-}
-
-// ── Page rendering with flip animation ───────────────────────
-function cpRenderPage(idx, direction) {
-  var book = document.getElementById('cpBook');
-  var eps  = cpEpisodes;
-  if (!book || idx < 0 || idx >= eps.length) return;
-  cpPage = idx;
-
-  // Update counter
-  document.getElementById('cpRdrCounter').textContent = 'Page ' + (idx+1) + ' / ' + eps.length;
-  // Update nav buttons
-  document.getElementById('cpNavPrev').disabled = idx === 0;
-  document.getElementById('cpNavNext').disabled = idx === eps.length - 1;
-  // Update thumbnail active
-  cpUpdateThumb(idx);
-
-  // Check desktop double-page
-  var isDouble = window.innerWidth >= 900 && idx + 1 < eps.length;
-
-  // Build new page(s) - detach old with flip-out
-  var oldPages = book.querySelectorAll('.cp-page');
-  var outClass = direction === 'prev' ? 'flip-out-prev' : 'flip-out';
-  oldPages.forEach(function(p){
-    p.classList.add(outClass);
-    setTimeout(function(){ p.remove(); }, 380);
-  });
-
-  // Play sound (not on initial load)
-  if (direction !== 'none') cpPlayFlip();
-
-  // Create new page(s)
-  setTimeout(function() {
-    book.innerHTML = '';
-    var inClass = direction === 'prev' ? 'flip-in-prev' : 'flip-in';
-
-    if (isDouble) {
-      book.classList.add('double-page');
-      [idx, idx+1].forEach(function(i) {
-        if (i < eps.length) {
-          book.appendChild(cpMakePage(eps[i], inClass, i));
-        }
-      });
-    } else {
-      book.classList.remove('double-page');
-      book.appendChild(cpMakePage(eps[idx], direction === 'none' ? '' : inClass, idx));
-    }
-  }, direction === 'none' ? 0 : 200);
-}
-
-function cpMakePage(ep, animClass, idx) {
-  var page = document.createElement('div');
-  page.className = 'cp-page' + (animClass ? ' ' + animClass : '');
-  var img = document.createElement('img');
-  img.className = 'cp-page-img';
-  img.src = ep.src;
-  img.alt = ep.title;
-  img.loading = 'lazy';
-  img.onclick = function(){ cpToggleLb(); };
-  var fold = document.createElement('div');
-  fold.className = 'cp-corner-fold';
-  page.appendChild(img);
-  page.appendChild(fold);
-  return page;
-}
-
-// ── Navigate pages ───────────────────────────────────────────
-function cpNav(dir) {
-  var isDouble = window.innerWidth >= 900 ? 2 : 1;
-  var next = cpPage + (dir > 0 ? isDouble : -isDouble);
-  next = Math.max(0, Math.min(cpEpisodes.length - 1, next));
-  if (next === cpPage) return;
-  cpRenderPage(next, dir > 0 ? 'next' : 'prev');
-}
-
-function cpKeyHandler(e) {
-  if (!document.getElementById('cpReaderView').classList.contains('active')) return;
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') cpNav(1);
-  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   cpNav(-1);
-  if (e.key === 'Escape') cpShowLib();
-}
-
-// ── Swipe ────────────────────────────────────────────────────
-function cpInitSwipe() {
-  var stage = document.getElementById('cpStage');
-  if (!stage) return;
-  var startX = 0;
-  function onStart(e) {
-    startX = (e.touches ? e.touches[0].clientX : e.clientX);
-  }
-  function onEnd(e) {
-    var endX = (e.changedTouches ? e.changedTouches[0].clientX : e.clientX);
-    var dx = startX - endX;
-    if (Math.abs(dx) > 40) cpNav(dx > 0 ? 1 : -1);
-  }
-  stage.removeEventListener('touchstart', onStart);
-  stage.removeEventListener('touchend', onEnd);
-  stage.addEventListener('touchstart', onStart, {passive:true});
-  stage.addEventListener('touchend', onEnd, {passive:true});
-}
-
-// ── Thumbnails ───────────────────────────────────────────────
-function cpBuildThumbs() {
-  var strip = document.getElementById('cpThumbsScroll');
-  if (!strip) return;
-  strip.innerHTML = '';
-  cpEpisodes.forEach(function(ep, i) {
-    var item = document.createElement('div');
-    item.className = 'cp-thumb-item' + (i === 0 ? ' active' : '');
-    item.innerHTML =
+  cpCurEp = 0;
+  document.getElementById('cpLibView').style.display = 'none';
+  document.getElementById('cpEpView').style.display = 'block';
+  document.getElementById('cpReaderView').style.display = 'none';
+  document.getElementById('cpEpSeriesName').textContent = cpCurSeries.title;
+  document.getElementById('cpEpSeriesSub').textContent = cpCurSeries.subtitle + ' · ' + cpCurSeries.description;
+  cpSetBreadcrumb(['All Series', cpCurSeries.title]);
+  // Build episode grid
+  var grid = document.getElementById('cpEpGrid');
+  grid.innerHTML = '';
+  cpCurSeries.episodes.forEach(function(ep, i) {
+    var card = document.createElement('div');
+    card.className = 'cp-ep-card';
+    card.innerHTML =
       '<img src="' + ep.src + '" alt="' + ep.title + '" loading="lazy">' +
-      '<div class="cp-thumb-num">' + (i+1) + '</div>';
-    item.onclick = function() { cpRenderPage(i, i > cpPage ? 'next' : 'prev'); };
-    strip.appendChild(item);
+      '<div class="cp-ep-label">' +
+        '<span class="cp-ep-num">EP ' + (i + 1) + '</span>' +
+        '<span class="cp-ep-title-small">' + ep.title + '</span>' +
+      '</div>';
+    card.onclick = function() { cpOpenReader(i); };
+    grid.appendChild(card);
+  });
+  // Scroll to top
+  document.getElementById('comics-panel').scrollTop = 0;
+}
+
+// ─── Reader ───────────────────────────────────────────────────
+function cpOpenReader(i) {
+  cpCurEp = i;
+  document.getElementById('cpLibView').style.display = 'none';
+  document.getElementById('cpEpView').style.display = 'none';
+  document.getElementById('cpReaderView').style.display = 'block';
+  cpSetBreadcrumb(['All Series', cpCurSeries.title, 'EP ' + (i + 1)]);
+  cpRenderReader();
+  document.getElementById('comics-panel').scrollTop = 0;
+}
+
+function cpRenderReader() {
+  if (!cpCurSeries) return;
+  var ep = cpCurSeries.episodes[cpCurEp];
+  document.getElementById('cpRdrImg').src = ep.src;
+  document.getElementById('cpRdrBadge').textContent = 'EP ' + (cpCurEp + 1) + ' / ' + cpCurSeries.episodes.length;
+  document.getElementById('cpRdrTitle').textContent = ep.title;
+  document.getElementById('cpRdrDesc').textContent = ep.desc;
+  // Dots
+  var dots = document.getElementById('cpRdrDots');
+  dots.innerHTML = '';
+  cpCurSeries.episodes.forEach(function(_, i) {
+    var d = document.createElement('div');
+    d.className = 'cp-rdot' + (i === cpCurEp ? ' act' : '');
+    d.onclick = function() { cpOpenReader(i); };
+    dots.appendChild(d);
+  });
+  cpSetBreadcrumb(['All Series', cpCurSeries.title, 'EP ' + (cpCurEp + 1) + ' — ' + ep.title]);
+}
+
+function cpRdrNav(dir) {
+  var next = cpCurEp + dir;
+  if (next < 0 || next >= cpCurSeries.episodes.length) return;
+  cpOpenReader(next);
+}
+
+function cpShowEpList() {
+  cpOpenSeries(CP_LIBRARY.indexOf(cpCurSeries));
+}
+
+// ─── Breadcrumb ───────────────────────────────────────────────
+function cpSetBreadcrumb(parts) {
+  var bc = document.getElementById('cpBreadcrumb');
+  bc.innerHTML = '';
+  parts.forEach(function(part, i) {
+    var span = document.createElement('span');
+    span.textContent = part;
+    if (i === parts.length - 1) {
+      span.className = 'current';
+    } else {
+      if (i === 0) span.onclick = function() { cpShowLib(); };
+      else if (i === 1) span.onclick = function() { cpOpenSeries(CP_LIBRARY.indexOf(cpCurSeries)); };
+      var sep = document.createElement('span');
+      sep.className = 'sep';
+      sep.textContent = ' › ';
+      bc.appendChild(span);
+      bc.appendChild(sep);
+      return;
+    }
+    bc.appendChild(span);
   });
 }
 
-function cpUpdateThumb(idx) {
-  var items = document.querySelectorAll('.cp-thumb-item');
-  items.forEach(function(el, i){ el.classList.toggle('active', i === idx); });
-  // Scroll thumb into view
-  var active = document.querySelector('.cp-thumb-item.active');
-  if (active) active.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+// ─── Lightbox ────────────────────────────────────────────────
+function cpOpenLb(i) {
+  cpLbEp = i;
+  document.getElementById('cpLightbox').classList.add('open');
+  cpUpdLb();
 }
-
-// ── Lightbox ─────────────────────────────────────────────────
-var cpLbOpen = false;
-function cpToggleLb() { cpLbOpen ? cpCloseLb() : cpOpenLb(); }
-
-function cpOpenLb() {
-  cpLbOpen = true;
-  var lb = document.getElementById('cpLb');
-  if (!lb) return;
-  lb.classList.add('open');
-  cpLbUpdate(cpPage);
-}
-
-function cpCloseLb() {
-  cpLbOpen = false;
-  var lb = document.getElementById('cpLb');
-  if (lb) lb.classList.remove('open');
-}
-
-function cpLbUpdate(idx) {
-  if (!cpEpisodes[idx]) return;
-  document.getElementById('cpLbImg').src   = cpEpisodes[idx].src;
-  document.getElementById('cpLbTitle').textContent = cpEpisodes[idx].title;
-  document.getElementById('cpLbCtr').textContent   = (idx+1) + ' / ' + cpEpisodes.length;
-  // Dots
-  var dots = document.getElementById('cpLbDots');
-  if (dots) {
-    dots.innerHTML = '';
-    cpEpisodes.forEach(function(_, i) {
-      var d = document.createElement('div');
-      d.className = 'cp-lb-dot' + (i === idx ? ' act' : '');
-      d.onclick = function(){ cpLbNav(null, i); };
-      dots.appendChild(d);
-    });
+function cpCloseLb(e) {
+  if (!e || e.target === document.getElementById('cpLightbox')) {
+    document.getElementById('cpLightbox').classList.remove('open');
   }
 }
-
-function cpLbNav(dir, toIdx) {
-  if (toIdx !== undefined) {
-    cpPage = toIdx;
-  } else {
-    var next = cpPage + dir;
-    if (next < 0 || next >= cpEpisodes.length) return;
-    cpPage = next;
-  }
-  cpLbUpdate(cpPage);
-  // Also update reader behind
-  document.getElementById('cpRdrCounter').textContent = 'Page ' + (cpPage+1) + ' / ' + cpEpisodes.length;
-  cpUpdateThumb(cpPage);
+function cpLbNav(dir) {
+  cpLbEp = (cpLbEp + dir + cpCurSeries.episodes.length) % cpCurSeries.episodes.length;
+  cpUpdLb();
 }
-
 function cpUpdLb() {
   var ep = cpCurSeries.episodes[cpLbEp];
   document.getElementById('cpLbImg').src = ep.src;
@@ -10003,89 +9532,71 @@ function gmBack() {
      COMICS PANEL — jak Community Gallery
      position:fixed pokrywa cały ekran
      ══════════════════════════════════════════════ -->
-<div id="comics-panel" style="">
+<div id="comics-panel">
 
-  <!-- ── HEADER ── -->
-  <div class="cp-header">
-    <span class="cp-header-logo">📚 $ANAL Comics</span>
-    <button class="cp-header-close" onclick="closeComics()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      CLOSE
-    </button>
+  <!-- Sticky header -->
+  <div class="comics-panel-header">
+    <div class="comics-panel-title">
+      📚 $ANAL COMICS
+    </div>
+    <button class="comics-panel-close" onclick="closeComics()">✕ Close</button>
+  </div>
+
+  <!-- Breadcrumb nawigacja -->
+  <div class="comics-breadcrumb" id="cpBreadcrumb">
+    <span class="current" onclick="cpShowLib()">All Series</span>
   </div>
 
   <!-- ── LIBRARY VIEW ── -->
-  <div class="cp-view cp-lib-view active" id="cpLibView">
-    <div class="cp-lib-hero">
-      <div class="cp-lib-hero-title">$ANAL COMICS</div>
-      <div class="cp-lib-hero-sub">Official Community Comic Series</div>
+  <div id="cpLibView">
+    <div class="cp-lib-intro">
+      <h2>$ANAL COMICS</h2>
+      <p>The official comic series of the $ANAL community</p>
     </div>
     <div class="cp-series-grid" id="cpSeriesGrid">
-      <!-- built by JS -->
+      <!-- karty serii budowane przez JS -->
     </div>
+  </div>
+
+  <!-- ── EPISODE LIST VIEW ── -->
+  <div id="cpEpView">
+    <div class="cp-ep-header">
+      <h3 id="cpEpSeriesName"></h3>
+      <p id="cpEpSeriesSub"></p>
+    </div>
+    <div class="cp-ep-grid" id="cpEpGrid"></div>
   </div>
 
   <!-- ── READER VIEW ── -->
-  <div class="cp-view cp-reader-view" id="cpReaderView">
-
-    <!-- Reader toolbar -->
-    <div class="cp-reader-bar">
-      <button class="cp-reader-back" onclick="cpShowLib()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-        BACK
-      </button>
-      <div class="cp-reader-title-bar">
-        <div class="cp-reader-series-name" id="cpRdrName">Comics</div>
-        <div class="cp-reader-page-counter" id="cpRdrCounter">Page 1 / 1</div>
+  <div id="cpReaderView">
+    <div class="cp-reader-wrap">
+      <div class="cp-reader-img-wrap" onclick="cpOpenLb(cpRdrEp)">
+        <div class="cp-reader-img-glow"></div>
+        <img id="cpRdrImg" src="" alt="">
       </div>
-      <button class="cp-reader-back" onclick="cpToggleLb()" style="color:#22ff88;border-color:rgba(34,255,136,.25);">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-        ZOOM
-      </button>
-    </div>
-
-    <!-- Page stage -->
-    <div class="cp-stage" id="cpStage">
-      <!-- Nav arrows -->
-      <button class="cp-nav-arrow cp-nav-prev" id="cpNavPrev" onclick="cpNav(-1)" disabled>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-
-      <!-- Page flip book -->
-      <div class="cp-book" id="cpBook">
-        <!-- pages injected by JS -->
+      <div class="cp-reader-info">
+        <div class="cp-reader-badge" id="cpRdrBadge"></div>
+        <div class="cp-reader-title" id="cpRdrTitle"></div>
+        <div class="cp-reader-desc" id="cpRdrDesc"></div>
       </div>
-
-      <button class="cp-nav-arrow cp-nav-next" id="cpNavNext" onclick="cpNav(1)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-      </button>
-    </div>
-
-    <!-- Thumbnail strip -->
-    <div class="cp-thumbs-bar">
-      <div class="cp-thumbs-scroll" id="cpThumbsScroll">
-        <!-- built by JS -->
+      <div class="cp-reader-nav">
+        <button class="cp-reader-btn cp-btn-p" onclick="cpRdrNav(-1)">◀ Prev</button>
+        <button class="cp-reader-btn cp-btn-ep" onclick="cpShowEpList()">☰ Episodes</button>
+        <button class="cp-reader-btn cp-btn-n" onclick="cpRdrNav(1)">Next ▶</button>
       </div>
+      <div class="cp-reader-dots" id="cpRdrDots"></div>
     </div>
-
-  </div>
-
-  <!-- ── LIGHTBOX (fullscreen zoom) ── -->
-  <div class="cp-lb" id="cpLb">
-    <button class="cp-lb-x" onclick="cpCloseLb()">✕</button>
-    <img class="cp-lb-img" id="cpLbImg" src="" alt="">
-    <div class="cp-lb-ctrl">
-      <button class="cp-lb-btn" onclick="cpLbNav(-1)">◀</button>
-      <div class="cp-lb-ctr" id="cpLbCtr">1 / 1</div>
-      <button class="cp-lb-btn" onclick="cpLbNav(1)">▶</button>
-    </div>
-    <div class="cp-lb-sub" id="cpLbTitle">Episode</div>
-    <div class="cp-lb-dots" id="cpLbDots"></div>
   </div>
 
 </div>
 
-
+<!-- ── LIGHTBOX ── -->
+<div id="cpLightbox" onclick="cpCloseLb(event)">
+  <button class="cp-lb-x" onclick="cpCloseLb()">✕</button>
+  <img id="cpLbImg" src="" alt="">
+  <div class="cp-lb-ctrl">
+    <button class="cp-lb-btn" onclick="cpLbNav(-1)">◀ Prev</button>
+    <div class="cp-lb-ctr" id="cpLbCtr">1 / 7</div>
     <button class="cp-lb-btn" onclick="cpLbNav(1)">Next ▶</button>
   </div>
 </div>
