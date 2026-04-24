@@ -2244,6 +2244,27 @@ header {
   }
 }
 
+
+/* ── MOBILE TOOLBAR: hidden by default (landing page) ── */
+/* Shown only after enterApp() via JS class .toolbar-ready */
+.mobile-toolbar { display: none !important; }
+.mobile-undo-bar { display: none !important; }
+.more-sheet     { display: none !important; }
+.more-sheet-backdrop { display: none !important; }
+
+/* When app entered: show toolbar on mobile */
+@media (max-width: 768px) {
+  body.toolbar-ready .mobile-toolbar { display: flex !important; }
+  body.toolbar-ready .mobile-undo-bar { display: flex !important; }
+  body.toolbar-ready .more-sheet.open { display: block !important; }
+  body.toolbar-ready .more-sheet-backdrop.open { display: block !important; }
+
+  /* Still hide during non-canvas modes */
+  body.toolbar-ready #app.games-mode ~ .mobile-toolbar,
+  body.toolbar-ready #app.comics-mode ~ .mobile-toolbar,
+  body.toolbar-ready #app.nocanvas-mode ~ .mobile-toolbar { display: none !important; }
+}
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
@@ -3608,6 +3629,7 @@ function enterApp(addr, verified) {
   state.walletAddr = addr;
   document.getElementById('gate').style.display = 'none';
   document.getElementById('app').classList.add('visible');
+  document.body.classList.add('toolbar-ready');  // show mobile toolbar
   const short = addr.slice(0,4)+'…'+addr.slice(-4);
   document.getElementById('hdr-wallet').textContent = verified ? short+' ✓ ANAL' : '🤞 honour';
   toast(verified ? '✅ ANAL verified. Welcome in.' : '🤞 Honour accepted.');
@@ -3620,6 +3642,7 @@ function disconnect() {
   state.frames = [];
   document.getElementById('gate').style.display = 'flex';
   document.getElementById('app').classList.remove('visible');
+  document.body.classList.remove('toolbar-ready');  // hide mobile toolbar
 }
 
 // ════════════════════════════════
