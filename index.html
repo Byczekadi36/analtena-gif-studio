@@ -2532,6 +2532,171 @@ header {
   text-transform: uppercase;
 }
 
+
+/* ════════════════════════════════════════════════════════════
+   GAMES v3 — ICON UPGRADE + DESKTOP SIDEBAR FIX
+   ════════════════════════════════════════════════════════════ */
+
+/* ── ART AREA: square, icon-centered ── */
+.gm-card-art {
+  aspect-ratio: 1 / 1 !important;
+  font-size: 0 !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── EMOJI ICON: neon glow + 3D on hover ── */
+.gm-card-art-emoji {
+  font-size: 52px !important;
+  line-height: 1 !important;
+  display: block !important;
+  position: relative;
+  z-index: 2;
+  transition: transform .28s cubic-bezier(.22,1,.36,1), filter .28s !important;
+  filter:
+    drop-shadow(0 0 8px var(--gm-neon, rgba(0,245,255,.6)))
+    drop-shadow(0 0 20px color-mix(in srgb, var(--gm-neon,#00f5ff) 40%, transparent))
+    drop-shadow(0 6px 16px rgba(0,0,0,.55)) !important;
+  animation: gmIconPulse 3.5s ease-in-out infinite !important;
+}
+
+@keyframes gmIconPulse {
+  0%,100% {
+    filter:
+      drop-shadow(0 0 6px var(--gm-neon, rgba(0,245,255,.45)))
+      drop-shadow(0 0 16px color-mix(in srgb, var(--gm-neon,#00f5ff) 25%, transparent))
+      drop-shadow(0 4px 12px rgba(0,0,0,.5));
+    transform: scale(1) translateY(0);
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 14px var(--gm-neon, rgba(0,245,255,.85)))
+      drop-shadow(0 0 28px color-mix(in srgb, var(--gm-neon,#00f5ff) 50%, transparent))
+      drop-shadow(0 4px 16px rgba(0,0,0,.5));
+    transform: scale(1.06) translateY(-2px);
+  }
+}
+
+/* ── HOVER: 3D perspective tilt + stronger glow ── */
+.gm-card:hover .gm-card-art-emoji,
+.gm-card:focus-within .gm-card-art-emoji {
+  animation: none !important;
+  transform:
+    scale(1.2)
+    perspective(320px)
+    rotateY(-10deg)
+    rotateX(4deg)
+    translateY(-3px) !important;
+  filter:
+    drop-shadow(0 0 18px var(--gm-neon, rgba(0,245,255,.9)))
+    drop-shadow(0 0 36px color-mix(in srgb, var(--gm-neon,#00f5ff) 60%, transparent))
+    drop-shadow(0 0 60px color-mix(in srgb, var(--gm-neon,#00f5ff) 25%, transparent))
+    drop-shadow(0 10px 24px rgba(0,0,0,.6)) !important;
+}
+
+/* Coming soon cards: no animation, dimmed */
+.gm-card[onclick=""] .gm-card-art-emoji,
+.gm-card:not([onclick]) .gm-card-art-emoji {
+  animation: none !important;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.4)) !important;
+  opacity: .35 !important;
+}
+
+/* Neon halo ring behind icon */
+.gm-card-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 60% 60% at 50% 55%,
+    color-mix(in srgb, var(--gm-neon,#00f5ff) 18%, transparent),
+    transparent 70%
+  );
+  z-index: 1;
+  pointer-events: none;
+  transition: all .28s;
+}
+.gm-card:hover .gm-card-art::after {
+  background: radial-gradient(
+    ellipse 80% 80% at 50% 55%,
+    color-mix(in srgb, var(--gm-neon,#00f5ff) 30%, transparent),
+    transparent 70%
+  );
+}
+
+/* ─────────────────────────────────────────
+   DESKTOP SIDEBAR FIX (>768px)
+   panel-content is ~204px wide on desktop sidebar
+   → 2-col compact grid, hide description
+   ───────────────────────────────────────── */
+@media (min-width: 769px) {
+  /* Hero compact */
+  .gm-hero {
+    padding: 12px 10px 8px !important;
+  }
+  .gm-hero-icon     { font-size: 28px !important; margin-bottom: 3px !important; }
+  .gm-hero-title    { font-size: 10px !important; letter-spacing: .1em !important; }
+  .gm-hero-sub      { font-size: 8px !important; }
+  .gm-balance       { margin: 6px 8px 0 !important; padding: 4px 8px !important; font-size: 9px !important; }
+
+  /* Grid: 2 columns inside ~204px panel-content */
+  .gm-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    padding: 8px 6px !important;
+  }
+
+  /* Cards compact */
+  .gm-card { border-radius: 10px !important; }
+
+  /* Icon smaller on sidebar */
+  .gm-card-art-emoji { font-size: 30px !important; }
+  @keyframes gmIconPulse { 0%,100%,50% { transform: scale(1); } }
+
+  .gm-card:hover .gm-card-art-emoji {
+    transform: scale(1.15) rotateY(-6deg) rotateX(3deg) translateY(-2px) !important;
+  }
+
+  /* Info area: no description, smaller text */
+  .gm-card-info     { padding: 4px 6px 6px !important; }
+  .gm-card-name     { font-size: 8px !important; letter-spacing: .04em !important; margin-bottom: 3px !important; }
+  .gm-card-desc     { display: none !important; }
+  .gm-card-badge    { font-size: 7px !important; padding: 2px 5px !important; }
+
+  /* panel-games must scroll, not clip */
+  #panel-games {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: 100% !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(123,97,255,.25) transparent !important;
+  }
+
+  /* panel-content: allow scroll */
+  .panel-content {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+}
+
+/* ─────────────────────────────────────────
+   MOBILE (≤768px): full icon, 2-col grid
+   ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  .gm-card-art-emoji { font-size: 56px !important; }
+  .gm-card-art { min-height: 100px; padding: 16px 10px 10px !important; }
+  .gm-card-info { padding: 8px 10px 10px !important; }
+  .gm-card-name { font-size: 10px !important; }
+  .gm-card-desc { font-size: 9px !important; }
+  .gm-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    padding: 12px 10px !important;
+  }
+}
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
