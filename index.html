@@ -1066,6 +1066,139 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 }
 .cp-lb-x:hover { color: #fff; }
 
+
+/* ═══════════════════════════════════════════════════
+   EDITOR ENHANCEMENTS — Undo/Redo + Upload + Stickers
+   ═══════════════════════════════════════════════════ */
+
+/* Toolbar separator */
+.tool-sep { width: 1px; height: 24px; background: var(--border); margin: 0 2px; flex-shrink: 0; }
+
+/* Undo / Redo buttons */
+.tool-btn-undo {
+  background: rgba(168,85,247,.12);
+  border: 1.5px solid rgba(168,85,247,.3);
+  color: #a855f7;
+}
+.tool-btn-undo:hover { background: rgba(168,85,247,.22); border-color: #a855f7; box-shadow: 0 0 10px rgba(168,85,247,.3); }
+.tool-btn-undo:disabled { opacity: .25; cursor: not-allowed; box-shadow: none; }
+
+/* Upload area */
+.upload-drop-zone {
+  position: absolute; inset: 0;
+  display: none;
+  align-items: center; justify-content: center;
+  background: rgba(0,245,255,.06);
+  border: 2px dashed rgba(0,245,255,.5);
+  border-radius: 4px;
+  z-index: 50;
+  pointer-events: none;
+  backdrop-filter: blur(2px);
+}
+.upload-drop-zone.active { display: flex; }
+.upload-drop-zone-label {
+  font-family: var(--font-d);
+  font-size: 18px; font-weight: 800;
+  color: #00f5ff;
+  text-shadow: 0 0 20px rgba(0,245,255,.7);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Draw options bar */
+.draw-options {
+  display: none;
+  align-items: center; gap: 10px;
+  padding: 0 8px;
+  animation: fadeIn .15s ease;
+}
+.draw-options.visible { display: flex; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+.draw-size-label { font-size: 10px; color: var(--muted); font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
+.draw-size-slider { width: 70px; accent-color: #00f5ff; cursor: pointer; }
+.draw-color-pick { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,.2); cursor: pointer; padding: 0; outline: none; background: none; }
+.draw-color-pick:hover { border-color: #00f5ff; }
+.draw-opacity-slider { width: 55px; accent-color: #a855f7; cursor: pointer; }
+
+/* Eraser active state */
+.tool-btn.eraser-active { color: #ff2d78 !important; border-color: rgba(255,45,120,.5) !important; background: rgba(255,45,120,.08) !important; }
+
+/* ── STICKERS PANEL ── */
+.stickers-panel {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: 280px;
+  max-height: 320px;
+  background: linear-gradient(145deg, #0f0f1a, #0a0a12);
+  border: 1px solid rgba(0,245,255,.25);
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(0,245,255,.08), 0 12px 40px rgba(0,0,0,.7);
+  z-index: 200;
+  overflow: hidden;
+  flex-direction: column;
+}
+.stickers-panel.open { display: flex; }
+.stickers-panel-head {
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.stickers-panel-title {
+  font-size: 11px; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: rgba(0,245,255,.7);
+}
+.stickers-panel-close {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.5); font-size: 12px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.stickers-panel-close:hover { color: #fff; background: rgba(255,255,255,.12); }
+.stickers-cats {
+  display: flex; gap: 4px; padding: 8px 10px 6px; flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.sticker-cat-btn {
+  font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+  padding: 4px 8px; border-radius: 20px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.1); background: transparent; color: rgba(255,255,255,.4);
+  transition: all .12s;
+}
+.sticker-cat-btn.active, .sticker-cat-btn:hover { border-color: rgba(0,245,255,.4); color: #00f5ff; background: rgba(0,245,255,.08); }
+.stickers-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 4px; padding: 8px 10px 10px; overflow-y: auto; flex: 1;
+  scrollbar-width: thin; scrollbar-color: rgba(0,245,255,.2) transparent;
+}
+.sticker-item {
+  aspect-ratio: 1; border-radius: 8px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; transition: all .12s;
+  background: rgba(255,255,255,.04); border: 1px solid transparent;
+  user-select: none;
+}
+.sticker-item:hover { background: rgba(0,245,255,.1); border-color: rgba(0,245,255,.3); transform: scale(1.1); }
+.sticker-item:active { transform: scale(.95); }
+.sticker-item.svg-sticker { font-size: 14px; color: rgba(255,255,255,.8); flex-direction: column; gap: 1px; }
+.sticker-item.svg-sticker span { font-size: 8px; color: rgba(255,255,255,.3); }
+
+/* Undo counter badge */
+.undo-count {
+  font-size: 8px; background: rgba(168,85,247,.4); color: #fff;
+  border-radius: 6px; padding: 0 4px; margin-left: 2px;
+  font-family: var(--font-m);
+}
+
+/* Upload hidden input */
+#upload-img-input { display: none; }
+
+/* Draw cursor */
+.canvas-drawing { cursor: crosshair !important; }
+.canvas-erasing { cursor: cell !important; }
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
@@ -1541,9 +1674,43 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
     <!-- CENTER: Canvas -->
     <div class="canvas-area">
       <div class="canvas-toolbar">
-        <button class="tool-btn active" id="tool-select" onclick="setTool('select',this)">↖ Select</button>
-        <button class="tool-btn" id="tool-text" onclick="setTool('text',this)">T Text</button>
-        <button class="tool-btn" id="tool-draw" onclick="setTool('draw',this)">✏ Draw</button>
+        <button class="tool-btn active" id="tool-select" onclick="setTool('select',this)" title="Select (V)">↖ Select</button>
+        <button class="tool-btn" id="tool-draw" onclick="setTool('draw',this)" title="Draw (B)">✏ Draw</button>
+        <button class="tool-btn" id="tool-erase" onclick="setTool('erase',this)" title="Erase (E)">◻ Erase</button>
+        <button class="tool-btn" id="tool-text" onclick="setTool('text',this)" title="Text (T)">T Text</button>
+
+        <!-- Draw options (shown when draw/erase active) -->
+        <div class="draw-options" id="drawOptions">
+          <div class="tool-sep"></div>
+          <span class="draw-size-label">Size</span>
+          <input type="range" class="draw-size-slider" id="drawSize" min="1" max="60" value="12" oninput="editorUpdateDrawOpts()">
+          <input type="color" class="draw-color-pick" id="drawColor" value="#00f5ff" oninput="editorUpdateDrawOpts()">
+          <span class="draw-size-label">Opacity</span>
+          <input type="range" class="draw-opacity-slider" id="drawOpacity" min="5" max="100" value="100" oninput="editorUpdateDrawOpts()">
+        </div>
+
+        <div class="tool-sep"></div>
+        <button class="tool-btn tool-btn-undo" id="undoBtn" onclick="editorUndo()" title="Undo (Ctrl+Z)" disabled>↩ Undo <span class="undo-count" id="undoCount">0</span></button>
+        <button class="tool-btn tool-btn-undo" id="redoBtn" onclick="editorRedo()" title="Redo (Ctrl+Shift+Z)" disabled>↪ Redo</button>
+        <div class="tool-sep"></div>
+
+        <!-- Upload -->
+        <button class="tool-btn" onclick="triggerUpload()" title="Upload Image">⬆ Upload</button>
+        <input type="file" id="upload-img-input" accept="image/*" onchange="handleUpload(event)">
+
+        <!-- Stickers -->
+        <div style="position:relative">
+          <button class="tool-btn" id="stickersBtn" onclick="toggleStickers()" title="Stickers">🦉 Stickers</button>
+          <div class="stickers-panel" id="stickersPanel">
+            <div class="stickers-panel-head">
+              <span class="stickers-panel-title">Stickers</span>
+              <button class="stickers-panel-close" onclick="toggleStickers()">✕</button>
+            </div>
+            <div class="stickers-cats" id="stickerCats"></div>
+            <div class="stickers-grid" id="stickersGrid"></div>
+          </div>
+        </div>
+
         <div class="tool-sep"></div>
         <button class="tool-btn" onclick="clearFrame()">⌫ Clear</button>
         <button class="tool-btn" onclick="duplicateFrame()">⧉ Duplicate</button>
@@ -1553,6 +1720,9 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 
       <div class="canvas-stage">
         <div class="canvas-wrap" id="canvas-wrap">
+          <div class="upload-drop-zone" id="uploadDropZone">
+            <div class="upload-drop-zone-label">📂 Drop Image Here</div>
+          </div>
           <canvas id="main-canvas" width="480" height="480"></canvas>
         </div>
       </div>
@@ -2251,8 +2421,67 @@ function disconnect() {
 let ctx;
 function initCanvas() {
   const canvas = document.getElementById('main-canvas');
-  ctx = canvas.getContext('2d');
+  ctx = canvas.getContext('2d', { willReadFrequently: true });
   canvas.addEventListener('click', canvasClick);
+
+  // ── Draw / Erase events ──────────────────────────────────
+  let drawing = false, lastX = 0, lastY = 0;
+
+  function getCanvasPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches ? e.touches[0] : e;
+    return {
+      x: (touch.clientX - rect.left) * (canvas.width / rect.width),
+      y: (touch.clientY - rect.top) * (canvas.height / rect.height)
+    };
+  }
+
+  function startDraw(e) {
+    if (state.tool !== 'draw' && state.tool !== 'erase') return;
+    e.preventDefault();
+    pushUndo(); // snapshot przed rysowaniem
+    drawing = true;
+    const pos = getCanvasPos(e);
+    lastX = pos.x; lastY = pos.y;
+    drawPoint(pos.x, pos.y);
+  }
+
+  function moveDraw(e) {
+    if (!drawing) return;
+    if (state.tool !== 'draw' && state.tool !== 'erase') return;
+    e.preventDefault();
+    const pos = getCanvasPos(e);
+    drawLine(lastX, lastY, pos.x, pos.y);
+    lastX = pos.x; lastY = pos.y;
+  }
+
+  function endDraw(e) {
+    if (!drawing) return;
+    drawing = false;
+    saveCurrentFrame();
+  }
+
+  canvas.addEventListener('pointerdown', startDraw);
+  canvas.addEventListener('pointermove', moveDraw);
+  canvas.addEventListener('pointerup', endDraw);
+  canvas.addEventListener('pointerleave', endDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', moveDraw, { passive: false });
+  canvas.addEventListener('touchend', endDraw);
+
+  // ── Drag & Drop upload ────────────────────────────────────
+  const wrap = document.getElementById('canvas-wrap');
+  const dropZone = document.getElementById('uploadDropZone');
+
+  wrap.addEventListener('dragenter', (e) => { e.preventDefault(); dropZone.classList.add('active'); });
+  wrap.addEventListener('dragover',  (e) => { e.preventDefault(); dropZone.classList.add('active'); });
+  wrap.addEventListener('dragleave', (e) => { if (!wrap.contains(e.relatedTarget)) dropZone.classList.remove('active'); });
+  wrap.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('active');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) loadImageToCanvas(file);
+  });
 }
 
 function getCanvas() { return document.getElementById('main-canvas'); }
@@ -6981,6 +7210,289 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'ArrowRight') cpLbNav(1);
   if (e.key === 'ArrowLeft')  cpLbNav(-1);
   if (e.key === 'Escape')     cpCloseLb();
+});
+
+
+
+// ══════════════════════════════════════════════════════════════
+//  EDITOR ENHANCEMENTS v2
+//  1. Undo / Redo (30 steps)
+//  2. Draw tool with pressure/size/color/opacity
+//  3. Erase tool
+//  4. Upload image (button + drag & drop)
+//  5. Stickers panel
+// ══════════════════════════════════════════════════════════════
+
+// ── UNDO / REDO ───────────────────────────────────────────────
+var undoStack = [];
+var redoStack = [];
+var MAX_UNDO = 30;
+
+function pushUndo() {
+  const c = getCanvas();
+  if (!c) return;
+  const snap = { frameIndex: state.currentFrame, imageData: ctx.getImageData(0, 0, c.width, c.height) };
+  undoStack.push(snap);
+  if (undoStack.length > MAX_UNDO) undoStack.shift();
+  redoStack = []; // clear redo on new action
+  editorUpdateUndoUI();
+}
+
+function editorUndo() {
+  if (!undoStack.length) return;
+  // Save current state to redo
+  const c = getCanvas();
+  redoStack.push({ frameIndex: state.currentFrame, imageData: ctx.getImageData(0, 0, c.width, c.height) });
+  const snap = undoStack.pop();
+  if (snap.frameIndex !== state.currentFrame) {
+    state.currentFrame = snap.frameIndex;
+    renderCurrentFrame();
+  }
+  ctx.putImageData(snap.imageData, 0, 0);
+  saveCurrentFrame();
+  editorUpdateUndoUI();
+}
+
+function editorRedo() {
+  if (!redoStack.length) return;
+  const c = getCanvas();
+  undoStack.push({ frameIndex: state.currentFrame, imageData: ctx.getImageData(0, 0, c.width, c.height) });
+  const snap = redoStack.pop();
+  if (snap.frameIndex !== state.currentFrame) {
+    state.currentFrame = snap.frameIndex;
+    renderCurrentFrame();
+  }
+  ctx.putImageData(snap.imageData, 0, 0);
+  saveCurrentFrame();
+  editorUpdateUndoUI();
+}
+
+function editorUpdateUndoUI() {
+  const undoBtn = document.getElementById('undoBtn');
+  const redoBtn = document.getElementById('redoBtn');
+  const undoCount = document.getElementById('undoCount');
+  if (undoBtn) undoBtn.disabled = undoStack.length === 0;
+  if (redoBtn) redoBtn.disabled = redoStack.length === 0;
+  if (undoCount) undoCount.textContent = undoStack.length;
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+  const panelOpen = document.getElementById('comics-panel')?.style.display === 'block'
+    || document.getElementById('gallery-panel')?.style.display === 'block';
+  if (panelOpen) return;
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); editorUndo(); }
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'Z' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); editorRedo(); }
+  // Tool shortcuts
+  if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (e.key === 'b' || e.key === 'B') setTool('draw', document.getElementById('tool-draw'));
+    if (e.key === 'e' || e.key === 'E') setTool('erase', document.getElementById('tool-erase'));
+    if (e.key === 't' || e.key === 'T') setTool('text', document.getElementById('tool-text'));
+    if (e.key === 'v' || e.key === 'V') setTool('select', document.getElementById('tool-select'));
+  }
+});
+
+// ── DRAW HELPERS ─────────────────────────────────────────────
+var drawState = { size: 12, color: '#00f5ff', opacity: 1.0 };
+
+function editorUpdateDrawOpts() {
+  drawState.size = parseInt(document.getElementById('drawSize')?.value || 12);
+  drawState.color = document.getElementById('drawColor')?.value || '#00f5ff';
+  drawState.opacity = (parseInt(document.getElementById('drawOpacity')?.value || 100)) / 100;
+}
+
+function drawPoint(x, y) {
+  ctx.save();
+  if (state.tool === 'erase') {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.globalAlpha = drawState.opacity;
+    ctx.beginPath();
+    ctx.arc(x, y, drawState.size, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,1)';
+    ctx.fill();
+  } else {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = drawState.opacity;
+    ctx.beginPath();
+    ctx.arc(x, y, drawState.size / 2, 0, Math.PI * 2);
+    ctx.fillStyle = drawState.color;
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawLine(x1, y1, x2, y2) {
+  ctx.save();
+  if (state.tool === 'erase') {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.globalAlpha = drawState.opacity;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+    ctx.strokeStyle = 'rgba(0,0,0,1)';
+    ctx.lineWidth = drawState.size * 2;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.stroke();
+  } else {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = drawState.opacity;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+    ctx.strokeStyle = drawState.color;
+    ctx.lineWidth = drawState.size;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// ── TOOL SWITCH (extended) ───────────────────────────────────
+const _origSetTool = setTool;
+setTool = function(name, el) {
+  _origSetTool(name, el);
+  const canvas = getCanvas();
+  // Update cursor
+  canvas.classList.remove('canvas-drawing', 'canvas-erasing');
+  if (name === 'draw') canvas.classList.add('canvas-drawing');
+  if (name === 'erase') canvas.classList.add('canvas-erasing');
+  // Show/hide draw options
+  const opts = document.getElementById('drawOptions');
+  if (opts) opts.classList.toggle('visible', name === 'draw' || name === 'erase');
+  // Erase button style
+  const eraseBtn = document.getElementById('tool-erase');
+  if (eraseBtn) eraseBtn.classList.toggle('eraser-active', name === 'erase');
+};
+
+// ── UPLOAD IMAGE ─────────────────────────────────────────────
+function triggerUpload() {
+  document.getElementById('upload-img-input')?.click();
+}
+
+function handleUpload(e) {
+  const file = e.target.files?.[0];
+  if (file) loadImageToCanvas(file);
+  e.target.value = ''; // reset so same file can be uploaded again
+}
+
+function loadImageToCanvas(file) {
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const img = new Image();
+    img.onload = function() {
+      pushUndo();
+      const c = getCanvas();
+      // Scale to fit keeping aspect ratio
+      const scale = Math.min(c.width / img.width, c.height / img.height);
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const x = Math.round((c.width - w) / 2);
+      const y = Math.round((c.height - h) / 2);
+      ctx.drawImage(img, x, y, w, h);
+      saveCurrentFrame();
+      toast('✅ Image added to canvas!');
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── STICKERS ─────────────────────────────────────────────────
+const STICKERS = {
+  emoji: [
+    '🦉','😂','💀','🔥','💎','🚀','⚡','🌙','⭐','💜',
+    '🤣','😭','🤝','👑','💰','📈','📉','🎯','🔮','🦅',
+    '🐸','🦁','🐺','🦊','🐉','👾','🤖','🎃','💣','🧨',
+    '✅','❌','⚠️','❓','❗','🔑','🛡️','⚔️','🎲','🃏'
+  ],
+  memes: [
+    '😎','🤔','😤','🥶','🤯','😏','🫡','🗿','💅','🥴',
+    '😈','👹','🫠','🤌','👀','🙈','🙊','🤷','🫶','🫵',
+    '💪','🖕','🤙','✌️','🤟','🤘','👊','🤜','🤛','👆',
+    '🧠','🦷','👁️','👂','💩','🫁','❤️','💔','🖤','💜'
+  ],
+  shapes: [
+    '⭕','❎','🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪',
+    '🔶','🔷','🔸','🔹','▪️','▫️','🔺','🔻','💠','🔘',
+    '➡️','⬅️','⬆️','⬇️','↗️','↘️','↙️','↖️','↕️','↔️',
+    '▶️','◀️','🔼','🔽','⏩','⏪','⏫','⏬','🔄','🔃'
+  ]
+};
+
+var stickersCat = 'emoji';
+
+function toggleStickers() {
+  const panel = document.getElementById('stickersPanel');
+  if (!panel) return;
+  const isOpen = panel.classList.contains('open');
+  if (!isOpen) {
+    buildStickersPanel();
+    panel.classList.add('open');
+  } else {
+    panel.classList.remove('open');
+  }
+}
+
+function buildStickersPanel() {
+  // Categories
+  const cats = document.getElementById('stickerCats');
+  if (cats && !cats.children.length) {
+    ['emoji', 'memes', 'shapes'].forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'sticker-cat-btn' + (cat === stickersCat ? ' active' : '');
+      btn.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+      btn.onclick = () => { stickersCat = cat; buildStickerGrid(); updateStickerCats(); };
+      cats.appendChild(btn);
+    });
+  }
+  buildStickerGrid();
+}
+
+function updateStickerCats() {
+  document.querySelectorAll('.sticker-cat-btn').forEach((btn, i) => {
+    const cats = ['emoji', 'memes', 'shapes'];
+    btn.classList.toggle('active', cats[i] === stickersCat);
+  });
+}
+
+function buildStickerGrid() {
+  const grid = document.getElementById('stickersGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const items = STICKERS[stickersCat] || [];
+  items.forEach(emoji => {
+    const item = document.createElement('div');
+    item.className = 'sticker-item';
+    item.textContent = emoji;
+    item.title = 'Add sticker';
+    item.onclick = () => addSticker(emoji);
+    grid.appendChild(item);
+  });
+}
+
+function addSticker(emoji) {
+  pushUndo();
+  const c = getCanvas();
+  const size = Math.round(c.width * 0.12); // 12% of canvas width
+  const x = Math.round(c.width / 2);
+  const y = Math.round(c.height / 2);
+  ctx.save();
+  ctx.font = size + 'px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(emoji, x, y);
+  ctx.restore();
+  saveCurrentFrame();
+  toast('Sticker added! ↕ Use Draw to position');
+  // Close panel
+  document.getElementById('stickersPanel')?.classList.remove('open');
+}
+
+// Close stickers panel on outside click
+document.addEventListener('click', function(e) {
+  const panel = document.getElementById('stickersPanel');
+  const btn = document.getElementById('stickersBtn');
+  if (panel && btn && !panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.classList.remove('open');
+  }
 });
 
 </script>
