@@ -1735,6 +1735,71 @@ header::before {
   }
 }
 
+
+/* ── STICKERS PANEL FIX — fixed overlay, not absolute in toolbar ── */
+.stickers-panel {
+  position: fixed !important;
+  bottom: auto !important;
+  z-index: 500 !important;
+  overflow: visible !important;
+  width: 300px !important;
+  max-height: 380px !important;
+}
+.stickers-panel .stickers-grid {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+.sticker-item {
+  overflow: visible !important;
+  position: relative;
+}
+.sticker-item:hover { z-index: 1; }
+
+@media(max-width: 768px) {
+  .music-player { bottom: 80px !important; }
+  #mob-stickers { display: none !important; }
+}
+
+.canvas-area { overflow: visible !important; }
+.canvas-stage { overflow: hidden !important; }
+
+
+/* ── MOBILE TOOLBAR: 5 equal buttons ── */
+@media(max-width: 768px) {
+  .mobile-toolbar {
+    justify-content: space-evenly !important;
+  }
+  .mob-tool-btn {
+    flex: 1 !important;
+    max-width: 72px !important;
+  }
+  /* Tools button — purple accent */
+  #mob-more.more-btn.active,
+  #mob-more.more-btn:active {
+    color: #a855f7 !important;
+    border-color: rgba(168,85,247,.45) !important;
+    background: rgba(168,85,247,.1) !important;
+  }
+  /* Stickers invoked from Tools sheet — position above toolbar */
+  .stickers-panel {
+    bottom: 80px !important;
+    top: auto !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-width: calc(100vw - 16px) !important;
+  }
+}
+
+/* ── DRAW OPTIONS IN UNDO BAR: visible when erase active ── */
+/* Already handled by .mob-draw-opts.visible — no change needed */
+
+
+/* ── FIX canvas-area overflow to allow stickers panel escape ── */
+.canvas-area { overflow: visible !important; }
+.canvas-stage { overflow: hidden !important; }
+.canvas-wrap { overflow: hidden !important; }
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
@@ -8092,9 +8157,46 @@ function toggleStickers() {
   const isOpen = panel.classList.contains('open');
   if (!isOpen) {
     buildStickersPanel();
+    // Position panel as fixed overlay relative to button
+    const btn = document.getElementById('stickersBtn') || document.getElementById('mob-stickers');
+    if (btn) {
+      const rect = btn.getBoundingClientRect();
+      const panelW = 300;
+      const margin = 8;
+      // Try above button first
+      let top = rect.top - margin;
+      let left = Math.max(8, Math.min(rect.left, window.innerWidth - panelW - 8));
+      // If would go off top, put below
+      if (top - 380 < 8) {
+        top = rect.bottom + margin;
+        panel.style.top = top + 'px';
+        panel.style.bottom = 'auto';
+      } else {
+        panel.style.bottom = (window.innerHeight - rect.top + margin) + 'px';
+        panel.style.top = 'auto';
+      }
+      panel.style.left = left + 'px';
+    }
     panel.classList.add('open');
+    // Close on outside click
+    setTimeout(() => {
+      document.addEventListener('click', _closeStickersOutside, { once: true, capture: true });
+    }, 50);
   } else {
     panel.classList.remove('open');
+  }
+}
+function _closeStickersOutside(e) {
+  const panel = document.getElementById('stickersPanel');
+  const btn = document.getElementById('stickersBtn');
+  const mobBtn = document.getElementById('mob-stickers');
+  if (panel && !panel.contains(e.target) &&
+      (!btn || !btn.contains(e.target)) &&
+      (!mobBtn || !mobBtn.contains(e.target))) {
+    panel.classList.remove('open');
+  } else if (panel && panel.classList.contains('open')) {
+    // Re-add listener if still open
+    document.addEventListener('click', _closeStickersOutside, { once: true, capture: true });
   }
 }
 
@@ -8222,24 +8324,8 @@ function closeMoreSheet() {
 
 // ── Mobile stickers (opens existing stickers panel or more sheet) ──
 function mobToggleStickers() {
-  // On mobile open sticker panel directly above the toolbar
-  const panel = document.getElementById('stickersPanel');
-  if (!panel) return;
-  const isOpen = panel.classList.contains('open');
-  if (!isOpen) {
-    // Position above mobile toolbar
-    panel.style.bottom = '68px';
-    panel.style.left = '8px';
-    panel.style.right = '8px';
-    panel.style.width = 'auto';
-    panel.style.maxHeight = '50vh';
-    buildStickersPanel();
-    panel.classList.add('open');
-    document.getElementById('mob-stickers').classList.add('active');
-  } else {
-    panel.classList.remove('open');
-    document.getElementById('mob-stickers').classList.remove('active');
-  }
+  // Delegate to fixed-position toggleStickers
+  toggleStickers();
 }
 
 // ── Patch editorUpdateUndoUI to also update mobile buttons ────
@@ -8438,33 +8524,26 @@ editorUpdateUndoUI = function() {
     <span>Upload</span>
   </button>
 
-  <!-- Stickers -->
-  <button class="mob-tool-btn" id="mob-stickers" onclick="mobToggleStickers()" aria-label="Stickers">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-    <span>Stickers</span>
-  </button>
-
-  <!-- More -->
-  <button class="mob-tool-btn more-btn" id="mob-more" onclick="toggleMoreSheet()" aria-label="More tools">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
-    <span>More</span>
+  <!-- Tools (was More) -->
+  <button class="mob-tool-btn more-btn" id="mob-more" onclick="toggleMoreSheet()" aria-label="Tools">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="3" width="7" height="7" rx="1"/>
+      <rect x="14" y="3" width="7" height="7" rx="1"/>
+      <rect x="14" y="14" width="7" height="7" rx="1"/>
+      <rect x="3" y="14" width="7" height="7" rx="1"/>
+    </svg>
+    <span>Tools</span>
   </button>
 </div>
 
-<!-- ── MORE TOOLS BOTTOM SHEET ── -->
+<!-- ── TOOLS BOTTOM SHEET (was More) ── -->
 <div class="more-sheet-backdrop" id="moreSheetBackdrop" onclick="closeMoreSheet()"></div>
 <div class="more-sheet" id="moreSheet">
   <div class="more-sheet-handle"></div>
-  <div class="more-sheet-title">More Tools</div>
+  <div class="more-sheet-title">Tools</div>
   <div class="more-sheet-grid">
 
-    <!-- Erase -->
-    <button class="more-item-btn" id="more-erase" onclick="mobSetTool('erase');closeMoreSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7L3 16l13-13 7 7-3 10z"/><path d="M6 17l4-4"/></svg>
-      <span>Erase</span>
-    </button>
-
-    <!-- Undo -->
+    <!-- Undo — big, always visible -->
     <button class="more-item-btn undo-btn" id="more-undo" onclick="editorUndo()" disabled>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 7v6h6"/><path d="M3 13C5 8 9 5 14 5a9 9 0 110 18 9 9 0 01-7.8-4.5"/></svg>
       <span>Undo</span>
@@ -8474,6 +8553,18 @@ editorUpdateUndoUI = function() {
     <button class="more-item-btn undo-btn" id="more-redo" onclick="editorRedo()" disabled>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 7v6h-6"/><path d="M21 13C19 8 15 5 10 5a9 9 0 100 18 9 9 0 007.8-4.5"/></svg>
       <span>Redo</span>
+    </button>
+
+    <!-- Stickers -->
+    <button class="more-item-btn" onclick="closeMoreSheet();setTimeout(()=>toggleStickers(),100)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-linecap="round" stroke-width="3"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-linecap="round" stroke-width="3"/></svg>
+      <span>Stickers</span>
+    </button>
+
+    <!-- Erase -->
+    <button class="more-item-btn" id="more-erase" onclick="mobSetTool('erase');closeMoreSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7L3 16l13-13 7 7-3 10z"/><path d="M6 17l4-4"/></svg>
+      <span>Erase</span>
     </button>
 
     <!-- Duplicate frame -->
@@ -8495,13 +8586,15 @@ editorUpdateUndoUI = function() {
     </button>
 
     <!-- Generate GIF -->
-    <button class="more-item-btn" onclick="closeMoreSheet();generateGIF()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    <button class="more-item-btn" onclick="closeMoreSheet();generateGIF()"
+            style="border-color:rgba(34,255,136,.35);color:#22ff88;">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
       <span>Generate</span>
     </button>
 
     <!-- AI Generate -->
-    <button class="more-item-btn" onclick="closeMoreSheet();document.getElementById('prompt-input')?.focus()">
+    <button class="more-item-btn" onclick="closeMoreSheet();document.getElementById('prompt-input')?.focus()"
+            style="border-color:rgba(168,85,247,.35);color:#a855f7;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
       <span>AI Gen</span>
     </button>
