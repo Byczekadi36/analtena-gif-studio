@@ -1800,6 +1800,308 @@ header::before {
 .canvas-stage { overflow: hidden !important; }
 .canvas-wrap { overflow: hidden !important; }
 
+
+/* ══════════════════════════════════════════════════════════════
+   PREMIUM LEFT PANEL NAVIGATION
+   Glassmorphism tabs with neon glow, SVG icons, smooth anim
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── LEFT PANEL BASE ── */
+.left-panel {
+  background: linear-gradient(180deg,
+    rgba(14,14,26,.98) 0%,
+    rgba(10,10,18,.99) 100%) !important;
+  border-right: 1px solid rgba(0,245,255,.08) !important;
+}
+
+/* ── PANEL TABS CONTAINER ── */
+.panel-tabs {
+  display: flex !important;
+  flex-direction: column !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  padding: 8px 6px !important;
+  gap: 3px !important;
+  background: transparent !important;
+  width: 100% !important;
+}
+
+/* When left-panel is vertical the tabs go horizontal on top */
+.left-panel {
+  flex-direction: row !important;
+}
+.panel-tabs {
+  flex-direction: row !important;
+  border-bottom: 1px solid rgba(0,245,255,.07) !important;
+  padding: 6px 8px !important;
+  gap: 4px !important;
+  flex-shrink: 0 !important;
+  overflow-x: auto;
+  scrollbar-width: none;
+  align-items: center;
+}
+.panel-tabs::-webkit-scrollbar { display: none; }
+.left-panel {
+  flex-direction: column !important;
+}
+
+/* ── PREMIUM PTAB ── */
+.ptab {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  min-width: 52px !important;
+  height: 60px !important;
+  padding: 6px 8px !important;
+  border-radius: 12px !important;
+  border: 1.5px solid transparent !important;
+  background: transparent !important;
+  color: rgba(255,255,255,.35) !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: all .2s cubic-bezier(.22,1,.36,1) !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  position: relative !important;
+  overflow: visible !important;
+  -webkit-tap-highlight-color: transparent !important;
+  flex-shrink: 0 !important;
+}
+
+/* Tab icon (emoji or svg inside) */
+.ptab .tab-icon {
+  font-size: 22px !important;
+  line-height: 1 !important;
+  transition: all .2s cubic-bezier(.22,1,.36,1) !important;
+  display: block !important;
+}
+.ptab svg.tab-icon {
+  width: 24px !important;
+  height: 24px !important;
+  display: block !important;
+}
+.ptab .tab-label {
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  letter-spacing: .07em !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
+}
+
+/* ── HOVER STATE ── */
+.ptab:hover {
+  color: #00f5ff !important;
+  border-color: rgba(0,245,255,.28) !important;
+  background: rgba(0,245,255,.06) !important;
+  box-shadow: 0 0 16px rgba(0,245,255,.1),
+              inset 0 0 10px rgba(0,245,255,.03) !important;
+  transform: translateY(-1px) !important;
+}
+.ptab:hover .tab-icon {
+  filter: drop-shadow(0 0 5px rgba(0,245,255,.7)) !important;
+  transform: scale(1.12) !important;
+}
+
+/* ── ACTIVE STATE ── */
+.ptab.active {
+  color: #00f5ff !important;
+  border-color: rgba(0,245,255,.4) !important;
+  background: linear-gradient(145deg,
+    rgba(0,245,255,.10) 0%,
+    rgba(0,245,255,.04) 100%) !important;
+  box-shadow: 0 0 20px rgba(0,245,255,.18),
+              0 4px 12px rgba(0,0,0,.3),
+              inset 0 0 12px rgba(0,245,255,.05) !important;
+}
+.ptab.active .tab-icon {
+  filter: drop-shadow(0 0 6px rgba(0,245,255,.8)) !important;
+}
+.ptab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00f5ff, transparent);
+  border-radius: 1px;
+  box-shadow: 0 0 6px #00f5ff;
+}
+
+/* ── PER-TAB COLOR VARIANTS ── */
+/* AI — cyan (default) */
+.ptab-ai:hover, .ptab-ai.active {
+  color: #00f5ff !important;
+  border-color: rgba(0,245,255,.4) !important;
+  background: rgba(0,245,255,.08) !important;
+}
+.ptab-ai.active::after {
+  background: linear-gradient(90deg, transparent, #00f5ff, transparent);
+  box-shadow: 0 0 6px #00f5ff;
+}
+
+/* Tools — purple */
+.ptab-tools:hover {
+  color: #a855f7 !important;
+  border-color: rgba(168,85,247,.35) !important;
+  background: rgba(168,85,247,.07) !important;
+  box-shadow: 0 0 16px rgba(168,85,247,.12) !important;
+}
+.ptab-tools:hover .tab-icon { filter: drop-shadow(0 0 5px rgba(168,85,247,.8)) !important; }
+.ptab-tools.active {
+  color: #a855f7 !important;
+  border-color: rgba(168,85,247,.45) !important;
+  background: rgba(168,85,247,.1) !important;
+  box-shadow: 0 0 20px rgba(168,85,247,.2) !important;
+}
+.ptab-tools.active::after {
+  background: linear-gradient(90deg, transparent, #a855f7, transparent);
+  box-shadow: 0 0 6px #a855f7;
+}
+
+/* Credits — amber/gold */
+.ptab-credits:hover {
+  color: #f59e0b !important;
+  border-color: rgba(245,158,11,.35) !important;
+  background: rgba(245,158,11,.07) !important;
+  box-shadow: 0 0 16px rgba(245,158,11,.12) !important;
+}
+.ptab-credits:hover .tab-icon { filter: drop-shadow(0 0 5px rgba(245,158,11,.8)) !important; }
+.ptab-credits.active {
+  color: #f59e0b !important;
+  border-color: rgba(245,158,11,.45) !important;
+  background: rgba(245,158,11,.1) !important;
+  box-shadow: 0 0 20px rgba(245,158,11,.2) !important;
+}
+.ptab-credits.active::after {
+  background: linear-gradient(90deg, transparent, #f59e0b, transparent);
+  box-shadow: 0 0 6px #f59e0b;
+}
+
+/* Roast — hot pink/red */
+.ptab-roast:hover {
+  color: #ff2d78 !important;
+  border-color: rgba(255,45,120,.35) !important;
+  background: rgba(255,45,120,.07) !important;
+  box-shadow: 0 0 16px rgba(255,45,120,.12) !important;
+}
+.ptab-roast:hover .tab-icon { filter: drop-shadow(0 0 5px rgba(255,45,120,.8)) !important; }
+.ptab-roast.active {
+  color: #ff2d78 !important;
+  border-color: rgba(255,45,120,.45) !important;
+  background: rgba(255,45,120,.1) !important;
+  box-shadow: 0 0 20px rgba(255,45,120,.2) !important;
+}
+.ptab-roast.active::after {
+  background: linear-gradient(90deg, transparent, #ff2d78, transparent);
+  box-shadow: 0 0 6px #ff2d78;
+}
+
+/* Comics — green */
+.ptab-comics:hover {
+  color: #22ff88 !important;
+  border-color: rgba(34,255,136,.35) !important;
+  background: rgba(34,255,136,.07) !important;
+  box-shadow: 0 0 16px rgba(34,255,136,.12) !important;
+}
+.ptab-comics:hover .tab-icon { filter: drop-shadow(0 0 5px rgba(34,255,136,.8)) !important; }
+.ptab-comics.active {
+  color: #22ff88 !important;
+  border-color: rgba(34,255,136,.45) !important;
+  background: rgba(34,255,136,.1) !important;
+  box-shadow: 0 0 20px rgba(34,255,136,.2) !important;
+}
+.ptab-comics.active::after {
+  background: linear-gradient(90deg, transparent, #22ff88, transparent);
+  box-shadow: 0 0 6px #22ff88;
+}
+
+/* Games — indigo */
+.ptab-games:hover {
+  color: #7b61ff !important;
+  border-color: rgba(123,97,255,.35) !important;
+  background: rgba(123,97,255,.07) !important;
+  box-shadow: 0 0 16px rgba(123,97,255,.12) !important;
+}
+.ptab-games:hover .tab-icon { filter: drop-shadow(0 0 5px rgba(123,97,255,.8)) !important; }
+.ptab-games.active {
+  color: #7b61ff !important;
+  border-color: rgba(123,97,255,.45) !important;
+  background: rgba(123,97,255,.1) !important;
+  box-shadow: 0 0 20px rgba(123,97,255,.2) !important;
+}
+.ptab-games.active::after {
+  background: linear-gradient(90deg, transparent, #7b61ff, transparent);
+  box-shadow: 0 0 6px #7b61ff;
+}
+
+/* ── CLICK RIPPLE ── */
+@keyframes ptabPulse {
+  0% { box-shadow: 0 0 0 0 rgba(0,245,255,.4); }
+  70% { box-shadow: 0 0 0 8px rgba(0,245,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,245,255,0); }
+}
+.ptab:active {
+  transform: scale(.93) !important;
+}
+
+/* ── PANEL CONTENT AREA ── */
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ── MOBILE: panel-tabs horizontal scroll ── */
+@media(max-width: 768px) {
+  .panel-tabs {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    gap: 3px !important;
+    padding: 4px 6px !important;
+  }
+  .ptab {
+    min-width: 48px !important;
+    height: 54px !important;
+  }
+}
+
+
+/* ── Data-panel active colors via attribute selector ── */
+.ptab[data-panel="ai"].active         { color: #00f5ff !important; border-color: rgba(0,245,255,.45) !important; background: rgba(0,245,255,.1) !important; box-shadow: 0 0 20px rgba(0,245,255,.18) !important; }
+.ptab[data-panel="tools"].active      { color: #a855f7 !important; border-color: rgba(168,85,247,.45) !important; background: rgba(168,85,247,.1) !important; box-shadow: 0 0 20px rgba(168,85,247,.2) !important; }
+.ptab[data-panel="credits"].active    { color: #f59e0b !important; border-color: rgba(245,158,11,.45) !important; background: rgba(245,158,11,.1) !important; box-shadow: 0 0 20px rgba(245,158,11,.2) !important; }
+.ptab[data-panel="roast"].active      { color: #ff2d78 !important; border-color: rgba(255,45,120,.45) !important; background: rgba(255,45,120,.1) !important; box-shadow: 0 0 20px rgba(255,45,120,.2) !important; }
+.ptab[data-panel="comics"].active     { color: #22ff88 !important; border-color: rgba(34,255,136,.45) !important; background: rgba(34,255,136,.1) !important; box-shadow: 0 0 20px rgba(34,255,136,.2) !important; }
+.ptab[data-panel="games"].active      { color: #7b61ff !important; border-color: rgba(123,97,255,.45) !important; background: rgba(123,97,255,.1) !important; box-shadow: 0 0 20px rgba(123,97,255,.2) !important; }
+
+/* active underline per panel */
+.ptab[data-panel="ai"].active::after     { background: linear-gradient(90deg, transparent, #00f5ff, transparent); box-shadow: 0 0 6px #00f5ff; }
+.ptab[data-panel="tools"].active::after  { background: linear-gradient(90deg, transparent, #a855f7, transparent); box-shadow: 0 0 6px #a855f7; }
+.ptab[data-panel="credits"].active::after{ background: linear-gradient(90deg, transparent, #f59e0b, transparent); box-shadow: 0 0 6px #f59e0b; }
+.ptab[data-panel="roast"].active::after  { background: linear-gradient(90deg, transparent, #ff2d78, transparent); box-shadow: 0 0 6px #ff2d78; }
+.ptab[data-panel="comics"].active::after { background: linear-gradient(90deg, transparent, #22ff88, transparent); box-shadow: 0 0 6px #22ff88; }
+.ptab[data-panel="games"].active::after  { background: linear-gradient(90deg, transparent, #7b61ff, transparent); box-shadow: 0 0 6px #7b61ff; }
+
+/* hover active icon glow per panel */
+.ptab[data-panel="ai"]:hover .tab-icon     { filter: drop-shadow(0 0 6px #00f5ff) !important; }
+.ptab[data-panel="tools"]:hover .tab-icon  { filter: drop-shadow(0 0 6px #a855f7) !important; }
+.ptab[data-panel="credits"]:hover .tab-icon{ filter: drop-shadow(0 0 6px #f59e0b) !important; }
+.ptab[data-panel="roast"]:hover .tab-icon  { filter: drop-shadow(0 0 6px #ff2d78) !important; }
+.ptab[data-panel="comics"]:hover .tab-icon { filter: drop-shadow(0 0 6px #22ff88) !important; }
+.ptab[data-panel="games"]:hover .tab-icon  { filter: drop-shadow(0 0 6px #7b61ff) !important; }
+.ptab[data-panel="ai"].active .tab-icon     { filter: drop-shadow(0 0 8px #00f5ff) !important; }
+.ptab[data-panel="tools"].active .tab-icon  { filter: drop-shadow(0 0 8px #a855f7) !important; }
+.ptab[data-panel="credits"].active .tab-icon{ filter: drop-shadow(0 0 8px #f59e0b) !important; }
+.ptab[data-panel="roast"].active .tab-icon  { filter: drop-shadow(0 0 8px #ff2d78) !important; }
+.ptab[data-panel="comics"].active .tab-icon { filter: drop-shadow(0 0 8px #22ff88) !important; }
+.ptab[data-panel="games"].active .tab-icon  { filter: drop-shadow(0 0 8px #7b61ff) !important; }
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
@@ -2000,21 +2302,68 @@ header::before {
 
     <!-- LEFT: AI + Controls -->
     <div class="left-panel">
-      <div class="panel-tabs">
-        <button class="ptab active" onclick="switchPanel('ai',this)">🦉 AI</button>
-        <button class="ptab" onclick="switchPanel('tools',this)">🎨 Tools</button>
-        <button class="ptab" onclick="switchPanel('credits',this)" style="color:var(--amber);">💰</button>
-        <button class="ptab" onclick="switchPanel('roast',this)" style="color:#ff2d78;">🔥</button>
-        <button class="ptab" onclick="openComics();return false;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:block;margin:0 auto 2px">
-            <rect x="3" y="2" width="13" height="17" rx="2" fill="currentColor" opacity=".85"/>
-            <rect x="8" y="6" width="13" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".45"/>
-            <path d="M6 7h7M6 10.5h7M6 14h5" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/>
-          </svg>
-          Comics
-        </button>
-        <button class="ptab" onclick="switchPanel('games',this)" style="color:#7b61ff;">🎮</button>
-      </div>
+      <div class="panel-tabs" id="panelTabs">
+
+  <!-- AI — cyan, owl icon -->
+  <button class="ptab ptab-ai active" onclick="switchPanel('ai',this)" data-panel="ai" title="AI Generator">
+    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.64 5.64l1.41 1.41M16.95 16.95l1.41 1.41M5.64 18.36l1.41-1.41M16.95 7.05l1.41-1.41"/>
+      <path d="M12 9a3 3 0 100 6 3 3 0 000-6z" fill="currentColor" opacity=".25"/>
+    </svg>
+    <span class="tab-label">AI</span>
+  </button>
+
+  <!-- Tools — purple, wrench+brush -->
+  <button class="ptab ptab-tools" onclick="switchPanel('tools',this)" data-panel="tools" title="Tools">
+    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+    </svg>
+    <span class="tab-label">Tools</span>
+  </button>
+
+  <!-- Credits — gold, coin -->
+  <button class="ptab ptab-credits" onclick="switchPanel('credits',this)" data-panel="credits" title="Credits">
+    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M12 7v1m0 8v1M9.5 9.5C9.5 8.12 10.62 7 12 7s2.5 1.12 2.5 2.5c0 1.6-2.5 2.5-2.5 2.5s-2.5.9-2.5 2.5C9.5 15.88 10.62 17 12 17s2.5-1.12 2.5-2.5"/>
+    </svg>
+    <span class="tab-label">Credits</span>
+  </button>
+
+  <!-- Roast — pink, flame -->
+  <button class="ptab ptab-roast" onclick="switchPanel('roast',this)" data-panel="roast" title="Roast Machine">
+    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/>
+    </svg>
+    <span class="tab-label">Roast</span>
+  </button>
+
+  <!-- Comics — green, book -->
+  <button class="ptab ptab-comics" onclick="openComics();return false;" data-panel="comics" title="Comics">
+    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+      <line x1="8" y1="7" x2="16" y2="7" stroke-linecap="round"/>
+      <line x1="8" y1="11" x2="14" y2="11" stroke-linecap="round"/>
+    </svg>
+    <span class="tab-label">Comics</span>
+  </button>
+
+  <!-- Games — indigo, gamepad -->
+  <button class="ptab ptab-games" onclick="switchPanel('games',this)" data-panel="games" title="Games">
+    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <rect x="2" y="6" width="20" height="12" rx="4"/>
+      <path d="M6 12h4M8 10v4" stroke-linecap="round"/>
+      <circle cx="16" cy="10" r="1" fill="currentColor"/>
+      <circle cx="18" cy="12" r="1" fill="currentColor"/>
+      <circle cx="16" cy="14" r="1" fill="currentColor"/>
+      <circle cx="14" cy="12" r="1" fill="currentColor"/>
+    </svg>
+    <span class="tab-label">Games</span>
+  </button>
+
+</div>
 
       <!-- AI PANEL -->
       <div class="panel-content" id="panel-ai">
