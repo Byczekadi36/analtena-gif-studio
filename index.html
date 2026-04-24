@@ -2102,6 +2102,148 @@ header::before {
 .ptab[data-panel="comics"].active .tab-icon { filter: drop-shadow(0 0 8px #22ff88) !important; }
 .ptab[data-panel="games"].active .tab-icon  { filter: drop-shadow(0 0 8px #7b61ff) !important; }
 
+
+/* ════════════════════════════════════════════════════════════
+   PANEL TABS — DESKTOP FIX
+   Desktop (>768px): icon-only, 44px compact, tooltip on hover
+   Mobile (≤768px): current layout (icon + label, scrollable)
+   ════════════════════════════════════════════════════════════ */
+
+/* ── DESKTOP: compact icon-only tabs ── */
+@media(min-width: 769px) {
+
+  /* Panel tabs row — compact, no overflow */
+  .panel-tabs {
+    padding: 5px 6px !important;
+    gap: 3px !important;
+    flex-wrap: nowrap !important;
+    overflow-x: hidden !important;   /* no scroll bar on desktop */
+  }
+
+  /* Each tab — square icon-only button */
+  .ptab {
+    min-width: 0 !important;
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    flex: 0 0 auto !important;       /* don't stretch */
+    border-radius: 10px !important;
+    gap: 0 !important;
+  }
+
+  /* Hide text labels on desktop */
+  .ptab .tab-label {
+    display: none !important;
+  }
+
+  /* Icon slightly larger since no label */
+  .ptab svg.tab-icon,
+  .ptab .tab-icon {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 18px !important;
+  }
+
+  /* ── CSS TOOLTIP on desktop ── */
+  .ptab {
+    position: relative !important;
+  }
+  .ptab::before {
+    content: attr(title);
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%) scale(.88);
+    background: rgba(8,8,20,.97);
+    border: 1px solid rgba(0,245,255,.25);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 800;
+    font-family: var(--font-d, monospace);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.8);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .15s, transform .15s;
+    z-index: 9999;
+    box-shadow: 0 4px 20px rgba(0,0,0,.5),
+                0 0 12px rgba(0,245,255,.08);
+  }
+  /* Tooltip arrow */
+  .ptab::after {
+    content: '';
+    position: absolute;
+    left: calc(100% + 5px);
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-right-color: rgba(0,245,255,.25);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .15s;
+    z-index: 9999;
+  }
+  /* Override: don't use ::after for neon underline on desktop (use outline instead) */
+  .ptab.active::after {
+    border: none !important;
+    content: '' !important;
+    left: auto !important;
+    top: auto !important;
+    bottom: -2px !important;
+    left: 15% !important;
+    right: 15% !important;
+    width: auto !important;
+    height: 2px !important;
+    background: var(--tab-neon, #00f5ff) !important;
+    box-shadow: 0 0 5px var(--tab-neon, #00f5ff) !important;
+    transform: none !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    border-radius: 1px !important;
+  }
+  .ptab:hover::before,
+  .ptab:hover::after {
+    opacity: 1;
+  }
+  .ptab:hover::before {
+    transform: translateY(-50%) scale(1);
+  }
+
+  /* Per-tab neon color for tooltip border + underline */
+  .ptab-ai    { --tab-neon: #00f5ff; }
+  .ptab-tools { --tab-neon: #a855f7; }
+  .ptab-credits { --tab-neon: #f59e0b; }
+  .ptab-roast { --tab-neon: #ff2d78; }
+  .ptab-comics { --tab-neon: #22ff88; }
+  .ptab-games { --tab-neon: #7b61ff; }
+
+  .ptab::before {
+    border-color: var(--tab-neon, rgba(0,245,255,.25)) !important;
+  }
+  .ptab::after {
+    border-right-color: var(--tab-neon, rgba(0,245,255,.25)) !important;
+  }
+
+  /* Left panel — can be narrower since tabs are compact */
+  .left-panel {
+    width: 220px !important;
+  }
+}
+
+/* ── MOBILE: keep as-is (full tab-label visible) ── */
+@media(max-width: 768px) {
+  .ptab::before,
+  .ptab::after {
+    display: none !important;
+  }
+  .ptab .tab-label {
+    display: block !important;
+  }
+}
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
