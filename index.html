@@ -2245,24 +2245,14 @@ header {
 }
 
 
-/* ── MOBILE TOOLBAR: hidden by default (landing page) ── */
-/* Shown only after enterApp() via JS class .toolbar-ready */
-.mobile-toolbar { display: none !important; }
-.mobile-undo-bar { display: none !important; }
-.more-sheet     { display: none !important; }
-.more-sheet-backdrop { display: none !important; }
-
-/* When app entered: show toolbar on mobile */
+/* ── MOBILE TOOLBAR REMOVED — cleanup ── */
+.mobile-toolbar, .mobile-undo-bar,
+.more-sheet, .more-sheet-backdrop,
+.mob-tool-btn, .mob-undo-btn { display: none !important; }
+/* Remove padding that was reserved for toolbar */
 @media (max-width: 768px) {
-  body.toolbar-ready .mobile-toolbar { display: flex !important; }
-  body.toolbar-ready .mobile-undo-bar { display: flex !important; }
-  body.toolbar-ready .more-sheet.open { display: block !important; }
-  body.toolbar-ready .more-sheet-backdrop.open { display: block !important; }
-
-  /* Still hide during non-canvas modes */
-  body.toolbar-ready #app.games-mode ~ .mobile-toolbar,
-  body.toolbar-ready #app.comics-mode ~ .mobile-toolbar,
-  body.toolbar-ready #app.nocanvas-mode ~ .mobile-toolbar { display: none !important; }
+  .canvas-area { padding-bottom: 0 !important; }
+  .music-player { bottom: 20px !important; }
 }
 
 </style>
@@ -2929,23 +2919,7 @@ header {
         <span style="font-size:11px;color:var(--muted);font-weight:700" id="res-label">480×480</span>
       </div>
 
-      <!-- Mobile undo bar — visible only on mobile -->
-      <div class="mobile-undo-bar" id="mobileUndoBar">
-        <button class="mob-undo-btn" id="mobUndoBtn" onclick="editorUndo()" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 7v6h6"/><path d="M3 13C5 8 9 5 14 5a9 9 0 110 18 9 9 0 01-7.8-4.5"/></svg>
-          Undo
-        </button>
-        <button class="mob-undo-btn" id="mobRedoBtn" onclick="editorRedo()" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 7v6h-6"/><path d="M21 13C19 8 15 5 10 5a9 9 0 100 18 9 9 0 007.8-4.5"/></svg>
-          Redo
-        </button>
-        <!-- Draw options shown when draw/erase active -->
-        <div class="mob-draw-opts" id="mobDrawOpts">
-          <span class="mob-draw-label">Sz</span>
-          <input type="range" min="1" max="60" value="12" oninput="editorUpdateDrawOpts();syncMobDraw(this);" id="mobDrawSize">
-          <input type="color" value="#00f5ff" oninput="editorUpdateDrawOpts();syncMobColor(this);" id="mobDrawColor">
-        </div>
-      </div>
+      
       <div class="canvas-stage">
         <div class="canvas-wrap" id="canvas-wrap">
           <div class="upload-drop-zone" id="uploadDropZone">
@@ -3629,7 +3603,6 @@ function enterApp(addr, verified) {
   state.walletAddr = addr;
   document.getElementById('gate').style.display = 'none';
   document.getElementById('app').classList.add('visible');
-  document.body.classList.add('toolbar-ready');  // show mobile toolbar
   const short = addr.slice(0,4)+'…'+addr.slice(-4);
   document.getElementById('hdr-wallet').textContent = verified ? short+' ✓ ANAL' : '🤞 honour';
   toast(verified ? '✅ ANAL verified. Welcome in.' : '🤞 Honour accepted.');
@@ -3642,7 +3615,6 @@ function disconnect() {
   state.frames = [];
   document.getElementById('gate').style.display = 'flex';
   document.getElementById('app').classList.remove('visible');
-  document.body.classList.remove('toolbar-ready');  // hide mobile toolbar
 }
 
 // ════════════════════════════════
@@ -9034,113 +9006,8 @@ function generateGIF() {
 </div>
 
 
-<!-- ═══════════════════════════════════════════════
-     MOBILE BOTTOM TOOLBAR
-     Shown only on mobile (≤768px) via CSS
-     ═══════════════════════════════════════════════ -->
-<div class="mobile-toolbar" id="mobileToolbar">
 
-  <!-- Select -->
-  <button class="mob-tool-btn active" id="mob-select" onclick="mobSetTool('select')" aria-label="Select">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 7.5-7 1.5-2.5 7L5 3z"/></svg>
-    <span>Select</span>
-  </button>
 
-  <!-- Draw -->
-  <button class="mob-tool-btn" id="mob-draw" onclick="mobSetTool('draw')" aria-label="Draw">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-    <span>Draw</span>
-  </button>
-
-  <!-- Text -->
-  <button class="mob-tool-btn" id="mob-text" onclick="mobSetTool('text')" aria-label="Text">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
-    <span>Text</span>
-  </button>
-
-  <!-- Upload -->
-  <button class="mob-tool-btn" id="mob-upload" onclick="triggerUpload()" aria-label="Upload">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-    <span>Upload</span>
-  </button>
-
-  <!-- Tools (was More) -->
-  <button class="mob-tool-btn more-btn" id="mob-more" onclick="toggleMoreSheet()" aria-label="Tools">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <rect x="3" y="3" width="7" height="7" rx="1"/>
-      <rect x="14" y="3" width="7" height="7" rx="1"/>
-      <rect x="14" y="14" width="7" height="7" rx="1"/>
-      <rect x="3" y="14" width="7" height="7" rx="1"/>
-    </svg>
-    <span>Tools</span>
-  </button>
-</div>
-
-<!-- ── TOOLS BOTTOM SHEET (was More) ── -->
-<div class="more-sheet-backdrop" id="moreSheetBackdrop" onclick="closeMoreSheet()"></div>
-<div class="more-sheet" id="moreSheet">
-  <div class="more-sheet-handle"></div>
-  <div class="more-sheet-title">Tools</div>
-  <div class="more-sheet-grid">
-
-    <!-- Undo — big, always visible -->
-    <button class="more-item-btn undo-btn" id="more-undo" onclick="editorUndo()" disabled>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 7v6h6"/><path d="M3 13C5 8 9 5 14 5a9 9 0 110 18 9 9 0 01-7.8-4.5"/></svg>
-      <span>Undo</span>
-    </button>
-
-    <!-- Redo -->
-    <button class="more-item-btn undo-btn" id="more-redo" onclick="editorRedo()" disabled>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 7v6h-6"/><path d="M21 13C19 8 15 5 10 5a9 9 0 100 18 9 9 0 007.8-4.5"/></svg>
-      <span>Redo</span>
-    </button>
-
-    <!-- Stickers -->
-    <button class="more-item-btn" onclick="closeMoreSheet();setTimeout(()=>toggleStickers(),100)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-linecap="round" stroke-width="3"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-linecap="round" stroke-width="3"/></svg>
-      <span>Stickers</span>
-    </button>
-
-    <!-- Erase -->
-    <button class="more-item-btn" id="more-erase" onclick="mobSetTool('erase');closeMoreSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7L3 16l13-13 7 7-3 10z"/><path d="M6 17l4-4"/></svg>
-      <span>Erase</span>
-    </button>
-
-    <!-- Duplicate frame -->
-    <button class="more-item-btn" onclick="duplicateFrame();closeMoreSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 00-2-2H5a2 2 0 00-2 2v9a2 2 0 002 2h3"/></svg>
-      <span>Duplicate</span>
-    </button>
-
-    <!-- Clear frame -->
-    <button class="more-item-btn danger" onclick="clearFrame();closeMoreSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-      <span>Clear</span>
-    </button>
-
-    <!-- Add Frame -->
-    <button class="more-item-btn" onclick="addBlankFrame();closeMoreSheet()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M12 7v6"/><path d="M9 10h6"/></svg>
-      <span>Add Frame</span>
-    </button>
-
-    <!-- Generate GIF -->
-    <button class="more-item-btn" onclick="closeMoreSheet();generateGIF()"
-            style="border-color:rgba(34,255,136,.35);color:#22ff88;">
-      <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      <span>Generate</span>
-    </button>
-
-    <!-- AI Generate -->
-    <button class="more-item-btn" onclick="closeMoreSheet();document.getElementById('prompt-input')?.focus()"
-            style="border-color:rgba(168,85,247,.35);color:#a855f7;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-      <span>AI Gen</span>
-    </button>
-
-  </div>
-</div>
 
 </body>
 </html>
