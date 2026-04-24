@@ -5771,6 +5771,122 @@ function initSlotsCanvas(){
   canvas.onclick=function(){if(!gSlotSpinning&&!gLeverPulled)pullLever();};
 }
 
+
+// ═══ SLOT SYMBOLS — vector drawing (works everywhere) ═══
+function drawSlotSymbolVector(ctx, sym, cx, cy, r) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  var s = r; // size unit
+
+  if (sym === '7️⃣' || sym === '7') {
+    // Red/gold 7
+    ctx.font = 'bold ' + Math.round(s * 2.2) + 'px Arial, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#cc0000';
+    ctx.strokeStyle = '#ff6600'; ctx.lineWidth = s * 0.15;
+    ctx.strokeText('7', 0, 0);
+    ctx.fillText('7', 0, 0);
+
+  } else if (sym === '🍒' || sym === 'CHR') {
+    // Cherry — two red circles + stems
+    var cr = s * 0.38;
+    // Left cherry
+    ctx.fillStyle = '#cc0000';
+    ctx.beginPath(); ctx.arc(-cr*0.7, cr*0.3, cr, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#ff3333';
+    ctx.beginPath(); ctx.arc(-cr*0.7 - cr*0.2, cr*0.3 - cr*0.25, cr*0.25, 0, Math.PI*2); ctx.fill();
+    // Right cherry
+    ctx.fillStyle = '#cc0000';
+    ctx.beginPath(); ctx.arc(cr*0.7, cr*0.3, cr, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#ff3333';
+    ctx.beginPath(); ctx.arc(cr*0.7 - cr*0.2, cr*0.3 - cr*0.25, cr*0.25, 0, Math.PI*2); ctx.fill();
+    // Stems
+    ctx.strokeStyle = '#228822'; ctx.lineWidth = s * 0.1;
+    ctx.beginPath(); ctx.moveTo(-cr*0.7, -cr*0.7); ctx.lineTo(-cr*0.7, cr*0.3 - cr); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cr*0.7, -cr*0.7); ctx.lineTo(cr*0.7, cr*0.3 - cr); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-cr*0.7, -cr*0.7); ctx.lineTo(cr*0.7, -cr*0.7); ctx.stroke();
+
+  } else if (sym === '🍋' || sym === 'LEM') {
+    // Lemon — yellow ellipse
+    ctx.fillStyle = '#ffe000';
+    ctx.beginPath(); ctx.ellipse(0, 0, s*0.72, s*0.58, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#ffcc00';
+    ctx.beginPath(); ctx.ellipse(-s*0.1, -s*0.1, s*0.3, s*0.22, 0, 0, Math.PI*2); ctx.fill();
+    // Tips
+    ctx.fillStyle = '#ffd000';
+    ctx.beginPath(); ctx.ellipse(-s*0.7, 0, s*0.18, s*0.12, 0.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(s*0.7, 0, s*0.18, s*0.12, -0.5, 0, Math.PI*2); ctx.fill();
+
+  } else if (sym === '💎' || sym === 'DIA') {
+    // Diamond — blue gem
+    ctx.fillStyle = '#00aaff';
+    ctx.beginPath();
+    ctx.moveTo(0, -s*0.9);
+    ctx.lineTo(s*0.7, -s*0.2);
+    ctx.lineTo(s*0.45, s*0.9);
+    ctx.lineTo(-s*0.45, s*0.9);
+    ctx.lineTo(-s*0.7, -s*0.2);
+    ctx.closePath(); ctx.fill();
+    // Shine
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.beginPath();
+    ctx.moveTo(0, -s*0.9);
+    ctx.lineTo(s*0.7, -s*0.2);
+    ctx.lineTo(0, 0);
+    ctx.lineTo(-s*0.7, -s*0.2);
+    ctx.closePath(); ctx.fill();
+    // Outline
+    ctx.strokeStyle = '#0066cc'; ctx.lineWidth = s * 0.08;
+    ctx.beginPath();
+    ctx.moveTo(0, -s*0.9); ctx.lineTo(s*0.7, -s*0.2);
+    ctx.lineTo(s*0.45, s*0.9); ctx.lineTo(-s*0.45, s*0.9);
+    ctx.lineTo(-s*0.7, -s*0.2); ctx.closePath(); ctx.stroke();
+
+  } else if (sym === '🦉' || sym === 'OWL') {
+    // Owl — body + head + eyes
+    // Body
+    ctx.fillStyle = '#8B6914';
+    ctx.beginPath(); ctx.ellipse(0, s*0.3, s*0.55, s*0.65, 0, 0, Math.PI*2); ctx.fill();
+    // Head
+    ctx.fillStyle = '#a07820';
+    ctx.beginPath(); ctx.arc(0, -s*0.25, s*0.48, 0, Math.PI*2); ctx.fill();
+    // Ears
+    ctx.fillStyle = '#8B6914';
+    ctx.beginPath(); ctx.moveTo(-s*0.3, -s*0.62); ctx.lineTo(-s*0.48, -s*0.95); ctx.lineTo(-s*0.12, -s*0.68); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(s*0.3, -s*0.62); ctx.lineTo(s*0.48, -s*0.95); ctx.lineTo(s*0.12, -s*0.68); ctx.fill();
+    // Eyes
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-s*0.2, -s*0.28, s*0.22, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(s*0.2, -s*0.28, s*0.22, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#1a0033';
+    ctx.beginPath(); ctx.arc(-s*0.18, -s*0.26, s*0.12, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(s*0.22, -s*0.26, s*0.12, 0, Math.PI*2); ctx.fill();
+    // Beak
+    ctx.fillStyle = '#ffaa00';
+    ctx.beginPath(); ctx.moveTo(-s*0.1, -s*0.08); ctx.lineTo(0, s*0.08); ctx.lineTo(s*0.1, -s*0.08); ctx.fill();
+
+  } else if (sym === '🌙' || sym === 'MON') {
+    // Moon — crescent
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath(); ctx.arc(0, 0, s*0.82, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#faf6ee'; // matches reel background
+    ctx.beginPath(); ctx.arc(s*0.32, -s*0.18, s*0.62, 0, Math.PI*2); ctx.fill();
+    // Stars around
+    ctx.fillStyle = '#ffd700';
+    [[s*0.7, -s*0.72],[s*0.85, s*0.2],[-s*0.1, -s*0.92]].forEach(function(p){
+      ctx.beginPath(); ctx.arc(p[0], p[1], s*0.08, 0, Math.PI*2); ctx.fill();
+    });
+
+  } else {
+    // Fallback — plain text (any unknown symbol)
+    ctx.font = 'bold ' + Math.round(s*1.6) + 'px Arial';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#333';
+    ctx.fillText(sym.substring(0,2), 0, 0);
+  }
+  ctx.restore();
+}
+
 function drawCasinoMachine(ctx,W,H,reels,spinning,f){
   ctx.clearRect(0,0,W,H);
   var mx=W/2;
@@ -5944,11 +6060,8 @@ function drawCasinoMachine(ctx,W,H,reels,spinning,f){
       ctx.drawImage(gLogoImg,rx+4,ry+4,RW3-8,RH3-8);
       ctx.restore();
     } else {
-      // BIG symbol - no shadow (white bg = visible)
-      var efs=Math.min(Math.round(RH3*0.62),Math.round(RW3*0.72));
-      ctx.font=efs+'px serif';
-      ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText(sym,cx3,cy3);
+      // Draw symbol as vector — works on all devices/browsers
+      drawSlotSymbolVector(ctx, sym, cx3, cy3, Math.min(RW3, RH3) * 0.42);
     }
 
     // Winner: red outline on reel
