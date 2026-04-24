@@ -1199,6 +1199,226 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 .canvas-drawing { cursor: crosshair !important; }
 .canvas-erasing { cursor: cell !important; }
 
+
+/* ═══════════════════════════════════════════════════════
+   MOBILE-FIRST EDITOR TOOLBAR
+   Desktop (>768px): existing horizontal toolbar unchanged
+   Mobile (≤768px): bottom bar + "More" bottom sheet
+   ═══════════════════════════════════════════════════════ */
+
+/* ── MOBILE BOTTOM TOOLBAR ── */
+.mobile-toolbar {
+  display: none; /* hidden on desktop */
+}
+
+@media(max-width: 768px) {
+  /* Hide desktop toolbar on mobile */
+  .canvas-toolbar {
+    display: none !important;
+  }
+
+  /* Show mobile bottom bar */
+  .mobile-toolbar {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 300;
+    background: linear-gradient(180deg, rgba(10,10,18,.97) 0%, rgba(6,6,12,1) 100%);
+    border-top: 1px solid rgba(0,245,255,.15);
+    box-shadow: 0 -4px 24px rgba(0,0,0,.5), 0 0 20px rgba(0,245,255,.04);
+    padding: 6px 4px env(safe-area-inset-bottom, 6px);
+    align-items: center;
+    justify-content: space-around;
+    gap: 2px;
+  }
+
+  /* Push canvas up so bottom bar doesn't overlap */
+  .canvas-area {
+    padding-bottom: 68px !important;
+  }
+
+  /* Mobile undo bar at top of canvas */
+  .mobile-undo-bar {
+    display: flex !important;
+  }
+}
+
+/* ── MOBILE TOOL BUTTON ── */
+.mob-tool-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  border: 1.5px solid transparent;
+  background: transparent;
+  color: rgba(255,255,255,.45);
+  cursor: pointer;
+  transition: all .15s;
+  padding: 0 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+.mob-tool-btn svg {
+  width: 22px; height: 22px;
+  flex-shrink: 0;
+}
+.mob-tool-btn span {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.mob-tool-btn:active {
+  transform: scale(.92);
+}
+.mob-tool-btn.active {
+  color: #00f5ff;
+  border-color: rgba(0,245,255,.35);
+  background: rgba(0,245,255,.08);
+  box-shadow: 0 0 12px rgba(0,245,255,.15);
+}
+.mob-tool-btn.active svg {
+  filter: drop-shadow(0 0 4px #00f5ff);
+}
+.mob-tool-btn.more-btn {
+  color: rgba(255,255,255,.5);
+}
+.mob-tool-btn.more-btn.active {
+  color: #a855f7;
+  border-color: rgba(168,85,247,.35);
+  background: rgba(168,85,247,.08);
+  box-shadow: 0 0 12px rgba(168,85,247,.15);
+}
+
+/* ── MOBILE UNDO BAR (top strip inside canvas area) ── */
+.mobile-undo-bar {
+  display: none; /* shown only on mobile via @media */
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(0,0,0,.3);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  flex-shrink: 0;
+}
+.mob-undo-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(168,85,247,.3);
+  background: rgba(168,85,247,.08);
+  color: #a855f7;
+  font-size: 11px; font-weight: 800;
+  cursor: pointer;
+  transition: all .12s;
+  min-height: 36px;
+}
+.mob-undo-btn:disabled { opacity: .25; cursor: not-allowed; }
+.mob-undo-btn:active:not(:disabled) { transform: scale(.95); }
+.mob-undo-btn svg { width: 14px; height: 14px; }
+
+/* Draw options mobile (inside undo bar) */
+.mob-draw-opts {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.mob-draw-opts.visible { display: flex; }
+.mob-draw-opts input[type=range] { flex: 1; max-width: 80px; accent-color: #00f5ff; }
+.mob-draw-opts input[type=color] { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,.2); padding: 0; cursor: pointer; }
+.mob-draw-label { font-size: 9px; font-weight: 700; color: rgba(255,255,255,.4); letter-spacing: 1px; white-space: nowrap; }
+
+/* ── "MORE" BOTTOM SHEET ── */
+.more-sheet-backdrop {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(4px);
+  z-index: 390;
+}
+.more-sheet-backdrop.open { display: block; animation: msBdIn .2s ease; }
+@keyframes msBdIn { from{opacity:0} to{opacity:1} }
+
+.more-sheet {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 400;
+  background: linear-gradient(180deg, #111120, #0a0a12);
+  border-top: 1px solid rgba(0,245,255,.2);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -8px 40px rgba(0,0,0,.6), 0 0 30px rgba(0,245,255,.06);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  transform: translateY(100%);
+}
+.more-sheet.open {
+  display: block;
+  animation: msIn .3s cubic-bezier(.22,1,.36,1) forwards;
+}
+@keyframes msIn { from{transform:translateY(100%)} to{transform:translateY(0)} }
+
+.more-sheet-handle {
+  width: 36px; height: 4px;
+  background: rgba(255,255,255,.15);
+  border-radius: 2px;
+  margin: 10px auto 14px;
+}
+.more-sheet-title {
+  font-size: 11px; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: rgba(0,245,255,.6);
+  padding: 0 16px 10px;
+}
+.more-sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 0 12px 16px;
+}
+.more-item-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 70px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.6);
+  cursor: pointer;
+  transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.more-item-btn svg { width: 24px; height: 24px; }
+.more-item-btn span { font-size: 10px; font-weight: 700; letter-spacing: .04em; }
+.more-item-btn:active { transform: scale(.93); }
+.more-item-btn.active,
+.more-item-btn:hover {
+  border-color: rgba(0,245,255,.4);
+  background: rgba(0,245,255,.08);
+  color: #00f5ff;
+  box-shadow: 0 0 14px rgba(0,245,255,.15);
+}
+.more-item-btn.danger:hover,
+.more-item-btn.danger.active {
+  border-color: rgba(255,45,120,.4);
+  background: rgba(255,45,120,.08);
+  color: #ff2d78;
+  box-shadow: 0 0 14px rgba(255,45,120,.15);
+}
+.more-item-btn.undo-btn:hover,
+.more-item-btn.undo-btn.active {
+  border-color: rgba(168,85,247,.4);
+  background: rgba(168,85,247,.08);
+  color: #a855f7;
+  box-shadow: 0 0 14px rgba(168,85,247,.15);
+}
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
@@ -1718,6 +1938,23 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
         <span style="font-size:11px;color:var(--muted);font-weight:700" id="res-label">480×480</span>
       </div>
 
+      <!-- Mobile undo bar — visible only on mobile -->
+      <div class="mobile-undo-bar" id="mobileUndoBar">
+        <button class="mob-undo-btn" id="mobUndoBtn" onclick="editorUndo()" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 7v6h6"/><path d="M3 13C5 8 9 5 14 5a9 9 0 110 18 9 9 0 01-7.8-4.5"/></svg>
+          Undo
+        </button>
+        <button class="mob-undo-btn" id="mobRedoBtn" onclick="editorRedo()" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 7v6h-6"/><path d="M21 13C19 8 15 5 10 5a9 9 0 100 18 9 9 0 007.8-4.5"/></svg>
+          Redo
+        </button>
+        <!-- Draw options shown when draw/erase active -->
+        <div class="mob-draw-opts" id="mobDrawOpts">
+          <span class="mob-draw-label">Sz</span>
+          <input type="range" min="1" max="60" value="12" oninput="editorUpdateDrawOpts();syncMobDraw(this);" id="mobDrawSize">
+          <input type="color" value="#00f5ff" oninput="editorUpdateDrawOpts();syncMobColor(this);" id="mobDrawColor">
+        </div>
+      </div>
       <div class="canvas-stage">
         <div class="canvas-wrap" id="canvas-wrap">
           <div class="upload-drop-zone" id="uploadDropZone">
@@ -7495,6 +7732,138 @@ document.addEventListener('click', function(e) {
   }
 });
 
+
+
+// ══════════════════════════════════════════════════════════════
+//  MOBILE TOOLBAR JS
+// ══════════════════════════════════════════════════════════════
+
+// ── Mobile tool switch ────────────────────────────────────────
+function mobSetTool(name) {
+  // Sync with desktop setTool
+  const desktopBtn = document.getElementById('tool-' + name);
+  setTool(name, desktopBtn || document.createElement('button'));
+
+  // Update mobile buttons
+  ['select','draw','erase','text'].forEach(function(t) {
+    const btn = document.getElementById('mob-' + t);
+    if (btn) btn.classList.toggle('active', t === name);
+  });
+  const moreErase = document.getElementById('more-erase');
+  if (moreErase) moreErase.classList.toggle('active', name === 'erase');
+
+  // Show/hide mobile draw options
+  const mobOpts = document.getElementById('mobDrawOpts');
+  if (mobOpts) mobOpts.classList.toggle('visible', name === 'draw' || name === 'erase');
+}
+
+// Sync sliders between mobile and desktop
+function syncMobDraw(el) {
+  const desktopEl = document.getElementById('drawSize');
+  if (desktopEl) desktopEl.value = el.value;
+  editorUpdateDrawOpts();
+}
+function syncMobColor(el) {
+  const desktopEl = document.getElementById('drawColor');
+  if (desktopEl) desktopEl.value = el.value;
+  editorUpdateDrawOpts();
+}
+
+// ── More Sheet ────────────────────────────────────────────────
+function toggleMoreSheet() {
+  const sheet = document.getElementById('moreSheet');
+  const backdrop = document.getElementById('moreSheetBackdrop');
+  const btn = document.getElementById('mob-more');
+  const isOpen = sheet.classList.contains('open');
+  if (isOpen) {
+    closeMoreSheet();
+  } else {
+    sheet.classList.add('open');
+    backdrop.classList.add('open');
+    if (btn) btn.classList.add('active');
+  }
+}
+function closeMoreSheet() {
+  document.getElementById('moreSheet').classList.remove('open');
+  document.getElementById('moreSheetBackdrop').classList.remove('open');
+  const btn = document.getElementById('mob-more');
+  if (btn) btn.classList.remove('active');
+}
+
+// ── Mobile stickers (opens existing stickers panel or more sheet) ──
+function mobToggleStickers() {
+  // On mobile open sticker panel directly above the toolbar
+  const panel = document.getElementById('stickersPanel');
+  if (!panel) return;
+  const isOpen = panel.classList.contains('open');
+  if (!isOpen) {
+    // Position above mobile toolbar
+    panel.style.bottom = '68px';
+    panel.style.left = '8px';
+    panel.style.right = '8px';
+    panel.style.width = 'auto';
+    panel.style.maxHeight = '50vh';
+    buildStickersPanel();
+    panel.classList.add('open');
+    document.getElementById('mob-stickers').classList.add('active');
+  } else {
+    panel.classList.remove('open');
+    document.getElementById('mob-stickers').classList.remove('active');
+  }
+}
+
+// ── Patch editorUpdateUndoUI to also update mobile buttons ────
+const _origUndoUI = editorUpdateUndoUI;
+editorUpdateUndoUI = function() {
+  _origUndoUI();
+  // Mobile undo bar buttons
+  const mobUndo = document.getElementById('mobUndoBtn');
+  const mobRedo = document.getElementById('mobRedoBtn');
+  const moreUndo = document.getElementById('more-undo');
+  const moreRedo = document.getElementById('more-redo');
+  if (mobUndo) mobUndo.disabled = undoStack.length === 0;
+  if (mobRedo) mobRedo.disabled = redoStack.length === 0;
+  if (moreUndo) moreUndo.disabled = undoStack.length === 0;
+  if (moreRedo) moreRedo.disabled = redoStack.length === 0;
+};
+
+// ── Patch setTool to sync mobile active state ──────────────────
+const _origMobSetTool = setTool;
+setTool = function(name, el) {
+  _origMobSetTool(name, el);
+  // Update mobile bottom bar active states
+  ['select','draw','text'].forEach(function(t) {
+    const btn = document.getElementById('mob-' + t);
+    if (btn) btn.classList.toggle('active', t === name);
+  });
+  // Draw opts mobile
+  const mobOpts = document.getElementById('mobDrawOpts');
+  if (mobOpts) mobOpts.classList.toggle('visible', name === 'draw' || name === 'erase');
+};
+
+// ── Close stickers when clicking outside on mobile ─────────────
+document.addEventListener('click', function(e) {
+  if (window.innerWidth > 768) return;
+  const panel = document.getElementById('stickersPanel');
+  const btn = document.getElementById('mob-stickers');
+  if (panel && btn && !panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.classList.remove('open');
+    btn.classList.remove('active');
+  }
+});
+
+// ── Swipe down to close more sheet ────────────────────────────
+(function() {
+  let startY = 0;
+  const sheet = document.getElementById('moreSheet');
+  if (!sheet) return;
+  sheet.addEventListener('touchstart', function(e) { startY = e.touches[0].clientY; }, { passive: true });
+  sheet.addEventListener('touchend', function(e) {
+    const dy = e.changedTouches[0].clientY - startY;
+    if (dy > 60) closeMoreSheet();
+  }, { passive: true });
+})();
+
 </script>
 
 <!-- ══════════════════════════════════════════════
@@ -7567,6 +7936,108 @@ document.addEventListener('click', function(e) {
     <button class="cp-lb-btn" onclick="cpLbNav(-1)">◀ Prev</button>
     <div class="cp-lb-ctr" id="cpLbCtr">1 / 7</div>
     <button class="cp-lb-btn" onclick="cpLbNav(1)">Next ▶</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     MOBILE BOTTOM TOOLBAR
+     Shown only on mobile (≤768px) via CSS
+     ═══════════════════════════════════════════════ -->
+<div class="mobile-toolbar" id="mobileToolbar">
+
+  <!-- Select -->
+  <button class="mob-tool-btn active" id="mob-select" onclick="mobSetTool('select')" aria-label="Select">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 7.5-7 1.5-2.5 7L5 3z"/></svg>
+    <span>Select</span>
+  </button>
+
+  <!-- Draw -->
+  <button class="mob-tool-btn" id="mob-draw" onclick="mobSetTool('draw')" aria-label="Draw">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    <span>Draw</span>
+  </button>
+
+  <!-- Text -->
+  <button class="mob-tool-btn" id="mob-text" onclick="mobSetTool('text')" aria-label="Text">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+    <span>Text</span>
+  </button>
+
+  <!-- Upload -->
+  <button class="mob-tool-btn" id="mob-upload" onclick="triggerUpload()" aria-label="Upload">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <span>Upload</span>
+  </button>
+
+  <!-- Stickers -->
+  <button class="mob-tool-btn" id="mob-stickers" onclick="mobToggleStickers()" aria-label="Stickers">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+    <span>Stickers</span>
+  </button>
+
+  <!-- More -->
+  <button class="mob-tool-btn more-btn" id="mob-more" onclick="toggleMoreSheet()" aria-label="More tools">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+    <span>More</span>
+  </button>
+</div>
+
+<!-- ── MORE TOOLS BOTTOM SHEET ── -->
+<div class="more-sheet-backdrop" id="moreSheetBackdrop" onclick="closeMoreSheet()"></div>
+<div class="more-sheet" id="moreSheet">
+  <div class="more-sheet-handle"></div>
+  <div class="more-sheet-title">More Tools</div>
+  <div class="more-sheet-grid">
+
+    <!-- Erase -->
+    <button class="more-item-btn" id="more-erase" onclick="mobSetTool('erase');closeMoreSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7L3 16l13-13 7 7-3 10z"/><path d="M6 17l4-4"/></svg>
+      <span>Erase</span>
+    </button>
+
+    <!-- Undo -->
+    <button class="more-item-btn undo-btn" id="more-undo" onclick="editorUndo()" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 7v6h6"/><path d="M3 13C5 8 9 5 14 5a9 9 0 110 18 9 9 0 01-7.8-4.5"/></svg>
+      <span>Undo</span>
+    </button>
+
+    <!-- Redo -->
+    <button class="more-item-btn undo-btn" id="more-redo" onclick="editorRedo()" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 7v6h-6"/><path d="M21 13C19 8 15 5 10 5a9 9 0 100 18 9 9 0 007.8-4.5"/></svg>
+      <span>Redo</span>
+    </button>
+
+    <!-- Duplicate frame -->
+    <button class="more-item-btn" onclick="duplicateFrame();closeMoreSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 00-2-2H5a2 2 0 00-2 2v9a2 2 0 002 2h3"/></svg>
+      <span>Duplicate</span>
+    </button>
+
+    <!-- Clear frame -->
+    <button class="more-item-btn danger" onclick="clearFrame();closeMoreSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      <span>Clear</span>
+    </button>
+
+    <!-- Add Frame -->
+    <button class="more-item-btn" onclick="addBlankFrame();closeMoreSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M12 7v6"/><path d="M9 10h6"/></svg>
+      <span>Add Frame</span>
+    </button>
+
+    <!-- Generate GIF -->
+    <button class="more-item-btn" onclick="closeMoreSheet();generateGIF()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span>Generate</span>
+    </button>
+
+    <!-- AI Generate -->
+    <button class="more-item-btn" onclick="closeMoreSheet();document.getElementById('prompt-input')?.focus()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span>AI Gen</span>
+    </button>
+
   </div>
 </div>
 
