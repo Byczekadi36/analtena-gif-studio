@@ -1806,373 +1806,187 @@ header::before {
    Glassmorphism tabs with neon glow, SVG icons, smooth anim
    ══════════════════════════════════════════════════════════════ */
 
-/* ── LEFT PANEL BASE ── */
+
+/* ════════════════════════════════════════════════════════════
+   ANAL GIF STUDIO — DEFINITIVE NAV + EDITOR CSS  v5.0
+   Single source of truth. No !important conflicts.
+   ════════════════════════════════════════════════════════════ */
+
+/* ── LEFT PANEL ── */
 .left-panel {
-  background: linear-gradient(180deg,
-    rgba(14,14,26,.98) 0%,
-    rgba(10,10,18,.99) 100%) !important;
-  border-right: 1px solid rgba(0,245,255,.08) !important;
+  background: linear-gradient(180deg, #0e0e1a 0%, #0a0a12 100%);
+  border-right: 1px solid rgba(0,245,255,.08);
+  overflow: visible;
 }
 
 /* ── PANEL TABS CONTAINER ── */
 .panel-tabs {
-  display: flex !important;
-  flex-direction: column !important;
-  border-right: none !important;
-  border-bottom: none !important;
-  padding: 8px 6px !important;
-  gap: 3px !important;
-  background: transparent !important;
-  width: 100% !important;
-}
-
-/* When left-panel is vertical the tabs go horizontal on top */
-.left-panel {
-  flex-direction: row !important;
-}
-.panel-tabs {
-  flex-direction: row !important;
-  border-bottom: 1px solid rgba(0,245,255,.07) !important;
-  padding: 6px 8px !important;
-  gap: 4px !important;
-  flex-shrink: 0 !important;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  border-bottom: 1px solid rgba(0,245,255,.07);
+  padding: 4px 6px;
+  gap: 3px;
+  flex-shrink: 0;
   overflow-x: auto;
   scrollbar-width: none;
   align-items: center;
 }
 .panel-tabs::-webkit-scrollbar { display: none; }
-.left-panel {
-  flex-direction: column !important;
-}
 
-/* ── PREMIUM PTAB ── */
+/* ── PTAB BASE — mobile first (icon + label) ── */
 .ptab {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 3px !important;
-  min-width: 52px !important;
-  height: 60px !important;
-  padding: 6px 8px !important;
-  border-radius: 12px !important;
-  border: 1.5px solid transparent !important;
-  background: transparent !important;
-  color: rgba(255,255,255,.35) !important;
-  font-size: 9px !important;
-  font-weight: 800 !important;
-  letter-spacing: .08em !important;
-  text-transform: uppercase !important;
-  cursor: pointer !important;
-  transition: all .2s cubic-bezier(.22,1,.36,1) !important;
-  white-space: nowrap !important;
-  text-align: center !important;
-  position: relative !important;
-  overflow: visible !important;
-  -webkit-tap-highlight-color: transparent !important;
-  flex-shrink: 0 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 50px;
+  height: 54px;
+  padding: 6px 4px;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  background: transparent;
+  color: rgba(255,255,255,.35);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .18s cubic-bezier(.22,1,.36,1);
+  white-space: nowrap;
+  position: relative;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
-
-/* Tab icon (emoji or svg inside) */
 .ptab .tab-icon {
-  font-size: 22px !important;
-  line-height: 1 !important;
-  transition: all .2s cubic-bezier(.22,1,.36,1) !important;
-  display: block !important;
+  font-size: 20px;
+  line-height: 1;
+  display: block;
+  transition: all .18s cubic-bezier(.22,1,.36,1);
 }
 .ptab svg.tab-icon {
-  width: 24px !important;
-  height: 24px !important;
-  display: block !important;
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 .ptab .tab-label {
-  font-size: 9px !important;
-  font-weight: 800 !important;
-  letter-spacing: .07em !important;
-  text-transform: uppercase !important;
-  line-height: 1 !important;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  line-height: 1;
+  display: block;
 }
 
-/* ── HOVER STATE ── */
+/* ── PTAB HOVER ── */
 .ptab:hover {
-  color: #00f5ff !important;
-  border-color: rgba(0,245,255,.28) !important;
-  background: rgba(0,245,255,.06) !important;
-  box-shadow: 0 0 16px rgba(0,245,255,.1),
-              inset 0 0 10px rgba(0,245,255,.03) !important;
-  transform: translateY(-1px) !important;
+  color: #00f5ff;
+  border-color: rgba(0,245,255,.3);
+  background: rgba(0,245,255,.07);
+  box-shadow: 0 0 14px rgba(0,245,255,.12);
+  transform: translateY(-1px);
 }
 .ptab:hover .tab-icon {
-  filter: drop-shadow(0 0 5px rgba(0,245,255,.7)) !important;
-  transform: scale(1.12) !important;
+  filter: drop-shadow(0 0 4px rgba(0,245,255,.7));
+  transform: scale(1.1);
 }
+.ptab:active { transform: scale(.93); }
 
-/* ── ACTIVE STATE ── */
+/* ── PTAB ACTIVE ── */
 .ptab.active {
-  color: #00f5ff !important;
-  border-color: rgba(0,245,255,.4) !important;
-  background: linear-gradient(145deg,
-    rgba(0,245,255,.10) 0%,
-    rgba(0,245,255,.04) 100%) !important;
-  box-shadow: 0 0 20px rgba(0,245,255,.18),
-              0 4px 12px rgba(0,0,0,.3),
-              inset 0 0 12px rgba(0,245,255,.05) !important;
+  color: var(--tab-neon, #00f5ff);
+  border-color: color-mix(in srgb, var(--tab-neon, #00f5ff) 40%, transparent);
+  background: color-mix(in srgb, var(--tab-neon, #00f5ff) 10%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--tab-neon, #00f5ff) 20%, transparent);
 }
 .ptab.active .tab-icon {
-  filter: drop-shadow(0 0 6px rgba(0,245,255,.8)) !important;
+  filter: drop-shadow(0 0 6px var(--tab-neon, #00f5ff));
 }
 .ptab.active::after {
   content: '';
   position: absolute;
-  bottom: -1px;
+  bottom: -2px;
   left: 20%;
   right: 20%;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #00f5ff, transparent);
   border-radius: 1px;
-  box-shadow: 0 0 6px #00f5ff;
+  background: var(--tab-neon, #00f5ff);
+  box-shadow: 0 0 5px var(--tab-neon, #00f5ff);
 }
 
-/* ── PER-TAB COLOR VARIANTS ── */
-/* AI — cyan (default) */
-.ptab-ai:hover, .ptab-ai.active {
-  color: #00f5ff !important;
-  border-color: rgba(0,245,255,.4) !important;
-  background: rgba(0,245,255,.08) !important;
-}
-.ptab-ai.active::after {
-  background: linear-gradient(90deg, transparent, #00f5ff, transparent);
-  box-shadow: 0 0 6px #00f5ff;
-}
+/* ── PER-TAB NEON COLORS (CSS custom props) ── */
+.ptab-ai      { --tab-neon: #00f5ff; }
+.ptab-tools   { --tab-neon: #a855f7; }
+.ptab-credits { --tab-neon: #f59e0b; }
+.ptab-roast   { --tab-neon: #ff2d78; }
+.ptab-comics  { --tab-neon: #22ff88; }
+.ptab-games   { --tab-neon: #7b61ff; }
 
-/* Tools — purple */
-.ptab-tools:hover {
-  color: #a855f7 !important;
-  border-color: rgba(168,85,247,.35) !important;
-  background: rgba(168,85,247,.07) !important;
-  box-shadow: 0 0 16px rgba(168,85,247,.12) !important;
-}
-.ptab-tools:hover .tab-icon { filter: drop-shadow(0 0 5px rgba(168,85,247,.8)) !important; }
-.ptab-tools.active {
-  color: #a855f7 !important;
-  border-color: rgba(168,85,247,.45) !important;
-  background: rgba(168,85,247,.1) !important;
-  box-shadow: 0 0 20px rgba(168,85,247,.2) !important;
-}
-.ptab-tools.active::after {
-  background: linear-gradient(90deg, transparent, #a855f7, transparent);
-  box-shadow: 0 0 6px #a855f7;
-}
+.ptab-tools:hover   { color: #a855f7; border-color: rgba(168,85,247,.3); background: rgba(168,85,247,.07); box-shadow: 0 0 14px rgba(168,85,247,.12); }
+.ptab-tools:hover .tab-icon { filter: drop-shadow(0 0 4px rgba(168,85,247,.7)); }
+.ptab-credits:hover { color: #f59e0b; border-color: rgba(245,158,11,.3);  background: rgba(245,158,11,.07);  box-shadow: 0 0 14px rgba(245,158,11,.12);  }
+.ptab-credits:hover .tab-icon { filter: drop-shadow(0 0 4px rgba(245,158,11,.7)); }
+.ptab-roast:hover   { color: #ff2d78; border-color: rgba(255,45,120,.3);  background: rgba(255,45,120,.07);  box-shadow: 0 0 14px rgba(255,45,120,.12);  }
+.ptab-roast:hover .tab-icon { filter: drop-shadow(0 0 4px rgba(255,45,120,.7)); }
+.ptab-comics:hover  { color: #22ff88; border-color: rgba(34,255,136,.3);  background: rgba(34,255,136,.07);  box-shadow: 0 0 14px rgba(34,255,136,.12);  }
+.ptab-comics:hover .tab-icon { filter: drop-shadow(0 0 4px rgba(34,255,136,.7)); }
+.ptab-games:hover   { color: #7b61ff; border-color: rgba(123,97,255,.3);  background: rgba(123,97,255,.07);  box-shadow: 0 0 14px rgba(123,97,255,.12);  }
+.ptab-games:hover .tab-icon { filter: drop-shadow(0 0 4px rgba(123,97,255,.7)); }
 
-/* Credits — amber/gold */
-.ptab-credits:hover {
-  color: #f59e0b !important;
-  border-color: rgba(245,158,11,.35) !important;
-  background: rgba(245,158,11,.07) !important;
-  box-shadow: 0 0 16px rgba(245,158,11,.12) !important;
-}
-.ptab-credits:hover .tab-icon { filter: drop-shadow(0 0 5px rgba(245,158,11,.8)) !important; }
-.ptab-credits.active {
-  color: #f59e0b !important;
-  border-color: rgba(245,158,11,.45) !important;
-  background: rgba(245,158,11,.1) !important;
-  box-shadow: 0 0 20px rgba(245,158,11,.2) !important;
-}
-.ptab-credits.active::after {
-  background: linear-gradient(90deg, transparent, #f59e0b, transparent);
-  box-shadow: 0 0 6px #f59e0b;
-}
+/* ── DESKTOP (>768px): icon-only, compact, tooltip ── */
+@media (min-width: 769px) {
+  .left-panel { width: 56px; }
 
-/* Roast — hot pink/red */
-.ptab-roast:hover {
-  color: #ff2d78 !important;
-  border-color: rgba(255,45,120,.35) !important;
-  background: rgba(255,45,120,.07) !important;
-  box-shadow: 0 0 16px rgba(255,45,120,.12) !important;
-}
-.ptab-roast:hover .tab-icon { filter: drop-shadow(0 0 5px rgba(255,45,120,.8)) !important; }
-.ptab-roast.active {
-  color: #ff2d78 !important;
-  border-color: rgba(255,45,120,.45) !important;
-  background: rgba(255,45,120,.1) !important;
-  box-shadow: 0 0 20px rgba(255,45,120,.2) !important;
-}
-.ptab-roast.active::after {
-  background: linear-gradient(90deg, transparent, #ff2d78, transparent);
-  box-shadow: 0 0 6px #ff2d78;
-}
-
-/* Comics — green */
-.ptab-comics:hover {
-  color: #22ff88 !important;
-  border-color: rgba(34,255,136,.35) !important;
-  background: rgba(34,255,136,.07) !important;
-  box-shadow: 0 0 16px rgba(34,255,136,.12) !important;
-}
-.ptab-comics:hover .tab-icon { filter: drop-shadow(0 0 5px rgba(34,255,136,.8)) !important; }
-.ptab-comics.active {
-  color: #22ff88 !important;
-  border-color: rgba(34,255,136,.45) !important;
-  background: rgba(34,255,136,.1) !important;
-  box-shadow: 0 0 20px rgba(34,255,136,.2) !important;
-}
-.ptab-comics.active::after {
-  background: linear-gradient(90deg, transparent, #22ff88, transparent);
-  box-shadow: 0 0 6px #22ff88;
-}
-
-/* Games — indigo */
-.ptab-games:hover {
-  color: #7b61ff !important;
-  border-color: rgba(123,97,255,.35) !important;
-  background: rgba(123,97,255,.07) !important;
-  box-shadow: 0 0 16px rgba(123,97,255,.12) !important;
-}
-.ptab-games:hover .tab-icon { filter: drop-shadow(0 0 5px rgba(123,97,255,.8)) !important; }
-.ptab-games.active {
-  color: #7b61ff !important;
-  border-color: rgba(123,97,255,.45) !important;
-  background: rgba(123,97,255,.1) !important;
-  box-shadow: 0 0 20px rgba(123,97,255,.2) !important;
-}
-.ptab-games.active::after {
-  background: linear-gradient(90deg, transparent, #7b61ff, transparent);
-  box-shadow: 0 0 6px #7b61ff;
-}
-
-/* ── CLICK RIPPLE ── */
-@keyframes ptabPulse {
-  0% { box-shadow: 0 0 0 0 rgba(0,245,255,.4); }
-  70% { box-shadow: 0 0 0 8px rgba(0,245,255,0); }
-  100% { box-shadow: 0 0 0 0 rgba(0,245,255,0); }
-}
-.ptab:active {
-  transform: scale(.93) !important;
-}
-
-/* ── PANEL CONTENT AREA ── */
-.panel-content {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-/* ── MOBILE: panel-tabs horizontal scroll ── */
-@media(max-width: 768px) {
   .panel-tabs {
-    flex-direction: row !important;
-    overflow-x: auto !important;
-    gap: 3px !important;
-    padding: 4px 6px !important;
+    flex-direction: column;
+    border-bottom: none;
+    border-right: 1px solid rgba(0,245,255,.06);
+    padding: 8px 6px;
+    gap: 4px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    align-items: center;
+    height: 100%;
   }
+
   .ptab {
-    min-width: 48px !important;
-    height: 54px !important;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    padding: 0;
+    flex: none;
+    border-radius: 10px;
+    gap: 0;
   }
-}
+  .ptab .tab-label { display: none; }
+  .ptab svg.tab-icon { width: 20px; height: 20px; }
+  .ptab .tab-icon { font-size: 20px; }
 
-
-/* ── Data-panel active colors via attribute selector ── */
-.ptab[data-panel="ai"].active         { color: #00f5ff !important; border-color: rgba(0,245,255,.45) !important; background: rgba(0,245,255,.1) !important; box-shadow: 0 0 20px rgba(0,245,255,.18) !important; }
-.ptab[data-panel="tools"].active      { color: #a855f7 !important; border-color: rgba(168,85,247,.45) !important; background: rgba(168,85,247,.1) !important; box-shadow: 0 0 20px rgba(168,85,247,.2) !important; }
-.ptab[data-panel="credits"].active    { color: #f59e0b !important; border-color: rgba(245,158,11,.45) !important; background: rgba(245,158,11,.1) !important; box-shadow: 0 0 20px rgba(245,158,11,.2) !important; }
-.ptab[data-panel="roast"].active      { color: #ff2d78 !important; border-color: rgba(255,45,120,.45) !important; background: rgba(255,45,120,.1) !important; box-shadow: 0 0 20px rgba(255,45,120,.2) !important; }
-.ptab[data-panel="comics"].active     { color: #22ff88 !important; border-color: rgba(34,255,136,.45) !important; background: rgba(34,255,136,.1) !important; box-shadow: 0 0 20px rgba(34,255,136,.2) !important; }
-.ptab[data-panel="games"].active      { color: #7b61ff !important; border-color: rgba(123,97,255,.45) !important; background: rgba(123,97,255,.1) !important; box-shadow: 0 0 20px rgba(123,97,255,.2) !important; }
-
-/* active underline per panel */
-.ptab[data-panel="ai"].active::after     { background: linear-gradient(90deg, transparent, #00f5ff, transparent); box-shadow: 0 0 6px #00f5ff; }
-.ptab[data-panel="tools"].active::after  { background: linear-gradient(90deg, transparent, #a855f7, transparent); box-shadow: 0 0 6px #a855f7; }
-.ptab[data-panel="credits"].active::after{ background: linear-gradient(90deg, transparent, #f59e0b, transparent); box-shadow: 0 0 6px #f59e0b; }
-.ptab[data-panel="roast"].active::after  { background: linear-gradient(90deg, transparent, #ff2d78, transparent); box-shadow: 0 0 6px #ff2d78; }
-.ptab[data-panel="comics"].active::after { background: linear-gradient(90deg, transparent, #22ff88, transparent); box-shadow: 0 0 6px #22ff88; }
-.ptab[data-panel="games"].active::after  { background: linear-gradient(90deg, transparent, #7b61ff, transparent); box-shadow: 0 0 6px #7b61ff; }
-
-/* hover active icon glow per panel */
-.ptab[data-panel="ai"]:hover .tab-icon     { filter: drop-shadow(0 0 6px #00f5ff) !important; }
-.ptab[data-panel="tools"]:hover .tab-icon  { filter: drop-shadow(0 0 6px #a855f7) !important; }
-.ptab[data-panel="credits"]:hover .tab-icon{ filter: drop-shadow(0 0 6px #f59e0b) !important; }
-.ptab[data-panel="roast"]:hover .tab-icon  { filter: drop-shadow(0 0 6px #ff2d78) !important; }
-.ptab[data-panel="comics"]:hover .tab-icon { filter: drop-shadow(0 0 6px #22ff88) !important; }
-.ptab[data-panel="games"]:hover .tab-icon  { filter: drop-shadow(0 0 6px #7b61ff) !important; }
-.ptab[data-panel="ai"].active .tab-icon     { filter: drop-shadow(0 0 8px #00f5ff) !important; }
-.ptab[data-panel="tools"].active .tab-icon  { filter: drop-shadow(0 0 8px #a855f7) !important; }
-.ptab[data-panel="credits"].active .tab-icon{ filter: drop-shadow(0 0 8px #f59e0b) !important; }
-.ptab[data-panel="roast"].active .tab-icon  { filter: drop-shadow(0 0 8px #ff2d78) !important; }
-.ptab[data-panel="comics"].active .tab-icon { filter: drop-shadow(0 0 8px #22ff88) !important; }
-.ptab[data-panel="games"].active .tab-icon  { filter: drop-shadow(0 0 8px #7b61ff) !important; }
-
-
-/* ════════════════════════════════════════════════════════════
-   PANEL TABS — DESKTOP FIX
-   Desktop (>768px): icon-only, 44px compact, tooltip on hover
-   Mobile (≤768px): current layout (icon + label, scrollable)
-   ════════════════════════════════════════════════════════════ */
-
-/* ── DESKTOP: compact icon-only tabs ── */
-@media(min-width: 769px) {
-
-  /* Panel tabs row — compact, no overflow */
-  .panel-tabs {
-    padding: 5px 6px !important;
-    gap: 3px !important;
-    flex-wrap: nowrap !important;
-    overflow-x: hidden !important;   /* no scroll bar on desktop */
-  }
-
-  /* Each tab — square icon-only button */
-  .ptab {
-    min-width: 0 !important;
-    width: 40px !important;
-    height: 40px !important;
-    padding: 0 !important;
-    flex: 0 0 auto !important;       /* don't stretch */
-    border-radius: 10px !important;
-    gap: 0 !important;
-  }
-
-  /* Hide text labels on desktop */
-  .ptab .tab-label {
-    display: none !important;
-  }
-
-  /* Icon slightly larger since no label */
-  .ptab svg.tab-icon,
-  .ptab .tab-icon {
-    width: 20px !important;
-    height: 20px !important;
-    font-size: 18px !important;
-  }
-
-  /* ── CSS TOOLTIP on desktop ── */
-  .ptab {
-    position: relative !important;
-  }
+  /* Tooltip appears to the RIGHT of the tab */
   .ptab::before {
     content: attr(title);
     position: absolute;
     left: calc(100% + 10px);
     top: 50%;
-    transform: translateY(-50%) scale(.88);
+    transform: translateY(-50%) scale(.9);
     background: rgba(8,8,20,.97);
-    border: 1px solid rgba(0,245,255,.25);
-    border-radius: 8px;
+    border: 1px solid var(--tab-neon, #00f5ff);
+    border-radius: 7px;
     padding: 5px 10px;
     font-size: 11px;
     font-weight: 800;
     font-family: var(--font-d, monospace);
     letter-spacing: .08em;
     text-transform: uppercase;
-    color: rgba(255,255,255,.8);
+    color: rgba(255,255,255,.85);
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;
     transition: opacity .15s, transform .15s;
     z-index: 9999;
-    box-shadow: 0 4px 20px rgba(0,0,0,.5),
-                0 0 12px rgba(0,245,255,.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,.5), 0 0 10px color-mix(in srgb, var(--tab-neon, #00f5ff) 10%, transparent);
   }
-  /* Tooltip arrow */
   .ptab::after {
     content: '';
     position: absolute;
@@ -2180,124 +1994,254 @@ header::before {
     top: 50%;
     transform: translateY(-50%);
     border: 5px solid transparent;
-    border-right-color: rgba(0,245,255,.25);
+    border-right-color: var(--tab-neon, #00f5ff);
     pointer-events: none;
     opacity: 0;
     transition: opacity .15s;
     z-index: 9999;
   }
-  /* Override: don't use ::after for neon underline on desktop (use outline instead) */
-  .ptab.active::after {
-    border: none !important;
-    content: '' !important;
-    left: auto !important;
-    top: auto !important;
-    bottom: -2px !important;
-    left: 15% !important;
-    right: 15% !important;
-    width: auto !important;
-    height: 2px !important;
-    background: var(--tab-neon, #00f5ff) !important;
-    box-shadow: 0 0 5px var(--tab-neon, #00f5ff) !important;
-    transform: none !important;
-    opacity: 1 !important;
-    pointer-events: none !important;
-    border-radius: 1px !important;
-  }
   .ptab:hover::before,
-  .ptab:hover::after {
+  .ptab:hover::after { opacity: 1; }
+  .ptab:hover::before { transform: translateY(-50%) scale(1); }
+
+  /* Active underline on left edge (vertical sidebar) */
+  .ptab.active::after {
+    left: -3px;
+    top: 15%;
+    bottom: 15%;
+    right: auto;
+    width: 2px;
+    height: auto;
+    border: none;
+    background: var(--tab-neon, #00f5ff);
+    box-shadow: 0 0 5px var(--tab-neon, #00f5ff);
     opacity: 1;
-  }
-  .ptab:hover::before {
-    transform: translateY(-50%) scale(1);
+    transform: none;
   }
 
-  /* Per-tab neon color for tooltip border + underline */
-  .ptab-ai    { --tab-neon: #00f5ff; }
-  .ptab-tools { --tab-neon: #a855f7; }
-  .ptab-credits { --tab-neon: #f59e0b; }
-  .ptab-roast { --tab-neon: #ff2d78; }
-  .ptab-comics { --tab-neon: #22ff88; }
-  .ptab-games { --tab-neon: #7b61ff; }
-
-  .ptab::before {
-    border-color: var(--tab-neon, rgba(0,245,255,.25)) !important;
-  }
-  .ptab::after {
-    border-right-color: var(--tab-neon, rgba(0,245,255,.25)) !important;
-  }
-
-  /* Left panel — can be narrower since tabs are compact */
-  .left-panel {
-    width: 220px !important;
-  }
+  /* Panel content area — pushed right */
+  .panel-content { flex: 1; }
+  .left-panel { width: 56px; flex-direction: row; }
+  .panel-tabs { width: 56px; flex-shrink: 0; }
+  .panel-content { width: calc(100% - 56px); overflow: hidden; }
 }
 
-/* ── MOBILE: keep as-is (full tab-label visible) ── */
-@media(max-width: 768px) {
-  .ptab::before,
-  .ptab::after {
-    display: none !important;
-  }
-  .ptab .tab-label {
-    display: block !important;
-  }
+/* ── PREMIUM HEADER ── */
+header {
+  background: linear-gradient(180deg, rgba(14,14,26,.97), rgba(10,10,18,.98));
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(0,245,255,.1);
+  box-shadow: 0 1px 0 rgba(0,245,255,.05), 0 4px 24px rgba(0,0,0,.4);
+  height: 60px;
+  padding: 0 16px;
+  position: relative;
+  z-index: 100;
 }
 
+/* ── ICON BUTTON SYSTEM (header toolbar) ── */
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.55);
+  cursor: pointer;
+  transition: all .18s cubic-bezier(.22,1,.36,1);
+  position: relative;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.icon-btn svg { width: 18px; height: 18px; transition: all .18s; }
+.icon-btn:hover {
+  color: #00f5ff;
+  border-color: rgba(0,245,255,.4);
+  background: rgba(0,245,255,.08);
+  box-shadow: 0 0 12px rgba(0,245,255,.2), inset 0 0 8px rgba(0,245,255,.04);
+  transform: scale(1.08);
+}
+.icon-btn:hover svg { filter: drop-shadow(0 0 4px #00f5ff); }
+.icon-btn:active { transform: scale(.94); }
+.icon-btn:disabled { opacity: .22; cursor: not-allowed; pointer-events: none; }
+.icon-btn.undo-ico:hover { color: #a855f7; border-color: rgba(168,85,247,.4); background: rgba(168,85,247,.08); box-shadow: 0 0 12px rgba(168,85,247,.2); }
+.icon-btn.undo-ico:hover svg { filter: drop-shadow(0 0 4px #a855f7); }
+.icon-btn.green:hover { color: #22ff88; border-color: rgba(34,255,136,.4); background: rgba(34,255,136,.08); box-shadow: 0 0 12px rgba(34,255,136,.2); }
 
-/* ════════════════════════════════════════════════════════
-   CONDITIONAL MOBILE TOOLBAR
-   Hidden when non-editor panels are active
-   .editor-active  → show toolbar (default in app)
-   .editor-hidden  → hide toolbar (games/comics/etc)
-   ════════════════════════════════════════════════════════ */
+/* Undo badge */
+.undo-badge {
+  position: absolute;
+  top: -6px; right: -6px;
+  background: #a855f7;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 900;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  box-shadow: 0 0 6px rgba(168,85,247,.6);
+}
+.icon-btn.has-steps .undo-badge { display: flex; }
 
-/* Mobile toolbar hidden by default in non-editor views */
-@media(max-width: 768px) {
-  /* Also hide header editor actions in non-canvas views */
-  #app.games-mode #hdrEditorActions,
-  #app.comics-mode #hdrEditorActions {
-    display: none !important;
-  }
+/* Tooltip on header icon buttons */
+.icon-btn[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) scale(.9);
+  background: rgba(10,10,20,.95);
+  border: 1px solid rgba(0,245,255,.2);
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,.8);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: all .15s;
+  font-family: var(--font-d, monospace);
+  letter-spacing: .05em;
+  z-index: 999;
+}
+.icon-btn[data-tip]:hover::after { opacity: 1; transform: translateX(-50%) scale(1); }
 
-  /* Mobile toolbar hidden during games */
-  #app.games-mode .mobile-toolbar,
-  #app.games-mode .mobile-undo-bar,
-  #app.games-mode .more-sheet,
-  #app.games-mode .more-sheet-backdrop {
-    display: none !important;
-  }
-
-  /* Mobile toolbar hidden during comics */
-  #app.comics-mode .mobile-toolbar,
-  #app.comics-mode .mobile-undo-bar {
-    display: none !important;
-  }
-
-  /* Mobile toolbar hidden during roast/credits non-canvas panels */
-  #app.nocanvas-mode .mobile-toolbar,
-  #app.nocanvas-mode .mobile-undo-bar {
-    display: none !important;
-  }
+.hdr-sep {
+  width: 1px;
+  height: 22px;
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,.12), transparent);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+.hdr-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-/* Desktop: header editor actions hidden in games/comics */
-@media(min-width: 769px) {
-  #app.games-mode #hdrEditorActions,
-  #app.comics-mode #hdrEditorActions {
-    display: none !important;
-  }
+/* GEN GIF pulse */
+@keyframes btnPulse {
+  0%,100% { box-shadow: 0 0 14px rgba(34,255,136,.25); }
+  50%      { box-shadow: 0 0 24px rgba(34,255,136,.45), 0 0 40px rgba(34,255,136,.12); }
 }
+.generate-pulse { animation: btnPulse 2s ease-in-out infinite; }
 
-
-/* Prompt input pulse when GEN GIF clicked without setup */
+/* Prompt pulse */
 @keyframes hdrGenPulseAnim {
   0%,100% { box-shadow: 0 0 0 0 rgba(34,255,136,.5); }
   50%     { box-shadow: 0 0 0 6px rgba(34,255,136,0); }
 }
-.hdr-gen-pulse {
-  animation: hdrGenPulseAnim .5s ease 3;
-  border-color: #22ff88 !important;
+.hdr-gen-pulse { animation: hdrGenPulseAnim .5s ease 3; border-color: #22ff88; }
+
+/* ── CONDITIONAL: hide mobile toolbar during games/comics ── */
+#app.games-mode .mobile-toolbar,
+#app.games-mode .mobile-undo-bar,
+#app.comics-mode .mobile-toolbar,
+#app.nocanvas-mode .mobile-toolbar { display: none; }
+@media (min-width: 769px) {
+  #app.games-mode #hdrEditorActions,
+  #app.comics-mode #hdrEditorActions { display: none; }
+}
+
+/* ── MOBILE (≤768px): keep full label layout ── */
+@media (max-width: 768px) {
+  .left-panel { width: 100%; flex-direction: column; }
+  .panel-tabs {
+    flex-direction: row;
+    border-bottom: 1px solid rgba(0,245,255,.07);
+    border-right: none;
+    padding: 4px 6px;
+    overflow-x: auto;
+    height: auto;
+  }
+  .ptab {
+    min-width: 48px;
+    height: 52px;
+    padding: 6px 4px;
+  }
+  .ptab .tab-label { display: block; }
+  .ptab::before, .ptab::after { display: none; }
+  .ptab.active::after { display: none; }
+  header { height: 56px; padding: 0 12px; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 12px; }
+  .icon-btn svg { width: 22px; height: 22px; }
+  .hdr-actions { gap: 4px; }
+}
+
+/* ── STICKERS PANEL (fixed overlay) ── */
+.stickers-panel {
+  position: fixed;
+  z-index: 500;
+  overflow: visible;
+  width: 300px;
+  max-height: 380px;
+  background: linear-gradient(145deg, #0f0f1a, #0a0a12);
+  border: 1px solid rgba(0,245,255,.25);
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(0,245,255,.08), 0 12px 40px rgba(0,0,0,.7);
+  flex-direction: column;
+  display: none;
+}
+.stickers-panel.open { display: flex; }
+.stickers-panel .stickers-grid { overflow-y: auto; overflow-x: hidden; }
+
+/* Canvas area — allow stickers to escape */
+.canvas-area { overflow: visible; }
+.canvas-stage { overflow: hidden; }
+.canvas-wrap { overflow: hidden; }
+
+/* Music above mobile toolbar */
+@media (max-width: 768px) {
+  .music-player { bottom: 80px; }
+  #mob-stickers { display: none; }
+}
+
+/* ── DESKTOP PANEL LAYOUT (sidebar + content) ── */
+@media (min-width: 769px) {
+  .left-panel {
+    width: 260px !important;  /* total width */
+    flex-direction: row !important;
+  }
+  .panel-tabs {
+    width: 56px !important;
+    height: 100% !important;
+    flex-shrink: 0 !important;
+    flex-direction: column !important;
+    padding: 8px 6px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    border-right: 1px solid rgba(0,245,255,.06) !important;
+    border-bottom: none !important;
+    gap: 4px !important;
+  }
+  .panel-content {
+    flex: 1 !important;
+    width: calc(260px - 56px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+  /* Active indicator: left edge bar */
+  .ptab.active::after {
+    left: -3px !important;
+    top: 15% !important;
+    bottom: 15% !important;
+    right: auto !important;
+    width: 2px !important;
+    height: auto !important;
+    border: none !important;
+    background: var(--tab-neon, #00f5ff) !important;
+    box-shadow: 0 0 5px var(--tab-neon, #00f5ff) !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 </style>
