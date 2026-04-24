@@ -2255,6 +2255,283 @@ header {
   .music-player { bottom: 20px !important; }
 }
 
+
+/* ════════════════════════════════════════════════════════════
+   GAMES SECTION — PREMIUM REDESIGN v2.0
+   Cyber-meme premium, mobile-first, neon glow
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Panel Games Container ── */
+#panel-games {
+  padding: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168,85,247,.3) transparent;
+}
+#panel-games::-webkit-scrollbar { width: 4px; }
+#panel-games::-webkit-scrollbar-thumb { background: rgba(168,85,247,.3); border-radius: 2px; }
+
+/* ── Hero Section ── */
+.gm-hero {
+  position: relative;
+  padding: 20px 16px 16px;
+  text-align: center;
+  background: linear-gradient(180deg,
+    rgba(123,97,255,.12) 0%,
+    rgba(168,85,247,.06) 50%,
+    transparent 100%);
+  border-bottom: 1px solid rgba(168,85,247,.12);
+  overflow: hidden;
+}
+.gm-hero::before {
+  content: '';
+  position: absolute;
+  top: -40px; left: 50%;
+  transform: translateX(-50%);
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(123,97,255,.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.gm-hero-icon {
+  font-size: 44px;
+  display: block;
+  margin-bottom: 8px;
+  animation: heroFloat 3s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+}
+@keyframes heroFloat {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+.gm-hero-title {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #7b61ff, #a855f7, #00f5ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4px;
+  position: relative;
+  z-index: 1;
+}
+.gm-hero-sub {
+  font-size: 10px;
+  color: rgba(255,255,255,.4);
+  letter-spacing: .06em;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Balance Badge ── */
+.gm-balance {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 10px 16px 0;
+  padding: 6px 12px;
+  background: rgba(255,183,0,.06);
+  border: 1px solid rgba(255,183,0,.18);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffb700;
+  position: relative;
+  z-index: 1;
+}
+.gm-balance-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #ffb700;
+  box-shadow: 0 0 6px #ffb700;
+  animation: vblink 2s infinite;
+}
+
+/* ── Game Cards Grid ── */
+.gm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 14px 12px;
+}
+@media (min-width: 480px) {
+  .gm-grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+/* ── Single Game Card ── */
+.gm-card {
+  position: relative;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255,255,255,.06);
+  background: linear-gradient(145deg, rgba(255,255,255,.04), rgba(0,0,0,.2));
+  overflow: hidden;
+  cursor: pointer;
+  transition: all .22s cubic-bezier(.22,1,.36,1);
+  -webkit-tap-highlight-color: transparent;
+}
+.gm-card:hover, .gm-card:active {
+  transform: translateY(-3px) scale(1.02);
+  border-color: var(--gm-neon, rgba(168,85,247,.5));
+  box-shadow: 0 8px 30px rgba(0,0,0,.4),
+              0 0 20px var(--gm-glow, rgba(168,85,247,.2));
+}
+.gm-card.gm-active {
+  border-color: var(--gm-neon, rgba(168,85,247,.6));
+  background: linear-gradient(145deg, var(--gm-bg, rgba(168,85,247,.08)), rgba(0,0,0,.2));
+  box-shadow: 0 0 20px var(--gm-glow, rgba(168,85,247,.2));
+}
+
+/* Card art area */
+.gm-card-art {
+  width: 100%;
+  aspect-ratio: 4/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  background: var(--gm-bg, rgba(168,85,247,.06));
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  position: relative;
+  overflow: hidden;
+}
+.gm-card-art::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+    rgba(255,255,255,.06) 0%,
+    transparent 60%);
+}
+.gm-card-art-emoji {
+  position: relative;
+  z-index: 1;
+  transition: transform .2s;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,.4));
+}
+.gm-card:hover .gm-card-art-emoji {
+  transform: scale(1.15) rotate(-5deg);
+}
+/* Animated background particles */
+.gm-card-art-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: .4;
+}
+.gm-art-dot {
+  position: absolute;
+  border-radius: 50%;
+  animation: artFloat 3s ease-in-out infinite;
+}
+@keyframes artFloat {
+  0%,100% { transform: translateY(0) scale(1); opacity: .4; }
+  50%      { transform: translateY(-8px) scale(1.1); opacity: .7; }
+}
+
+/* Card info */
+.gm-card-info {
+  padding: 8px 10px 10px;
+}
+.gm-card-name {
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(255,255,255,.9);
+  letter-spacing: .04em;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+}
+.gm-card-desc {
+  font-size: 9px;
+  color: rgba(255,255,255,.35);
+  line-height: 1.4;
+  margin-bottom: 7px;
+}
+.gm-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+.gm-badge-play {
+  color: #22ff88;
+  border-color: rgba(34,255,136,.3);
+  background: rgba(34,255,136,.06);
+}
+.gm-badge-soon {
+  color: rgba(255,255,255,.3);
+  border-color: rgba(255,255,255,.1);
+  background: rgba(255,255,255,.03);
+}
+.gm-badge-hot {
+  color: #ff2d78;
+  border-color: rgba(255,45,120,.3);
+  background: rgba(255,45,120,.06);
+}
+
+/* Neon underline on active card */
+.gm-card.gm-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gm-neon, #a855f7);
+  box-shadow: 0 0 6px var(--gm-neon, #a855f7);
+}
+
+/* ── Old game-left-btn override (now handled by gm-card) ── */
+.game-left-btn { display: none !important; }
+.gm-hero-inner-btns { display: none; }
+
+/* ── Current game display (center overlay) ── */
+#games-center-overlay {
+  background: #080810 !important;
+}
+.gm-overlay-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: rgba(0,0,0,.3);
+  border-bottom: 1px solid rgba(168,85,247,.1);
+  flex-shrink: 0;
+}
+.gm-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(168,85,247,.3);
+  background: rgba(168,85,247,.08);
+  color: #a855f7;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: .06em;
+  transition: all .15s;
+}
+.gm-back-btn:hover {
+  background: rgba(168,85,247,.15);
+  box-shadow: 0 0 10px rgba(168,85,247,.2);
+}
+.gm-overlay-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(255,255,255,.8);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
@@ -2789,23 +3066,124 @@ header {
 
 
     <!-- 🎮 GAMES PANEL (mini - left panel) -->
-    <div class="panel-content" id="panel-games" style="display:none;padding:10px;">
-      <div style="text-align:center;padding:20px 10px;">
-        <div style="font-size:32px;margin-bottom:8px;">🎮</div>
-        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;">Games are open!</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.4);">Playing in the main area →</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
-        <button onclick="selectGameCenter('mario',this)" class="game-left-btn game-left-active">🦉 ANAL Runner</button>
-        <button onclick="selectGameCenter('slots',this)" class="game-left-btn">🎰 ANAL Slots</button>
-        <button onclick="selectGameCenter('coinflip',this)" class="game-left-btn">🪙 Coin Flip</button>
-        <button onclick="selectGameCenter('chart',this)" class="game-left-btn">📈 Chart Guesser</button>
-      </div>
-      <div style="margin-top:14px;background:rgba(255,183,0,0.07);border:1px solid rgba(255,183,0,0.2);border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:10px;color:rgba(255,255,255,0.4);">Balance</span>
-        <span style="font-size:12px;font-weight:800;color:#ffb700;" id="games-balance-display">0 ANAL</span>
+    <div class="panel-content" id="panel-games" style="display:none;">
+
+    <!-- ── HERO ── -->
+    <div class="gm-hero">
+      <span class="gm-hero-icon">🎮</span>
+      <div class="gm-hero-title">DEGEN MINI GAMES</div>
+      <div class="gm-hero-sub">Play · Earn · $ANAL</div>
+      <div class="gm-balance">
+        <span class="gm-balance-dot"></span>
+        <span id="games-balance-display">0 ANAL</span>
+        <span style="color:rgba(255,255,255,.25);font-weight:400;">balance</span>
       </div>
     </div>
+
+    <!-- ── GAME CARDS GRID ── -->
+    <div class="gm-grid">
+
+      <!-- ANAL Runner -->
+      <div class="gm-card" id="gmcard-mario"
+           style="--gm-neon:#00f5ff;--gm-glow:rgba(0,245,255,.2);--gm-bg:rgba(0,245,255,.06);"
+           onclick="gmSelectGame('mario',this)">
+        <div class="gm-card-art">
+          <div class="gm-card-art-bg">
+            <div class="gm-art-dot" style="width:40px;height:40px;background:rgba(0,245,255,.15);top:10%;left:15%;animation-delay:0s;"></div>
+            <div class="gm-art-dot" style="width:20px;height:20px;background:rgba(0,245,255,.1);bottom:20%;right:20%;animation-delay:1s;"></div>
+          </div>
+          <span class="gm-card-art-emoji">🦉</span>
+        </div>
+        <div class="gm-card-info">
+          <div class="gm-card-name">ANAL Runner</div>
+          <div class="gm-card-desc">Sowa skacze, zbiera $ANAL, unika niedźwiedzi</div>
+          <span class="gm-card-badge gm-badge-hot">🔥 Hot</span>
+        </div>
+      </div>
+
+      <!-- ANAL Slots -->
+      <div class="gm-card" id="gmcard-slots"
+           style="--gm-neon:#a855f7;--gm-glow:rgba(168,85,247,.2);--gm-bg:rgba(168,85,247,.06);"
+           onclick="gmSelectGame('slots',this)">
+        <div class="gm-card-art">
+          <div class="gm-card-art-bg">
+            <div class="gm-art-dot" style="width:50px;height:50px;background:rgba(168,85,247,.15);top:5%;right:10%;animation-delay:.5s;"></div>
+            <div class="gm-art-dot" style="width:25px;height:25px;background:rgba(168,85,247,.1);bottom:15%;left:15%;animation-delay:1.5s;"></div>
+          </div>
+          <span class="gm-card-art-emoji">🎰</span>
+        </div>
+        <div class="gm-card-info">
+          <div class="gm-card-name">ANAL Slots</div>
+          <div class="gm-card-desc">Spin & win $ANAL tokens</div>
+          <span class="gm-card-badge gm-badge-play">▶ Play Now</span>
+        </div>
+      </div>
+
+      <!-- Coin Flip -->
+      <div class="gm-card" id="gmcard-coinflip"
+           style="--gm-neon:#f59e0b;--gm-glow:rgba(245,158,11,.2);--gm-bg:rgba(245,158,11,.06);"
+           onclick="gmSelectGame('coinflip',this)">
+        <div class="gm-card-art">
+          <div class="gm-card-art-bg">
+            <div class="gm-art-dot" style="width:45px;height:45px;background:rgba(245,158,11,.15);top:15%;left:50%;animation-delay:.3s;"></div>
+          </div>
+          <span class="gm-card-art-emoji">🪙</span>
+        </div>
+        <div class="gm-card-info">
+          <div class="gm-card-name">Coin Flip</div>
+          <div class="gm-card-desc">50/50 degen bet on $ANAL</div>
+          <span class="gm-card-badge gm-badge-play">▶ Play Now</span>
+        </div>
+      </div>
+
+      <!-- Chart Guesser -->
+      <div class="gm-card" id="gmcard-chart"
+           style="--gm-neon:#22ff88;--gm-glow:rgba(34,255,136,.2);--gm-bg:rgba(34,255,136,.06);"
+           onclick="gmSelectGame('chart',this)">
+        <div class="gm-card-art">
+          <div class="gm-card-art-bg">
+            <div class="gm-art-dot" style="width:35px;height:35px;background:rgba(34,255,136,.15);bottom:20%;right:20%;animation-delay:.8s;"></div>
+          </div>
+          <span class="gm-card-art-emoji">📈</span>
+        </div>
+        <div class="gm-card-info">
+          <div class="gm-card-name">Chart Guesser</div>
+          <div class="gm-card-desc">Pump or dump? You decide.</div>
+          <span class="gm-card-badge gm-badge-play">▶ Play Now</span>
+        </div>
+      </div>
+
+      <!-- Moon Mission — coming soon -->
+      <div class="gm-card"
+           style="--gm-neon:#7b61ff;--gm-glow:rgba(123,97,255,.15);--gm-bg:rgba(123,97,255,.04);"
+           onclick="">
+        <div class="gm-card-art" style="opacity:.5;">
+          <span class="gm-card-art-emoji">🚀</span>
+        </div>
+        <div class="gm-card-info">
+          <div class="gm-card-name">Moon Mission</div>
+          <div class="gm-card-desc">Launch $ANAL to the moon</div>
+          <span class="gm-card-badge gm-badge-soon">Coming Soon</span>
+        </div>
+      </div>
+
+      <!-- ANAL Arena — coming soon -->
+      <div class="gm-card"
+           style="--gm-neon:#ff2d78;--gm-glow:rgba(255,45,120,.15);--gm-bg:rgba(255,45,120,.04);"
+           onclick="">
+        <div class="gm-card-art" style="opacity:.5;">
+          <span class="gm-card-art-emoji">⚔️</span>
+        </div>
+        <div class="gm-card-info">
+          <div class="gm-card-name">ANAL Arena</div>
+          <div class="gm-card-desc">PvP token battle royale</div>
+          <span class="gm-card-badge gm-badge-soon">Coming Soon</span>
+        </div>
+      </div>
+
+    </div><!-- /gm-grid -->
+
+  </div>
     
     <!-- ══ COMICS PANEL ══ -->
     <div id="panel-comics">
@@ -2943,6 +3321,15 @@ header {
 
     <!-- 🎮 GAMES OVERLAY - sibling to canvas-area -->
     <div id="games-center-overlay" style="display:none;flex:1;flex-direction:column;overflow:hidden;background:#080810;">
+
+      <!-- Premium games overlay header -->
+      <div class="gm-overlay-header" id="gmOverlayHeader">
+        <button class="gm-back-btn" onclick="gmBack()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          GAMES
+        </button>
+        <span class="gm-overlay-title" id="gmOverlayTitle">🎮 Select Game</span>
+      </div>
 
       <!-- MARIO RUNNER -->
       <div id="gcenter-mario" style="display:none;width:100%;height:100%;flex-direction:column;">
@@ -8928,6 +9315,50 @@ function generateGIF() {
     }
     toast('🦉 Enter a prompt to generate your GIF!');
   }, 200);
+}
+
+
+
+// ════════════════════════════════════════════════════════════
+//  GAMES — PREMIUM v2 JS
+// ════════════════════════════════════════════════════════════
+
+// Maps game id → display name + emoji
+var GM_META = {
+  mario:    { name: '🦉 ANAL Runner',    emoji: '🦉' },
+  slots:    { name: '🎰 ANAL Slots',     emoji: '🎰' },
+  coinflip: { name: '🪙 Coin Flip',      emoji: '🪙' },
+  chart:    { name: '📈 Chart Guesser',  emoji: '📈' },
+};
+
+function gmSelectGame(id, cardEl) {
+  // Mark card active
+  document.querySelectorAll('.gm-card').forEach(function(c) {
+    c.classList.remove('gm-active');
+  });
+  if (cardEl) cardEl.classList.add('gm-active');
+
+  // Update overlay header
+  var meta = GM_META[id] || { name: id, emoji: '🎮' };
+  var titleEl = document.getElementById('gmOverlayTitle');
+  if (titleEl) titleEl.textContent = meta.name;
+
+  // Delegate to existing selectGameCenter
+  selectGameCenter(id, null);
+}
+
+// Back button: hide overlay, return to game grid
+function gmBack() {
+  var overlay = document.getElementById('games-center-overlay');
+  var canvasArea = document.querySelector('.canvas-area');
+  var rightPanel = document.querySelector('.right-panel');
+  if (overlay) { overlay.style.display = 'none'; overlay.style.flex = '0'; }
+  if (canvasArea) { canvasArea.style.display = ''; canvasArea.style.flex = '1'; }
+  if (rightPanel) { rightPanel.style.display = ''; }
+  // Clear active card
+  document.querySelectorAll('.gm-card').forEach(function(c) {
+    c.classList.remove('gm-active');
+  });
 }
 
 </script>
