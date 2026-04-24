@@ -315,25 +315,68 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 /* ── MUSIC PLAYER ── */
 .music-player{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
 .music-controls{display:flex;align-items:flex-end;gap:8px;}
-.music-btn{width:48px;height:48px;border-radius:50%;border:2px solid var(--neon3);background:rgba(123,97,255,.15);
-  backdrop-filter:blur(10px);cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;
-  transition:all .2s;color:var(--text);}
-.music-btn:hover{background:rgba(123,97,255,.3);box-shadow:0 0 20px rgba(123,97,255,.4);transform:scale(1.1);}
-.music-btn.playing{border-color:var(--neon);background:rgba(0,255,204,.15);animation:music-pulse 1.5s ease-in-out infinite;}
-@keyframes music-pulse{0%,100%{box-shadow:0 0 8px rgba(0,255,204,.3)}50%{box-shadow:0 0 24px rgba(0,255,204,.6)}}
-.music-panel{background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:14px;
-  width:220px;display:none;box-shadow:0 8px 32px rgba(0,0,0,.5);}
-.music-panel.show{display:block;}
-.music-panel-title{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
-.music-track{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;cursor:pointer;transition:all .12s;border:1px solid transparent;}
-.music-track:hover{background:var(--card2);}
-.music-track.active{background:rgba(123,97,255,.12);border-color:var(--neon3);}
-.music-track-icon{font-size:14px;width:20px;text-align:center;}
-.music-track-name{font-size:12px;font-weight:700;flex:1;color:var(--text);}
-.music-track-bpm{font-size:10px;color:var(--muted);font-family:var(--font-m);}
-.music-vol{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
-.music-vol-label{font-size:10px;color:var(--muted);font-weight:700;}
-.music-vol input{flex:1;accent-color:var(--neon3);}
+.music-btn{width:52px;height:52px;border-radius:50%;border:2px solid rgba(0,245,255,.4);background:rgba(0,245,255,.08);backdrop-filter:blur(12px);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s cubic-bezier(.22,1,.36,1);position:relative;box-shadow:0 4px 20px rgba(0,0,0,.4);}
+.music-btn svg{width:22px;height:22px;color:#00f5ff;transition:all .2s;}
+.music-btn:hover{transform:scale(1.12);border-color:#00f5ff;box-shadow:0 0 22px rgba(0,245,255,.45),0 4px 24px rgba(0,0,0,.5);background:rgba(0,245,255,.15);}
+.music-btn.playing{border-color:#00f5ff;animation:apBtnPulse 2s ease-in-out infinite;}
+@keyframes apBtnPulse{0%,100%{box-shadow:0 0 8px rgba(0,245,255,.3),0 4px 20px rgba(0,0,0,.4);}50%{box-shadow:0 0 26px rgba(0,245,255,.7),0 4px 24px rgba(0,0,0,.5);}}
+.music-btn .wv{position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);display:flex;gap:2px;align-items:flex-end;height:10px;opacity:0;transition:opacity .2s;pointer-events:none;}
+.music-btn.playing .wv{opacity:1;}
+.music-btn .wv span{width:2px;background:#00f5ff;border-radius:1px;animation:apWvBar 1s ease-in-out infinite;}
+.music-btn .wv span:nth-child(1){height:4px;}.music-btn .wv span:nth-child(2){height:8px;animation-delay:.15s;}.music-btn .wv span:nth-child(3){height:6px;animation-delay:.3s;}.music-btn .wv span:nth-child(4){height:9px;animation-delay:.1s;}.music-btn .wv span:nth-child(5){height:4px;animation-delay:.25s;}
+@keyframes apWvBar{0%,100%{transform:scaleY(1);}50%{transform:scaleY(.3);}}
+.ap-backdrop{display:none;position:fixed;inset:0;z-index:490;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);}
+.ap-backdrop.open{display:block;animation:apBdFade .2s ease;}
+@keyframes apBdFade{from{opacity:0}to{opacity:1}}
+.ap-modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.94);z-index:491;width:340px;background:linear-gradient(145deg,#0f0f1a,#0a0a12);border:1px solid rgba(0,245,255,.2);border-radius:20px;box-shadow:0 0 40px rgba(0,245,255,.1),0 24px 80px rgba(0,0,0,.7);overflow:hidden;}
+.ap-modal.open{display:block;animation:apModalIn .25s cubic-bezier(.22,1,.36,1) forwards;}
+@keyframes apModalIn{from{transform:translate(-50%,-50%) scale(.92);opacity:0;}to{transform:translate(-50%,-50%) scale(1);opacity:1;}}
+.ap-sheet{display:none;position:fixed;bottom:0;left:0;right:0;z-index:491;background:linear-gradient(180deg,#0f0f1a,#0a0a12);border-top:1px solid rgba(0,245,255,.2);border-radius:20px 20px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.6);max-height:75vh;overflow:hidden;transform:translateY(100%);}
+.ap-sheet.open{display:block;animation:apSheetIn .35s cubic-bezier(.22,1,.36,1) forwards;}
+@keyframes apSheetIn{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.ap-sheet-handle{width:40px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:10px auto 0;}
+.ap-inner{display:flex;flex-direction:column;overflow:hidden;}
+.ap-modal .ap-inner{max-height:80vh;}.ap-sheet .ap-inner{max-height:calc(75vh - 24px);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.ap-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;flex-shrink:0;}
+.ap-head-title{font-family:var(--font-d);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,245,255,.6);}
+.ap-close{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0;}
+.ap-close:hover{background:rgba(255,255,255,.12);color:#fff;}
+.ap-now{padding:0 18px 14px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+.ap-track-name{font-family:var(--font-d);font-size:15px;font-weight:800;color:#fff;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ap-track-meta{font-size:11px;color:rgba(255,255,255,.35);margin-bottom:12px;}
+.ap-progress-wrap{position:relative;height:4px;background:rgba(255,255,255,.08);border-radius:2px;cursor:pointer;margin-bottom:6px;}
+.ap-progress-fill{height:100%;background:linear-gradient(90deg,#00f5ff,#a855f7);border-radius:2px;transition:width .5s linear;position:relative;}
+.ap-progress-fill::after{content:'';position:absolute;right:-4px;top:-4px;width:10px;height:10px;border-radius:50%;background:#00f5ff;box-shadow:0 0 8px rgba(0,245,255,.7);opacity:0;transition:opacity .15s;}
+.ap-progress-wrap:hover .ap-progress-fill::after{opacity:1;}
+.ap-time{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.25);font-family:var(--font-m);}
+.ap-waveform{display:flex;align-items:center;gap:2px;height:28px;margin-bottom:12px;overflow:hidden;}
+.ap-waveform span{flex:1;background:rgba(0,245,255,.25);border-radius:2px;min-height:2px;}
+.ap-waveform.active span{animation:apWfAnim 1.2s ease-in-out infinite;}
+.ap-waveform span:nth-child(odd){animation-delay:.1s;}.ap-waveform span:nth-child(3n){animation-delay:.25s;}.ap-waveform span:nth-child(5n){animation-delay:.4s;}
+@keyframes apWfAnim{0%,100%{background:rgba(0,245,255,.2);}50%{background:rgba(168,85,247,.6);}}
+.ap-controls{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px;}
+.ap-ctrl-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s;flex-shrink:0;}
+.ap-ctrl-btn svg{width:16px;height:16px;}.ap-ctrl-btn:hover{background:rgba(255,255,255,.12);color:#fff;}.ap-ctrl-btn.active{border-color:rgba(0,245,255,.5);color:#00f5ff;background:rgba(0,245,255,.08);}
+.ap-play-btn{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#00f5ff,#a855f7);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(0,245,255,.35),0 4px 16px rgba(0,0,0,.4);transition:all .15s;flex-shrink:0;}
+.ap-play-btn:hover{transform:scale(1.08);box-shadow:0 0 30px rgba(0,245,255,.55);}.ap-play-btn svg{width:22px;height:22px;color:#fff;}
+.ap-volume{display:flex;align-items:center;gap:10px;padding:10px 18px 12px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+.ap-vol-icon{color:rgba(255,255,255,.35);flex-shrink:0;}.ap-vol-icon svg{width:14px;height:14px;}
+.ap-volume input[type=range]{flex:1;accent-color:#00f5ff;height:4px;cursor:pointer;appearance:none;background:rgba(255,255,255,.1);border-radius:2px;}
+.ap-volume input[type=range]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:#00f5ff;cursor:pointer;box-shadow:0 0 8px rgba(0,245,255,.6);}
+.ap-tracklist{overflow-y:auto;max-height:200px;-webkit-overflow-scrolling:touch;padding:8px 10px;flex:1;}
+.ap-sheet .ap-tracklist{max-height:none;}
+.ap-track{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;cursor:pointer;transition:all .12s;border:1px solid transparent;min-height:44px;}
+.ap-track:hover{background:rgba(255,255,255,.05);}.ap-track.ap-active{background:rgba(0,245,255,.07);border-color:rgba(0,245,255,.25);}
+.ap-track-num{width:22px;font-size:11px;color:rgba(255,255,255,.25);font-family:var(--font-m);text-align:center;flex-shrink:0;}
+.ap-track.ap-active .ap-track-num{color:#00f5ff;}
+.ap-track-info{flex:1;min-width:0;}.ap-track-nm{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ap-track.ap-active .ap-track-nm{color:#00f5ff;}.ap-track-bpm{font-size:10px;color:rgba(255,255,255,.3);font-family:var(--font-m);}
+.ap-playing-indicator{display:flex;gap:2px;align-items:flex-end;height:16px;}
+.ap-playing-indicator span{width:3px;background:#00f5ff;border-radius:1px;animation:apPiBar 1s ease-in-out infinite;}
+.ap-playing-indicator span:nth-child(1){height:6px;}.ap-playing-indicator span:nth-child(2){height:14px;animation-delay:.2s;}.ap-playing-indicator span:nth-child(3){height:8px;animation-delay:.1s;}
+@keyframes apPiBar{0%,100%{transform:scaleY(1);}50%{transform:scaleY(.3);}}
+@media(max-width:768px){.ap-modal{display:none!important;}.ap-track{padding:11px 12px;}.ap-play-btn{width:60px;height:60px;}.ap-ctrl-btn{width:44px;height:44px;}}
+@media(min-width:769px){.ap-sheet{display:none!important;}}
 
 /* ── TOAST ── */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
@@ -4724,96 +4767,104 @@ function scheduleTrack(trackId) {
   musicTimeout = setTimeout(() => scheduleTrack(trackId), totalDur - 50);
 }
 
-function stopMusic() {
-  musicPlaying = false;
-  clearTimeout(musicTimeout);
-  musicNodes.forEach(n => { try { n.stop(); } catch(e){} });
-  musicNodes = [];
-  const mainAudio = document.getElementById('main-audio');
-  if (mainAudio) { mainAudio.pause(); mainAudio.currentTime = 0; }
-  localStorage.removeItem('anal_music_playing');
-  document.getElementById('music-btn').classList.remove('playing');
-  document.getElementById('music-btn').textContent = '🎵';
-  // mascot removed
+// ══ PREMIUM AUDIO PLAYER ══════════════════════════════════════
+var apState=(function(){try{return JSON.parse(localStorage.getItem('ap_state')||'{}');}catch(e){return{};}})();
+var apCurTrackId=apState.currentTrack||null;
+var apShuffle=apState.shuffle!==false;
+var apRepeat=apState.repeat||false;
+var apVolume2=apState.volume!==undefined?apState.volume:40;
+var apPlaying=false,apWasPlayingBeforeGen=false;
+
+function apSaveState(){try{localStorage.setItem('ap_state',JSON.stringify({currentTrack:apCurTrackId,shuffle:apShuffle,repeat:apRepeat,volume:apVolume2}));}catch(e){}}
+
+function toggleAudioPlayer(){
+  var isMob=window.innerWidth<=768;
+  var modal=document.getElementById('apModal'),sheet=document.getElementById('apSheet'),backdrop=document.getElementById('apBackdrop');
+  var target=isMob?sheet:modal;
+  if(target.classList.contains('open')){closeAudioPlayer();return;}
+  backdrop.classList.add('open');target.classList.add('open');
+  apBuildTrackList();apUpdateNowPlaying();
+  ['apVolume','apVolume2'].forEach(function(id){var el=document.getElementById(id);if(el)el.value=apVolume2;});
+  apUpdateShuffleRepeatBtns();
+}
+function closeAudioPlayer(){
+  document.getElementById('apModal').classList.remove('open');
+  document.getElementById('apSheet').classList.remove('open');
+  document.getElementById('apBackdrop').classList.remove('open');
 }
 
-function playTrack(trackId) {
-  stopMusic();
-  currentTrackId = trackId;
-  musicPlaying = true;
-
-  const track = TRACKS.find(t => t.id === trackId);
-  if (track && track.file) {
-    let audio = document.getElementById('main-audio');
-    if (!audio) {
-      audio = document.createElement('audio');
-      audio.id = 'main-audio';
-      audio.loop = true;
-      document.body.appendChild(audio);
-    }
-    audio.src = '/' + track.file;
-    audio.play().catch(e => console.log('Audio play failed:', e));
-  }
-
-  document.getElementById('music-btn').classList.add('playing');
-  document.getElementById('music-btn').textContent = '🎶';
-  // mascot removed
-  document.querySelectorAll('.music-track').forEach(el => {
-    el.classList.toggle('active', el.dataset.id === trackId);
+function apBuildTrackList(){
+  ['apTrackList','apTrackList2'].forEach(function(id){
+    var list=document.getElementById(id);if(!list)return;list.innerHTML='';
+    TRACKS.forEach(function(t,i){
+      var item=document.createElement('div');
+      item.className='ap-track'+(apCurTrackId===t.id?' ap-active':'');
+      item.innerHTML='<div class="ap-track-num">'+(apCurTrackId===t.id?'<div class="ap-playing-indicator"><span></span><span></span><span></span></div>':(i+1))+'</div>'+
+        '<div class="ap-track-info"><div class="ap-track-nm">'+t.name+'</div><div class="ap-track-bpm">'+t.bpm+' BPM</div></div>';
+      item.onclick=function(){if(apCurTrackId===t.id&&apPlaying)apPause();else apPlayTrack(t.id);};
+      list.appendChild(item);
+    });
   });
-  // Save state so music continues after navigation
-  localStorage.setItem('anal_music_playing', trackId);
 }
 
-function toggleMusicPanel() {
-  // Toggle music on/off AND show/hide panel
-  if (musicPlaying) {
-    stopMusic();
-    document.getElementById('music-panel').classList.remove('show');
-  } else {
-    const panel = document.getElementById('music-panel');
-    panel.classList.toggle('show');
-    if (panel.classList.contains('show') && !document.getElementById('track-list').innerHTML) {
-      renderTrackList();
-    }
+function apUpdateNowPlaying(){
+  var track=TRACKS.find(function(t){return t.id===apCurTrackId;});
+  var name=track?track.name:'—',meta=track?(track.bpm+' BPM'):'Select a track';
+  ['apTrackName','apTrackName2'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=name;});
+  ['apTrackMeta','apTrackMeta2'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=meta;});
+  ['apWaveform','apWaveform2'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.toggle('active',apPlaying);});
+  var icon=apPlaying?'<path d="M6 4h4v16H6zM14 4h4v16h-4"/>':'<path d="M5 3l14 9-14 9V3z"/>';
+  ['apPlayIcon','apPlayIcon2'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML=icon;});
+  var btn=document.getElementById('music-btn');if(btn)btn.classList.toggle('playing',apPlaying);
+}
+
+function apPlayTrack(trackId){
+  stopMusic();currentTrackId=trackId;apCurTrackId=trackId;apPlaying=true;musicPlaying=true;
+  var track=TRACKS.find(function(t){return t.id===trackId;});
+  if(track&&track.file){
+    var audio=document.getElementById('main-audio');
+    if(!audio){audio=document.createElement('audio');audio.id='main-audio';document.body.appendChild(audio);}
+    audio.src='./'+track.file;audio.volume=apVolume2/100;audio.loop=apRepeat;
+    audio.play().catch(function(){});
+    audio.onended=function(){if(!apRepeat)apNext();};
+    audio.ontimeupdate=function(){apUpdateProgress(audio.currentTime,audio.duration||0);};
   }
+  apSaveState();apUpdateNowPlaying();apBuildTrackList();
 }
 
-function toggleMusic() {
-  if (musicPlaying) {
-    stopMusic();
-  } else {
-    const trackId = currentTrackId || TRACKS[0].id;
-    playTrack(trackId);
-    const panel = document.getElementById('music-panel');
-    panel.classList.add('show');
-    if (!document.getElementById('track-list').innerHTML) renderTrackList();
-  }
+function apPause(){apPlaying=false;musicPlaying=false;var a=document.getElementById('main-audio');if(a)a.pause();apUpdateNowPlaying();}
+function apResume(){if(!apCurTrackId){apPlayTrack(TRACKS[0].id);return;}apPlaying=true;musicPlaying=true;var a=document.getElementById('main-audio');if(a&&a.src)a.play().catch(function(){});else apPlayTrack(apCurTrackId);apUpdateNowPlaying();}
+function apTogglePlay(){if(apPlaying)apPause();else apResume();}
+function apNext(){var idx=TRACKS.findIndex(function(t){return t.id===apCurTrackId;});apPlayTrack(TRACKS[apShuffle?Math.floor(Math.random()*TRACKS.length):(idx+1)%TRACKS.length].id);}
+function apPrev(){var idx=TRACKS.findIndex(function(t){return t.id===apCurTrackId;});apPlayTrack(TRACKS[(idx-1+TRACKS.length)%TRACKS.length].id);}
+function apToggleShuffle(){apShuffle=!apShuffle;apSaveState();apUpdateShuffleRepeatBtns();}
+function apToggleRepeat(){apRepeat=!apRepeat;var a=document.getElementById('main-audio');if(a)a.loop=apRepeat;apSaveState();apUpdateShuffleRepeatBtns();}
+function apUpdateShuffleRepeatBtns(){
+  ['apShuffleBtn','apShuffleBtn2'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.toggle('active',apShuffle);});
+  ['apRepeatBtn','apRepeatBtn2'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.toggle('active',apRepeat);});
 }
-
-function renderTrackList() {
-  const list = document.getElementById('track-list');
-  list.innerHTML = TRACKS.map(t => `
-    <div class="music-track ${currentTrackId===t.id?'active':''}" data-id="${t.id}"
-         onclick="currentTrackId==='${t.id}' && musicPlaying ? stopMusic() : playTrack('${t.id}')">
-      <span class="music-track-icon">${t.icon}</span>
-      <span class="music-track-name">${t.name}</span>
-      <span class="music-track-bpm">${t.bpm}bpm</span>
-    </div>
-  `).join('');
+function apSetVolume(val){apVolume2=parseInt(val);musicVolume=apVolume2/100;var a=document.getElementById('main-audio');if(a)a.volume=musicVolume;['apVolume','apVolume2'].forEach(function(id){var el=document.getElementById(id);if(el)el.value=apVolume2;});apSaveState();}
+function apUpdateProgress(cur,dur){
+  var pct=dur>0?(cur/dur*100).toFixed(1):0;
+  ['apProgressFill','apProgressFill2'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.width=pct+'%';});
+  function fmt(s){var m=Math.floor(s/60);return m+':'+('0'+Math.floor(s%60)).slice(-2);}
+  ['apTimeCur','apTimeCur2'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=fmt(cur);});
+  ['apTimeTot','apTimeTot2'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=fmt(dur||0);});
 }
+function apSeek(e){var a=document.getElementById('main-audio');if(!a||!a.duration)return;var r=e.currentTarget.getBoundingClientRect();a.currentTime=(e.clientX-r.left)/r.width*a.duration;}
+function apPauseForGeneration(){apWasPlayingBeforeGen=apPlaying;if(apPlaying)apPause();}
+function apResumeAfterGeneration(){if(apWasPlayingBeforeGen)apResume();}
 
-function setVolume(val) {
-  musicVolume = val / 100;
-}
+// Compatibility stubs
+function stopMusic(){apPlaying=false;musicPlaying=false;var a=document.getElementById('main-audio');if(a){a.pause();a.currentTime=0;}}
+function playTrack(id){apPlayTrack(id);}
+function toggleMusicPanel(){toggleAudioPlayer();}
+function toggleMusic(){apTogglePlay();}
+function setVolume(val){apSetVolume(val);}
+function renderTrackList(){apBuildTrackList();}
 
-// Close panel when clicking outside
-document.addEventListener('click', e => {
-  const player = document.getElementById('music-player');
-  if (player && !player.contains(e.target)) {
-    document.getElementById('music-panel')?.classList.remove('show');
-  }
-});
+// Init
+(function(){musicVolume=apVolume2/100;setTimeout(apUpdateShuffleRepeatBtns,100);})();
 
 // ════════════════════════════════
 // CURSOR TRAIL
@@ -5208,17 +5259,57 @@ function shareToX() {
 </script>
 <!-- ── MUSIC PLAYER ── -->
 <div class="music-player" id="music-player">
-  <div class="music-panel" id="music-panel">
-    <div class="music-panel-title">🎵 Retro Soundtrack</div>
-    <div id="track-list"></div>
-    <div class="music-vol">
-      <span class="music-vol-label">VOL</span>
-      <input type="range" id="music-vol" min="0" max="100" value="40" oninput="setVolume(this.value)"/>
+  <!-- ── PREMIUM AUDIO PLAYER ── -->
+  <div class="ap-backdrop" id="apBackdrop" onclick="closeAudioPlayer()"></div>
+  <div class="ap-modal" id="apModal">
+    <div class="ap-inner">
+      <div class="ap-head"><span class="ap-head-title">Now Playing</span><button class="ap-close" onclick="closeAudioPlayer()">✕</button></div>
+      <div class="ap-now">
+        <div class="ap-track-name" id="apTrackName">—</div>
+        <div class="ap-track-meta" id="apTrackMeta">Select a track</div>
+        <div class="ap-waveform" id="apWaveform"><span style="height:3px"></span><span style="height:8px"></span><span style="height:5px"></span><span style="height:12px"></span><span style="height:7px"></span><span style="height:10px"></span><span style="height:4px"></span><span style="height:9px"></span><span style="height:6px"></span><span style="height:11px"></span><span style="height:5px"></span><span style="height:8px"></span><span style="height:3px"></span><span style="height:7px"></span><span style="height:10px"></span><span style="height:5px"></span><span style="height:9px"></span><span style="height:4px"></span><span style="height:12px"></span><span style="height:6px"></span></div>
+        <div class="ap-progress-wrap" onclick="apSeek(event)"><div class="ap-progress-fill" id="apProgressFill" style="width:0%"></div></div>
+        <div class="ap-time"><span id="apTimeCur">0:00</span><span id="apTimeTot">0:00</span></div>
+      </div>
+      <div style="padding:12px 18px 6px"><div class="ap-controls">
+        <button class="ap-ctrl-btn" id="apShuffleBtn" onclick="apToggleShuffle()" title="Shuffle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5M4 20l16-16M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></button>
+        <button class="ap-ctrl-btn" onclick="apPrev()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 20L9 12l10-8v16zM5 19V5"/></svg></button>
+        <button class="ap-play-btn" onclick="apTogglePlay()"><svg id="apPlayIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg></button>
+        <button class="ap-ctrl-btn" onclick="apNext()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4l10 8-10 8V4zM19 5v14"/></svg></button>
+        <button class="ap-ctrl-btn" id="apRepeatBtn" onclick="apToggleRepeat()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg></button>
+      </div></div>
+      <div class="ap-volume"><span class="ap-vol-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg></span><input type="range" id="apVolume" min="0" max="100" value="40" oninput="apSetVolume(this.value)"></div>
+      <div class="ap-tracklist" id="apTrackList"></div>
     </div>
   </div>
-  
-  <div class="music-controls"><button class="music-btn" id="music-btn" onclick="toggleMusicPanel()" title="Open music player">🎵</button></div>
-</div>
+  <div class="ap-sheet" id="apSheet">
+    <div class="ap-sheet-handle"></div>
+    <div class="ap-inner">
+      <div class="ap-head"><span class="ap-head-title">Now Playing</span><button class="ap-close" onclick="closeAudioPlayer()">✕</button></div>
+      <div class="ap-now">
+        <div class="ap-track-name" id="apTrackName2">—</div>
+        <div class="ap-track-meta" id="apTrackMeta2">Select a track</div>
+        <div class="ap-waveform" id="apWaveform2"><span style="height:3px"></span><span style="height:8px"></span><span style="height:5px"></span><span style="height:12px"></span><span style="height:7px"></span><span style="height:10px"></span><span style="height:4px"></span><span style="height:9px"></span><span style="height:6px"></span><span style="height:11px"></span><span style="height:5px"></span><span style="height:8px"></span><span style="height:3px"></span><span style="height:7px"></span><span style="height:10px"></span><span style="height:5px"></span><span style="height:9px"></span><span style="height:4px"></span><span style="height:12px"></span><span style="height:6px"></span></div>
+        <div class="ap-progress-wrap" onclick="apSeek(event)"><div class="ap-progress-fill" id="apProgressFill2" style="width:0%"></div></div>
+        <div class="ap-time"><span id="apTimeCur2">0:00</span><span id="apTimeTot2">0:00</span></div>
+      </div>
+      <div style="padding:12px 18px 6px"><div class="ap-controls">
+        <button class="ap-ctrl-btn" id="apShuffleBtn2" onclick="apToggleShuffle()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5M4 20l16-16M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg></button>
+        <button class="ap-ctrl-btn" onclick="apPrev()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 20L9 12l10-8v16zM5 19V5"/></svg></button>
+        <button class="ap-play-btn" onclick="apTogglePlay()"><svg id="apPlayIcon2" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg></button>
+        <button class="ap-ctrl-btn" onclick="apNext()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4l10 8-10 8V4zM19 5v14"/></svg></button>
+        <button class="ap-ctrl-btn" id="apRepeatBtn2" onclick="apToggleRepeat()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg></button>
+      </div></div>
+      <div class="ap-volume"><span class="ap-vol-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg></span><input type="range" id="apVolume2" min="0" max="100" value="40" oninput="apSetVolume(this.value)"></div>
+      <div class="ap-tracklist" id="apTrackList2"></div>
+    </div>
+  </div>
+  <div class="music-controls">
+    <button class="music-btn" id="music-btn" onclick="toggleAudioPlayer()" title="Music Player">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      <div class="wv"><span></span><span></span><span></span><span></span><span></span></div>
+    </button>
+  </div>
 
 
 <!-- ── CELEBRATION OVERLAY ── -->
