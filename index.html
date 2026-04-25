@@ -2818,6 +2818,34 @@ header {
   .canvas-area { flex: 1 !important; overflow: hidden !important; }
 }
 
+
+/* ════ GAMES OVERLAY — naprawia podwójny ekran ════ */
+
+/* Gdy gra jest aktywna: canvas-area schowane, overlay zajmuje flex:1 */
+#app.games-mode .canvas-area {
+  display: none !important;
+  flex: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+}
+#app.games-mode .right-panel {
+  display: none !important;
+  flex: 0 !important;
+}
+#app.games-mode #games-center-overlay {
+  display: flex !important;
+  flex: 1 !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Gdy gra NIE jest aktywna: overlay schowany */
+#app:not(.games-mode) #games-center-overlay {
+  display: none !important;
+  flex: 0 !important;
+}
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
@@ -9768,6 +9796,8 @@ function gmSelectGame(id, cardEl) {
 
 // Back button: hide overlay, return to game grid
 function gmBack() {
+  var appEl = document.getElementById('app');
+  if (appEl) appEl.classList.remove('games-mode');
   var overlay = document.getElementById('games-center-overlay');
   var canvasArea = document.querySelector('.canvas-area');
   var rightPanel = document.querySelector('.right-panel');
