@@ -1275,7 +1275,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 .comics-breadcrumb .current { color: #ffd700; font-weight: 700; }
 
 /* ── LIBRARY VIEW (grid kart serii) ── */
-#cpLibView { display: block; }
+#cpLibView  { /* controlled by .cp-view.active */ }
 .cp-lib-intro {
   padding: 20px 16px 8px;
   text-align: center;
@@ -1390,7 +1390,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,.92);backdrop-filte
 }
 
 /* ── READER VIEW ── */
-#cpReaderView { display: none; }
+#cpReaderView { /* controlled by .cp-view.active */ }
 .cp-reader-wrap { max-width: 800px; margin: 0 auto; padding: 16px; }
 .cp-reader-img-wrap {
   position: relative;
@@ -3113,6 +3113,19 @@ header {
   }
 }
 
+
+/* ── COMICS VIEWS — fix id vs class specificity conflict ── */
+.cp-view              { display: none !important; }
+.cp-view.active       { display: flex !important; }
+.cp-lib-view.active   { display: flex !important; flex-direction: column !important; overflow-y: auto !important; }
+.cp-reader-view.active{ display: flex !important; flex-direction: column !important; }
+/* Lightbox */
+.cp-lb       { display: none !important; }
+.cp-lb.open  { display: flex !important; }
+/* Panel itself */
+#comics-panel         { display: none; }
+#comics-panel.open    { display: flex !important; flex-direction: column !important; }
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
@@ -3767,139 +3780,7 @@ header {
   </div>
     
     <!-- ══ COMICS PANEL ══ -->
-    <div id="panel-comics">
-
-      <!-- LIBRARY VIEW -->
-      <div id="cmxLib">
-        <div class="cmx-lib-header">
-          <div class="cmx-lib-title">$ANAL COMICS</div>
-          <div class="cmx-lib-sub">Choose a series to read</div>
-        </div>
-        <div class="cmx-grid" id="cmxGrid"><!-- built by JS --></div>
-      </div>
-
-      <!-- READER VIEW -->
-      <div class="cmx-reader" id="cmxReader">
-        <div class="cmx-rdr-header">
-          <button class="cmx-back" onclick="cmxShowLib()">← Series</button>
-          <div class="cmx-rdr-title-wrap">
-            <div class="cmx-rdr-series" id="cmxRdrName"></div>
-            <div class="cmx-rdr-season" id="cmxRdrSub"></div>
-          </div>
-        </div>
-        <div class="cmx-strip-wrap">
-          <div class="cmx-strip-lbl">Episodes</div>
-          <div class="cmx-strip" id="cmxStrip"></div>
-        </div>
-        <div class="cmx-divider"></div>
-        <div class="cmx-featured-wrap">
-          <div class="cmx-feat-lbl">Now Reading</div>
-          <div class="cmx-featured">
-            <div class="cmx-img-col" onclick="cmxOpenLb(cmxEp)">
-              <div class="cmx-img-glow"></div>
-              <img id="cmxFeatImg" src="" alt="">
-            </div>
-            <div class="cmx-info-col">
-              <div class="cmx-ep-badge" id="cmxEpBadge"></div>
-              <div class="cmx-ep-title" id="cmxEpTitle"></div>
-              <div class="cmx-ep-desc" id="cmxEpDesc"></div>
-              <div class="cmx-nav">
-                <button class="cmx-nbtn cmx-nbtn-p" onclick="cmxGoEp(cmxEp-1)">◀ Prev</button>
-                <button class="cmx-nbtn cmx-nbtn-f" onclick="cmxOpenLb(cmxEp)">🔍 Full</button>
-                <button class="cmx-nbtn cmx-nbtn-n" onclick="cmxGoEp(cmxEp+1)">Next ▶</button>
-              </div>
-              <div class="cmx-dots" id="cmxDots"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ══ LIGHTBOX ══ -->
-    <div class="cmx-lb" id="cmxLb" onclick="cmxCloseLb(event)">
-      <button class="cmx-lb-x" onclick="cmxCloseLb()">✕</button>
-      <img class="cmx-lb-img" id="cmxLbImg" src="" alt="">
-      <div class="cmx-lb-sub" id="cmxLbSub"></div>
-      <div class="cmx-lb-ctrl">
-        <button class="cmx-lb-btn" onclick="cmxLbNav(-1)">◀ Prev</button>
-        <div class="cmx-lb-ctr" id="cmxLbCtr"></div>
-        <button class="cmx-lb-btn" onclick="cmxLbNav(1)">Next ▶</button>
-      </div>
-      <div class="cmx-lb-dots cmx-dots" id="cmxLbDots"></div>
-    </div>
-
-</div><!-- /left-panel -->
-
-    <!-- CENTER: Canvas -->
-    <div class="canvas-area">
-      <div class="canvas-toolbar">
-        <button class="tool-btn active" id="tool-select" onclick="setTool('select',this)" title="Select (V)">↖ Select</button>
-        <button class="tool-btn" id="tool-draw" onclick="setTool('draw',this)" title="Draw (B)">✏ Draw</button>
-        <button class="tool-btn" id="tool-erase" onclick="setTool('erase',this)" title="Erase (E)">◻ Erase</button>
-        <button class="tool-btn" id="tool-text" onclick="setTool('text',this)" title="Text (T)">T Text</button>
-
-        <!-- Draw options (shown when draw/erase active) -->
-        <div class="draw-options" id="drawOptions">
-          <div class="tool-sep"></div>
-          <span class="draw-size-label">Size</span>
-          <input type="range" class="draw-size-slider" id="drawSize" min="1" max="60" value="12" oninput="editorUpdateDrawOpts()">
-          <input type="color" class="draw-color-pick" id="drawColor" value="#00f5ff" oninput="editorUpdateDrawOpts()">
-          <span class="draw-size-label">Opacity</span>
-          <input type="range" class="draw-opacity-slider" id="drawOpacity" min="5" max="100" value="100" oninput="editorUpdateDrawOpts()">
-        </div>
-
-        <div class="tool-sep"></div>
-        <button class="tool-btn tool-btn-undo" id="undoBtn" onclick="editorUndo()" title="Undo (Ctrl+Z)" disabled>↩ Undo <span class="undo-count" id="undoCount">0</span></button>
-        <button class="tool-btn tool-btn-undo" id="redoBtn" onclick="editorRedo()" title="Redo (Ctrl+Shift+Z)" disabled>↪ Redo</button>
-        <div class="tool-sep"></div>
-
-        <!-- Upload -->
-        <button class="tool-btn" onclick="triggerUpload()" title="Upload Image">⬆ Upload</button>
-        <input type="file" id="upload-img-input" accept="image/*" onchange="handleUpload(event)">
-
-        <!-- Stickers -->
-        <div style="position:relative">
-          <button class="tool-btn" id="stickersBtn" onclick="toggleStickers()" title="Stickers">🦉 Stickers</button>
-          <div class="stickers-panel" id="stickersPanel">
-            <div class="stickers-panel-head">
-              <span class="stickers-panel-title">Stickers</span>
-              <button class="stickers-panel-close" onclick="toggleStickers()">✕</button>
-            </div>
-            <div class="stickers-cats" id="stickerCats"></div>
-            <div class="stickers-grid" id="stickersGrid"></div>
-          </div>
-        </div>
-
-        <div class="tool-sep"></div>
-        <button class="tool-btn" onclick="clearFrame()">⌫ Clear</button>
-        <button class="tool-btn" onclick="duplicateFrame()">⧉ Duplicate</button>
-        <div class="tool-sep"></div>
-        <span style="font-size:11px;color:var(--muted);font-weight:700" id="res-label">480×480</span>
-      </div>
-
-      
-      <div class="canvas-stage">
-        <div class="canvas-wrap" id="canvas-wrap">
-          <div class="upload-drop-zone" id="uploadDropZone">
-            <div class="upload-drop-zone-label">📂 Drop Image Here</div>
-          </div>
-          <canvas id="main-canvas" width="480" height="480"></canvas>
-        </div>
-      </div>
-
-      <div id="frame-strip" style="display:none;"></div>
-      <div class="canvas-footer">
-        <div class="playbar">
-          <button class="play-btn" onclick="prevFrame()">◀</button>
-          <button class="play-btn" id="play-pause-btn" onclick="togglePlay()">▶</button>
-          <button class="play-btn" onclick="nextFrame()">▶▶</button>
-          <span class="frame-counter" id="frame-counter">Frame 1 / 1</span>
-        </div>
-        <button class="export-btn" id="save-orig-toolbar" onclick="saveOriginalImage()" style="display:none;background:var(--neon3);margin-left:8px;">🖼 Save Image</button>
-      </div>
-    </div>
-
+    
     <!-- 🎮 GAMES OVERLAY - sibling to canvas-area -->
     <div id="games-center-overlay" style="display:none;flex:1;flex-direction:column;overflow:hidden;background:#080810;">
 
