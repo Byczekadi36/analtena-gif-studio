@@ -2676,63 +2676,146 @@ header {
 .cp-lb.open { display:flex !important; }
 
 
-/* ════ DESKTOP LAYOUT FIX — proporcje lewego panelu ════ */
+
+
+/* ════════════════════════════════════════════════════════════
+   DESKTOP LAYOUT v2 — ostateczny, nadpisuje wszystko
+   Ekran: Header(60px) + App-body(reszta)
+   App-body: LeftPanel(280px) | Canvas(flex:1) | RightPanel(260px)
+   LeftPanel: Tabs(56px) | PanelContent(224px)
+   ════════════════════════════════════════════════════════════ */
 @media (min-width: 769px) {
-  /* Cały left-panel: 280px = 56px tabs + 224px content */
+
+  /* ── APP BODY ── */
+  .app-body {
+    display: flex !important;
+    flex-direction: row !important;
+    flex: 1 !important;
+    overflow: hidden !important;
+    height: calc(100vh - 60px) !important;
+    min-height: 0 !important;
+  }
+
+  /* ── LEFT PANEL: 280px total ── */
   .left-panel {
     width: 280px !important;
     min-width: 280px !important;
-    flex-direction: row !important;
+    max-width: 280px !important;
     flex-shrink: 0 !important;
+    flex-direction: row !important;
+    display: flex !important;
     overflow: visible !important;
+    height: 100% !important;
+    background: linear-gradient(180deg, #0e0e1a 0%, #0a0a12 100%) !important;
+    border-right: 1px solid rgba(0,245,255,.08) !important;
   }
-  /* Tabs sidebar: pionowa kolumna 56px */
+
+  /* ── TABS SIDEBAR: 56px vertical ── */
   .panel-tabs {
     width: 56px !important;
     min-width: 56px !important;
     flex-shrink: 0 !important;
+    display: flex !important;
     flex-direction: column !important;
-    height: 100% !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 8px 6px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    border-right: 1px solid rgba(0,245,255,.08) !important;
+    scrollbar-width: none !important;
+    border-right: 1px solid rgba(0,245,255,.06) !important;
     border-bottom: none !important;
-    padding: 8px 6px !important;
-    gap: 4px !important;
-    align-items: center !important;
+    height: 100% !important;
+    background: transparent !important;
   }
-  /* Panel content: reszta 224px */
+  .panel-tabs::-webkit-scrollbar { display: none !important; }
+
+  /* ── PANEL CONTENT: 224px ── */
   .panel-content {
     flex: 1 !important;
-    width: 224px !important;
+    width: 0 !important;
     min-width: 0 !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(0,245,255,.2) transparent !important;
   }
-  /* Canvas area: flex:1 — zajmuje całą resztę */
+  .panel-content::-webkit-scrollbar { width: 3px !important; }
+  .panel-content::-webkit-scrollbar-thumb {
+    background: rgba(0,245,255,.2) !important;
+    border-radius: 2px !important;
+  }
+
+  /* ── CANVAS AREA: flex:1, cała reszta ── */
   .canvas-area {
     flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
     overflow: hidden !important;
+    min-width: 0 !important;
+    background: var(--bg, #080810) !important;
   }
-  /* Right panel: 260px stały */
+
+  /* ── RIGHT PANEL: 260px ── */
   .right-panel {
     width: 260px !important;
     min-width: 260px !important;
+    max-width: 260px !important;
     flex-shrink: 0 !important;
+    overflow-y: auto !important;
   }
-  /* App body: row layout */
-  .app-body {
-    flex-direction: row !important;
-    overflow: hidden !important;
-    height: calc(100vh - 60px) !important;
-  }
-  /* Canvas toolbar: nie przełamuj wierszy */
+
+  /* ── CANVAS TOOLBAR: nie zawijaj, scroll poziomy ── */
   .canvas-toolbar {
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
     scrollbar-width: none !important;
+    flex-shrink: 0 !important;
   }
   .canvas-toolbar::-webkit-scrollbar { display: none !important; }
+
+  /* ── CANVAS WRAP: wycentruj w canvas-area ── */
+  .canvas-wrap {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 1 !important;
+    overflow: hidden !important;
+    padding: 16px !important;
+  }
+
+  /* ── CANVAS STAGE: wycentruj ── */
+  .canvas-stage {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 1 !important;
+  }
+}
+
+/* ── MOBILE: lewy panel pełna szerokość, pionowo ── */
+@media (max-width: 768px) {
+  .app-body { flex-direction: column !important; }
+  .left-panel {
+    width: 100% !important;
+    min-width: unset !important;
+    max-width: unset !important;
+    flex-direction: column !important;
+    height: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(0,245,255,.08) !important;
+  }
+  .panel-tabs {
+    flex-direction: row !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow-x: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(0,245,255,.06) !important;
+    padding: 6px 8px !important;
+    gap: 3px !important;
+  }
+  .canvas-area { flex: 1 !important; overflow: hidden !important; }
 }
 
 </style>
@@ -3126,7 +3209,9 @@ header {
         <div class="ctrl">
           <label>Export duration</label>
           <select id="export-duration" style="width:100%;padding:8px;background:var(--card);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--font-d);font-size:13px;">
-            <option value="5">⚡ 5 seconds</option>
+            <option value="2">⚡ 2 seconds</option>
+            <option value="3">🎬 3 seconds</option>
+            <option value="5" selected>🎬 5 seconds</option>
             <option value="10">🎬 10 seconds</option>
           </select>
         </div>
@@ -5769,7 +5854,8 @@ async function exportGIF() {
         frames: b64frames,
         width: sz,
         height: sz,
-        duration: duration
+        duration: duration,
+        fps: Math.round(1000 / (parseInt(document.getElementById('frame-delay').value) || 100))
       })
     });
 
@@ -5790,7 +5876,7 @@ async function exportGIF() {
     state.resultBlob = blob;
     document.getElementById('result-img').src = url;
     document.getElementById('result-meta').textContent =
-      Math.round(blob.size/1024) + 'KB · ' + sz + 'px · ' + duration + 's · MP4';
+      Math.round(blob.size/1024) + 'KB · ' + sz + 'px · ' + duration + 's · ' + Math.round(1000/(parseInt(document.getElementById('frame-delay').value)||100)) + 'fps · MP4';
 
     document.getElementById('result-dl-btn').textContent = '⬇ Download MP4';
     document.getElementById('result-dl-btn').onclick = () => {
