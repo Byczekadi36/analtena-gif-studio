@@ -2206,6 +2206,48 @@ header {
   }
 }
 
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CANVAS FULLSCREEN na mobile — po wygenerowaniu GIF
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 768px) {
+  /* Gdy canvas-fullscreen aktywny: left-panel schowany */
+  #app.canvas-fullscreen .left-panel {
+    display: none !important;
+  }
+  #app.canvas-fullscreen .canvas-area {
+    flex: 1 !important;
+    height: calc(100vh - 56px) !important;
+    overflow: hidden !important;
+  }
+  #app.canvas-fullscreen .canvas-stage {
+    flex: 1 !important;
+    height: 100% !important;
+    padding: 8px !important;
+  }
+  /* Przycisk powrotu do panelu AI */
+  #canvas-back-btn {
+    display: none;
+    position: fixed;
+    top: 64px;
+    left: 10px;
+    z-index: 150;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(0,245,255,.4);
+    background: rgba(6,6,14,.92);
+    color: #00f5ff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+  }
+  #app.canvas-fullscreen #canvas-back-btn {
+    display: block !important;
+  }
+}
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
@@ -2919,7 +2961,11 @@ header {
 
     <!-- CENTER: Canvas -->
     <div class="canvas-area">
-      <div class="canvas-toolbar">
+      <button id="canvas-back-btn" onclick="
+  document.getElementById('app').classList.remove('canvas-fullscreen');
+  setTimeout(fitCanvasToScreen, 100);
+">← AI</button>
+<div class="canvas-toolbar">
         <button class="tool-btn active" id="tool-select" onclick="setTool('select',this)" title="Select (V)">↖ Select</button>
         <button class="tool-btn" id="tool-draw" onclick="setTool('draw',this)" title="Draw (B)">✏ Draw</button>
         <button class="tool-btn" id="tool-erase" onclick="setTool('erase',this)" title="Erase (E)">◻ Erase</button>
@@ -4840,9 +4886,10 @@ async function generateWithAI() {
     setTimeout(fitCanvasToScreen, 200);
     // Na mobile: scroll do canvas żeby użytkownik widział wynik
     setTimeout(function(){
-      var canvasArea = document.querySelector('.canvas-area');
-      if (canvasArea && window.innerWidth <= 768) {
-        canvasArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (window.innerWidth <= 768) {
+        // Pokaż canvas fullscreen na mobile
+        document.getElementById('app').classList.add('canvas-fullscreen');
+        fitCanvasToScreen();
       }
     }, 400); showCelebration();
     // Show save original button in toolbar
