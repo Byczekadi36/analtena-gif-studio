@@ -2248,6 +2248,20 @@ header {
   }
 }
 
+
+/* ━━━━ MOBILE: schowaj canvas gdy zakładka nie potrzebuje canvasu ━━━━ */
+@media (max-width: 768px) {
+  #app.nocanvas-mode .canvas-area,
+  #app.nocanvas-mode .right-panel {
+    display: none !important;
+  }
+  #app.nocanvas-mode .left-panel {
+    max-height: none !important;
+    height: calc(100vh - 56px) !important;
+    overflow-y: auto !important;
+  }
+}
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
@@ -5412,6 +5426,8 @@ function showCelebration() {
 }
 
 function openGallery() {
+  var appEl = document.getElementById('app');
+  if (appEl) appEl.classList.add('nocanvas-mode');
   document.getElementById('gallery-panel').style.display = 'block';
   document.body.style.overflow = 'hidden';
   // Init gallery if not yet loaded
@@ -5422,6 +5438,8 @@ function openGallery() {
 }
 
 function closeGallery() {
+  var appEl = document.getElementById('app');
+  if (appEl) appEl.classList.remove('nocanvas-mode');
   document.getElementById('gallery-panel').style.display = 'none';
   document.body.style.overflow = '';
   // Switch to AI Generator tab
