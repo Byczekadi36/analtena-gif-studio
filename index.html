@@ -9494,17 +9494,84 @@ function showGifFullscreen() {
 var _tickerInterval = null;
 
 async function fetchAnalPrice() {
-  // Własny Vercel endpoint który pobiera cenę po stronie serwera
+  var ANAL = 'EFPkbXTdr3c7aRbCEKoJDYdbbzgzVDBShYGybP3gQwmy';
+  var SOL  = 'So11111111111111111111111111111111111111112';
+  var now  = Math.floor(Date.now() / 1000);
+  var from = now - 7200;
+
+  // Próbuj /api/price (Vercel serverless) jeśli istnieje
   try {
-    var r = await fetch('/api/price', { signal: AbortSignal.timeout(8000) });
-    if (r.ok) {
-      var d = await r.json();
-      if (d.price && d.price > 0) {
-        console.log('[Ticker] /api/price OK:', d.price, 'source:', d.source);
-        return { price: d.price, change24h: d.change24h || 0, source: d.source || 'xdex' };
+    var r0 = await fetch('/api/price', { signal: AbortSignal.timeout(4000) });
+    if (r0.ok) {
+      var d0 = await r0.json();
+      if (d0.price && d0.price > 0) {
+        console.log('[Ticker] /api/price OK:', d0.price);
+        return { price: d0.price, change24h: d0.change24h || 0, source: 'xdex' };
       }
     }
-  } catch(e) { console.log('[Ticker] /api/price error:', e.message); }
+  } catch(e) {}
+
+  // Bezpośrednio z xdex (przeglądarka może mieć dostęp, serwer nie)
+  try {
+    var xurl = 'https://api.xdex.xyz/api/xdex/chart/history' +
+      '?from_token=' + SOL +
+      '&to_token=' + ANAL +
+      '&resolution=60&time_from=' + from + '&time_to=' + now +
+      '&network=X1%20Mainnet';
+    var rx = await fetch(xurl, {
+      headers: { 'Referer': 'https://app.xdex.xyz/', 'Origin': 'https://app.xdex.xyz' },
+      signal: AbortSignal.timeout(6000)
+    });
+    if (rx.ok) {
+      var dx = await rx.json();
+      if (dx.c && dx.c.length > 0) {
+        var last  = dx.c[dx.c.length - 1]; // ile ANAL za 1 SOL
+        var first = dx.c[0];
+        var analInSol = 1 / last; // ile SOL za 1 ANAL
+        var change = first > 0 ? ((last - first) / first * 100) : 0;
+        // Pobierz XNT/USD (So111... na X1 = Wrapped XNT, nie SOL!)
+        var xntUsd = 0.404; // fallback ~$0.40
+        try {
+          var cgr = await fetch(
+            'https://api.coingecko.com/api/v3/simple/price?ids=xen-network,x1-network&vs_currencies=usd',
+            { signal: AbortSignal.timeout(3000) }
+          );
+          if (cgr.ok) {
+            var cgd = await cgr.json();
+            var v = (cgd['xen-network']&&cgd['xen-network'].usd)||(cgd['x1-network']&&cgd['x1-network'].usd)||0;
+            if (v > 0) xntUsd = v;
+          }
+        } catch(e) {}
+        var analUsd = analInSol * xntUsd;
+        if (analUsd > 0) {
+          console.log('[Ticker] xdex direct OK:', analUsd, 'SOL price:', solUsd);
+          return { price: analUsd, change24h: change, source: 'xdex' };
+        }
+      }
+    }
+  } catch(e) { console.log('[Ticker] xdex error:', e.message); }
+
+  // Fallback: GeckoTerminal (obsługuje X1 Network)
+  try {
+    var gtUrl = 'https://api.geckoterminal.com/api/v2/networks/x1/tokens/' + ANAL;
+    var gr = await fetch(gtUrl, {
+      headers: { 'Accept': 'application/json;version=20230302' },
+      signal: AbortSignal.timeout(5000)
+    });
+    if (gr.ok) {
+      var gd = await gr.json();
+      var attrs = gd.data && gd.data.attributes;
+      if (attrs && parseFloat(attrs.price_usd) > 0) {
+        console.log('[Ticker] GeckoTerminal OK:', attrs.price_usd);
+        return {
+          price: parseFloat(attrs.price_usd),
+          change24h: parseFloat(attrs.price_change_percentage && attrs.price_change_percentage.h24 || 0),
+          source: 'xdex'
+        };
+      }
+    }
+  } catch(e) { console.log('[Ticker] gecko error:', e.message); }
+
   return null;
 }
 
@@ -9522,7 +9589,10 @@ function buildTickerHTML(d) {
   var arrow = isUp ? '&#9650;' : '&#9660;';
   var cls   = isUp ? 'up' : 'down';
   var chg   = Math.abs(d.change24h || 0).toFixed(2) + '%';
-  var src   = '&#9889; XDEX LIVE';
+  // Kolor zielony gdy połączony z live source, szary gdy fallback
+  var srcColor = (d.source === 'xdex' || d.source === 'x1rpc' || d.source === 'x1ninja')
+    ? '#22ff88' : 'rgba(255,255,255,.3)';
+  var src = '&#9889; XDEX LIVE';
 
   var core =
     '<span class="ticker-item"><span class="ticker-dot"></span>' +
@@ -9530,7 +9600,7 @@ function buildTickerHTML(d) {
     '<span class="ticker-price">' + formatPrice(d.price) + '</span>' +
     '<span class="ticker-change ' + cls + '">' + arrow + ' ' + chg + '</span>' +
     '</span>' +
-    '<span class="ticker-item"><span style="color:rgba(255,255,255,.18);font-size:8px;letter-spacing:.08em;">' + src + '</span></span>';
+    '<span class="ticker-item"><span style="color:' + srcColor + ';font-size:8px;font-weight:800;letter-spacing:.08em;">' + src + '</span></span>';
 
   return core + core;
 }
