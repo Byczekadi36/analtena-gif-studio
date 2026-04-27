@@ -2595,6 +2595,12 @@ header {
         <button class="gen-btn" id="gen-btn" onclick="generateWithAI()">
           🦉 Generate GIF with AI
         </button>
+        <button id="view-gif-btn" onclick="showGifFullscreen()" style="
+          display:none;width:100%;margin-top:8px;padding:10px;
+          background:rgba(0,245,255,.08);border:1.5px solid rgba(0,245,255,.3);
+          border-radius:10px;color:#00f5ff;font-size:12px;font-weight:800;
+          letter-spacing:.06em;cursor:pointer;font-family:var(--font-d);
+        ">↓ Zobacz wygenerowany GIF</button>
 
 
 
@@ -2961,10 +2967,20 @@ header {
 
     <!-- CENTER: Canvas -->
     <div class="canvas-area">
-      <button id="canvas-back-btn" onclick="
-  document.getElementById('app').classList.remove('canvas-fullscreen');
-  setTimeout(fitCanvasToScreen, 100);
-">← AI</button>
+      <button id="canvas-back-btn" onclick="(function(){
+  var app=document.getElementById('app');
+  app.classList.remove('canvas-fullscreen');
+  var aiTab=document.querySelector('.ptab[data-panel=\'ai\']');
+  if(aiTab){
+    ['ai','tools','credits','roast','games','comics'].forEach(function(p){
+      var el=document.getElementById('panel-'+p);
+      if(el)el.style.display=p==='ai'?'block':'none';
+    });
+    document.querySelectorAll('.ptab').forEach(function(b){b.classList.remove('active');});
+    aiTab.classList.add('active');
+  }
+  setTimeout(fitCanvasToScreen,100);
+})()">← AI</button>
 <div class="canvas-toolbar">
         <button class="tool-btn active" id="tool-select" onclick="setTool('select',this)" title="Select (V)">↖ Select</button>
         <button class="tool-btn" id="tool-draw" onclick="setTool('draw',this)" title="Draw (B)">✏ Draw</button>
@@ -3799,6 +3815,7 @@ function setCanvasSize(sz) {
 // FRAMES
 // ════════════════════════════════
 function addBlankFrame() {
+  // Keep canvas-fullscreen — user may be adding frames to existing GIF
   const sz = getSize();
   const oc = document.createElement('canvas');
   oc.width = sz; oc.height = sz;
@@ -4890,6 +4907,8 @@ async function generateWithAI() {
         // Pokaż canvas fullscreen na mobile
         document.getElementById('app').classList.add('canvas-fullscreen');
         fitCanvasToScreen();
+        var vgb = document.getElementById('view-gif-btn');
+        if (vgb) vgb.style.display = 'block';
       }
     }, 400); showCelebration();
     // Show save original button in toolbar
@@ -5545,7 +5564,7 @@ function switchPanel(name, el) {
   // ── Conditional toolbar visibility ──
   var appEl = document.getElementById('app');
   if (appEl) {
-    appEl.classList.remove('games-mode','comics-mode','nocanvas-mode');
+    appEl.classList.remove('games-mode','comics-mode','nocanvas-mode','canvas-fullscreen');
     if (name === 'games')   appEl.classList.add('games-mode');
     if (name === 'comics')  appEl.classList.add('comics-mode');
     if (name === 'roast' || name === 'credits') appEl.classList.add('nocanvas-mode');
@@ -9229,6 +9248,14 @@ function gmBack() {
   document.querySelectorAll('.gm-card').forEach(function(c) {
     c.classList.remove('gm-active');
   });
+}
+
+
+// ── TOGGLE CANVAS FULLSCREEN (mobile) ──────────────────────
+function showGifFullscreen() {
+  if (window.innerWidth > 768) return;
+  document.getElementById('app').classList.add('canvas-fullscreen');
+  fitCanvasToScreen();
 }
 
 </script>
