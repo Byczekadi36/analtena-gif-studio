@@ -2014,18 +2014,18 @@ header {
   /* ── GRID: 2 kolumny, minimalny gap ── */
   .gm-grid {
     grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    padding: 8px;
+    gap: 5px;
+    padding: 6px;
   }
 
   /* ── KARTA: mniejsza ── */
   .gm-card { border-radius: 8px; }
 
-  /* Art: 3:2 ratio = wyraźnie niższy niż 1:1 */
+  /* Art: 5:3 ratio = płaski, ~60px height na małym ekranie */
   .gm-card-art {
-    aspect-ratio: 3 / 2 !important;
+    aspect-ratio: 5 / 3 !important;
     min-height: unset;
-    padding: 6px 4px 4px;
+    padding: 4px 4px 3px;
   }
   .gm-card-art::before { display: none; }
   .gm-card-art::after  {
@@ -2038,7 +2038,7 @@ header {
 
   /* Emoji: 32px — wyraźnie mniejsze */
   .gm-card-art-emoji {
-    font-size: 32px !important;
+    font-size: 28px !important;
     animation: none !important;
     filter:
       drop-shadow(0 0 5px var(--gm-neon, rgba(0,245,255,.5)))
@@ -9054,13 +9054,29 @@ function gmSelectGame(id, cardEl) {
   });
   if (cardEl) cardEl.classList.add('gm-active');
 
-  // Update overlay header
+  // Update overlay header title
   var meta = GM_META[id] || { name: id, emoji: '🎮' };
   var titleEl = document.getElementById('gmOverlayTitle');
   if (titleEl) titleEl.textContent = meta.name;
 
-  // Delegate to existing selectGameCenter
-  selectGameCenter(id, null);
+  // Upewnij się że overlay jest widoczny
+  var appEl = document.getElementById('app');
+  var overlay = document.getElementById('games-center-overlay');
+  var canvasArea = document.querySelector('.canvas-area');
+  var rightPanel = document.querySelector('.right-panel');
+
+  // Dodaj games-mode do #app (potrzebne dla CSS na mobile)
+  if (appEl) appEl.classList.add('games-mode');
+
+  // Pokaż overlay, schowaj canvas
+  if (overlay)     { overlay.style.display = 'flex'; overlay.style.flex = '1'; }
+  if (canvasArea)  { canvasArea.style.display = 'none'; canvasArea.style.flex = '0'; }
+  if (rightPanel)  { rightPanel.style.display = 'none'; }
+
+  // Uruchom grę (z małym delay dla renderowania)
+  setTimeout(function() {
+    selectGameCenter(id, null);
+  }, 80);
 }
 
 // Back button: hide overlay, return to game grid
