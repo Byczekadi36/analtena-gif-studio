@@ -1966,9 +1966,15 @@ header {
     max-width: unset;
     flex-direction: column;
     height: auto;
+    max-height: 55vh;
+    overflow: hidden;
     border-right: none;
     border-bottom: 1px solid rgba(0,245,255,.08);
     flex-shrink: 0;
+  }
+  .panel-content {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .panel-tabs {
     flex-direction: row;
@@ -5251,6 +5257,11 @@ async function exportGIF() {
       if (isMobile) setTimeout(() => toast('📱 Saved! Check your Downloads or Photos folder'), 1000);
     };
 
+    // Na mobile: upewnij się że result-modal jest na górze ekranu
+    if (window.innerWidth <= 768) {
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+    }
     document.getElementById('result-modal').classList.add('show');
     // Show "Save Original Image" button if Replicate URL available
     const origBtn = document.getElementById('result-save-orig-btn');
@@ -5893,8 +5904,11 @@ function fitCanvasToScreen() {
   const isMobile = window.innerWidth <= 768;
 
   if (isMobile) {
-    // Mobile: fit to screen width
-    const size = window.innerWidth - 16;
+    // Mobile: fit to smaller of screen width OR available stage height
+    // (stage may be small if left-panel takes a lot of vertical space)
+    const stageH = stage.clientHeight > 80 ? stage.clientHeight - 16 : window.innerHeight * 0.4;
+    const stageW = window.innerWidth - 16;
+    const size = Math.min(stageW, stageH, canvas.width || 480);
     canvas.style.width  = size + 'px';
     canvas.style.height = size + 'px';
     if (wrap) { wrap.style.width = size + 'px'; wrap.style.height = size + 'px'; }
