@@ -2115,6 +2115,71 @@ header {
   }
 }
 
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RESULT MODAL — mobile fix
+   Pełny widok GIF bez ucinania na małych ekranach
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 768px) {
+
+  /* Overlay: scrollowalny zamiast centered */
+  .result-modal {
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding: 12px 10px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Box: pełna szerokość, żaden overflow */
+  .result-box {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 16px 14px !important;
+    border-radius: 14px !important;
+    margin: 0 auto !important;
+  }
+
+  /* GIF image: pełna szerokość, proporcjonalna wysokość */
+  #result-img {
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    display: block !important;
+    border-radius: 10px !important;
+    object-fit: contain !important;
+  }
+
+  /* Tytuł i meta: mniejszy */
+  .result-title {
+    font-size: 18px !important;
+    margin: 10px 0 4px !important;
+  }
+  .result-meta {
+    font-size: 11px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* Przyciski: 2 kolumny zamiast pionowo */
+  .result-btns {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 7px !important;
+    margin-top: 12px !important;
+  }
+
+  /* Przycisk Back: pełna szerokość */
+  .rbtn-close {
+    grid-column: 1 / -1 !important;
+  }
+
+  /* Przyciski: mniejszy padding */
+  .rbtn {
+    padding: 10px 8px !important;
+    font-size: 12px !important;
+  }
+}
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
