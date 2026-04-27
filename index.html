@@ -9487,138 +9487,25 @@ function showGifFullscreen() {
 
 
 // ══════════════════════════════════════════════════════════
-//  $ANAL LIVE PRICE TICKER
-//  Źródło: x1.ninja/pair/GwwCyLS4VEeZXyPWPYRNiVSuVur6ntioxBmjDQHHHv9x
-//  Parse tytułu strony: "ANAL/XNT $0.000482 (-3.69%)"
+//  $ANAL LIVE PRICE TICKER — v4 via /api/price
+//  Źródło: /api/price (Vercel serverless) → xdex → x1ninja
 // ══════════════════════════════════════════════════════════
 
 var _tickerInterval = null;
-var _tickerData = null;
-
-// Parsuje tytuł x1.ninja: "ANAL/XNT $0.000482 (-3.69%) | X1.Ninja Screener"
-function parseX1NinjaTitle(text) {
-  // Szukaj: $NUMBER (NUMBER%)
-  var priceMatch = text.match(/\$([\d.]+)/);
-  var changeMatch = text.match(/\(([+-]?[\d.]+)%\)/);
-  if (!priceMatch) return null;
-  return {
-    price:     parseFloat(priceMatch[1]),
-    change24h: changeMatch ? parseFloat(changeMatch[1]) : 0,
-    source:    'x1.ninja'
-  };
-}
-
-async function fetchFromX1Ninja() {
-  // Próbuje x1prism.com API (ze screena DevTools widać endpoint list?network=X1%20Mainnet)
-  try {
-    var resp = await fetch(
-      'https://x1prism.com/api/list?network=X1%20Mainnet',
-      { signal: AbortSignal.timeout(6000) }
-    );
-    if (!resp.ok) throw new Error('x1prism ' + resp.status);
-    var data = await resp.json();
-
-    // Szukaj tokena ANAL po mint address lub symbol
-    var ANAL_MINT = 'EFPkbXTdr3c7aRbCEKoJDYdbbzgzVDBShYGybP3gQwmy';
-    var token = null;
-    var list = Array.isArray(data) ? data : (data.tokens || data.data || data.pairs || []);
-
-    // Szukaj po mint address
-    token = list.find(function(t) {
-      return (t.mint || t.address || t.token || t.id || '') === ANAL_MINT;
-    });
-    // Fallback: szukaj po symbolu
-    if (!token) {
-      token = list.find(function(t) {
-        var sym = (t.symbol || t.name || '').toUpperCase();
-        return sym === 'ANAL' || sym === '$ANAL';
-      });
-    }
-
-    if (!token) throw new Error('ANAL not found in list');
-
-    var price = parseFloat(token.priceUsd || token.price_usd || token.usdPrice || token.price || 0);
-    var change = parseFloat(token.change24h || token.priceChange24h || token.change_24h || 0);
-    var vol    = parseFloat(token.volume24h || token.vol24h || token.volume || 0);
-    var liq    = parseFloat(token.liquidity || token.liq || 0);
-
-    if (!price) throw new Error('price=0');
-    return { price: price, change24h: change, vol24h: vol, liq: liq, source: 'x1prism' };
-
-  } catch(e) {
-    console.log('[Ticker] x1prism /api/ error:', e.message);
-    // Retry bez /api/ prefix (ze screena URL wygląda jak /list?network=...)
-    try {
-      var resp2 = await fetch(
-        'https://x1prism.com/list?network=X1%20Mainnet',
-        { signal: AbortSignal.timeout(6000) }
-      );
-      if (resp2.ok) {
-        var data2 = await resp2.json();
-        var ANAL_MINT2 = 'EFPkbXTdr3c7aRbCEKoJDYdbbzgzVDBShYGybP3gQwmy';
-        var list2 = Array.isArray(data2) ? data2 : (data2.tokens || data2.data || data2.pairs || []);
-        var token2 = list2.find(function(t){ return (t.mint||t.address||t.token||t.id||'')===ANAL_MINT2; });
-        if (!token2) token2 = list2.find(function(t){ return (t.symbol||'').toUpperCase()==='ANAL'; });
-        if (token2) {
-          var p2 = parseFloat(token2.priceUsd||token2.price_usd||token2.usdPrice||token2.price||0);
-          if (p2) return { price:p2, change24h:parseFloat(token2.change24h||0), source:'x1prism' };
-        }
-      }
-    } catch(e3) { console.log('[Ticker] x1prism /list/ error:', e3.message); }
-    // Fallback: x1.ninja parse title
-    try {
-      var proxyUrl = 'https://api.allorigins.win/get?url=' +
-        encodeURIComponent('https://x1.ninja/pair/GwwCyLS4VEeZXyPWPYRNiVSuVur6ntioxBmjDQHHHv9x');
-      var r2 = await fetch(proxyUrl, { signal: AbortSignal.timeout(6000) });
-      if (!r2.ok) throw new Error('proxy');
-      var d2 = await r2.json();
-      var titleMatch = (d2.contents || '').match(/<title>([^<]+)<\/title>/i);
-      if (!titleMatch) throw new Error('no title');
-      var parsed = parseX1NinjaTitle(titleMatch[1]);
-      if (parsed && parsed.price) return parsed;
-    } catch(e2) {
-      console.log('[Ticker] x1.ninja fallback error:', e2.message);
-    }
-    return null;
-  }
-}
-
-async function fetchFromDexScreener() {
-  try {
-    var resp = await fetch(
-      'https://api.dexscreener.com/latest/dex/search?q=ANAL',
-      { signal: AbortSignal.timeout(8000) }
-    );
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    var data = await resp.json();
-    var pairs = (data.pairs || []).filter(function(p) {
-      var sym = (p.baseToken && p.baseToken.symbol || '').toUpperCase();
-      return sym === 'ANAL' || sym === '$ANAL';
-    });
-    if (!pairs.length) return null;
-    pairs.sort(function(a,b) {
-      return parseFloat(b.volume&&b.volume.h24||0) - parseFloat(a.volume&&a.volume.h24||0);
-    });
-    var p = pairs[0];
-    return {
-      price:     parseFloat(p.priceUsd || 0),
-      change24h: parseFloat(p.priceChange && p.priceChange.h24 || 0),
-      vol24h:    parseFloat(p.volume && p.volume.h24 || 0),
-      liq:       parseFloat(p.liquidity && p.liquidity.usd || 0),
-      source:    'dexscreener'
-    };
-  } catch(e) {
-    console.log('[Ticker] dexscreener error:', e.message);
-    return null;
-  }
-}
 
 async function fetchAnalPrice() {
-  // Próbuj x1prism najpierw (prawdziwe dane X1 Network)
-  var d = await fetchFromX1Ninja();
-  if (d && d.price) return d;
-  // Fallback: DexScreener
-  return await fetchFromDexScreener();
+  // Własny Vercel endpoint który pobiera cenę po stronie serwera
+  try {
+    var r = await fetch('/api/price', { signal: AbortSignal.timeout(8000) });
+    if (r.ok) {
+      var d = await r.json();
+      if (d.price && d.price > 0) {
+        console.log('[Ticker] /api/price OK:', d.price, 'source:', d.source);
+        return { price: d.price, change24h: d.change24h || 0, source: d.source || 'xdex' };
+      }
+    }
+  } catch(e) { console.log('[Ticker] /api/price error:', e.message); }
+  return null;
 }
 
 function formatPrice(n) {
@@ -9630,39 +9517,21 @@ function formatPrice(n) {
   return '$' + n.toFixed(2);
 }
 
-function formatVol(n) {
-  if (!n) return '-';
-  if (n >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
-  if (n >= 1e3) return '$' + (n/1e3).toFixed(1) + 'K';
-  return '$' + n.toFixed(0);
-}
-
 function buildTickerHTML(d) {
-  var isUp = d.change24h >= 0;
-  var cls  = isUp ? 'up' : 'down';
-  var arrow = isUp ? '&#9650;' : '&#9650;';
-  // prawdziwy symbol kierunku
-  var sign = isUp ? '+' : '';
-  var chg  = sign + parseFloat(d.change24h || 0).toFixed(2) + '%';
-  var srcLabel = d.source === 'x1prism' ? '&#9889; X1PRISM LIVE' : (d.source === 'x1.ninja' ? '&#9889; X1NINJA LIVE' : '&#9656; DEXSCREENER');
-
-  var vol  = d.vol24h ? '<span class="ticker-vol">Vol ' + formatVol(d.vol24h) + '</span>' : '';
-  var liq  = d.liq    ? '<span class="t-seg"><span class="ticker-label">Liq</span><span style="color:rgba(255,255,255,.5);font-size:9px;">' + formatVol(d.liq) + '</span></span>' : '';
+  var isUp  = (d.change24h || 0) >= 0;
+  var arrow = isUp ? '&#9650;' : '&#9660;';
+  var cls   = isUp ? 'up' : 'down';
+  var chg   = Math.abs(d.change24h || 0).toFixed(2) + '%';
+  var src   = '&#9889; XDEX LIVE';
 
   var core =
-    '<span class="ticker-item">' +
-      '<span class="ticker-dot"></span>' +
-      '<span class="ticker-label">$ANAL</span>' +
-      '<span class="ticker-price">' + formatPrice(d.price) + '</span>' +
-      '<span class="ticker-change ' + cls + '">' + (isUp?'&#9650;':'&#9660;') + ' ' + Math.abs(d.change24h||0).toFixed(2) + '%</span>' +
-      vol +
+    '<span class="ticker-item"><span class="ticker-dot"></span>' +
+    '<span class="ticker-label">$ANAL</span>' +
+    '<span class="ticker-price">' + formatPrice(d.price) + '</span>' +
+    '<span class="ticker-change ' + cls + '">' + arrow + ' ' + chg + '</span>' +
     '</span>' +
-    liq +
-    '<span class="ticker-item">' +
-      '<span style="color:rgba(255,255,255,.18);font-size:8px;letter-spacing:.08em;">' + srcLabel + '</span>' +
-    '</span>';
+    '<span class="ticker-item"><span style="color:rgba(255,255,255,.18);font-size:8px;letter-spacing:.08em;">' + src + '</span></span>';
 
-  // Podwój dla seamless loop
   return core + core;
 }
 
@@ -9671,23 +9540,19 @@ async function updateTicker() {
   if (!track) return;
   var data = await fetchAnalPrice();
   if (!data || !data.price) {
-    track.innerHTML =
-      '<span class="ticker-loading" style="color:rgba(255,150,50,.6);">&#9888; $ANAL price unavailable &mdash; <a href="https://x1.ninja/pair/GwwCyLS4VEeZXyPWPYRNiVSuVur6ntioxBmjDQHHHv9x" target="_blank" style="color:#00f5ff;">x1.ninja</a></span>';
+    track.innerHTML = '<span class="ticker-loading" style="color:rgba(255,150,50,.5);">&#9888; $ANAL price unavailable</span>';
     return;
   }
-  _tickerData = data;
   track.innerHTML = buildTickerHTML(data);
   track.style.animation = 'none';
   track.offsetHeight;
   track.style.animation = '';
 }
 
-// Start
 (function initTicker() {
   updateTicker();
   _tickerInterval = setInterval(updateTicker, 30000);
 })();
-
 </script>
 
 <!-- ══════════════════════════════════════════════
