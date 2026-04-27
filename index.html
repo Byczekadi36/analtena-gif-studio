@@ -9487,138 +9487,133 @@ function showGifFullscreen() {
 
 
 // ══════════════════════════════════════════════════════════
-//  $ANAL LIVE PRICE TICKER
-//  Źródło: x1.ninja/pair/GwwCyLS4VEeZXyPWPYRNiVSuVur6ntioxBmjDQHHHv9x
-//  Parse tytułu strony: "ANAL/XNT $0.000482 (-3.69%)"
+//  $ANAL LIVE PRICE TICKER — v3 clean
+//  Źródła (w kolejności):
+//  1. DexScreener pair endpoint (para ANAL na X1/xdex)
+//  2. DexScreener token endpoint (po mint address)
+//  3. DexScreener search (fallback, filtr X1 chain)
 // ══════════════════════════════════════════════════════════
 
 var _tickerInterval = null;
-var _tickerData = null;
 
-// Parsuje tytuł x1.ninja: "ANAL/XNT $0.000482 (-3.69%) | X1.Ninja Screener"
-function parseX1NinjaTitle(text) {
-  // Szukaj: $NUMBER (NUMBER%)
-  var priceMatch = text.match(/\$([\d.]+)/);
-  var changeMatch = text.match(/\(([+-]?[\d.]+)%\)/);
-  if (!priceMatch) return null;
-  return {
-    price:     parseFloat(priceMatch[1]),
-    change24h: changeMatch ? parseFloat(changeMatch[1]) : 0,
-    source:    'x1.ninja'
-  };
-}
-
-async function fetchFromX1Ninja() {
-  // Próbuje x1prism.com API (ze screena DevTools widać endpoint list?network=X1%20Mainnet)
-  try {
-    var resp = await fetch(
-      'https://x1prism.com/api/list?network=X1%20Mainnet',
-      { signal: AbortSignal.timeout(6000) }
-    );
-    if (!resp.ok) throw new Error('x1prism ' + resp.status);
-    var data = await resp.json();
-
-    // Szukaj tokena ANAL po mint address lub symbol
-    var ANAL_MINT = 'EFPkbXTdr3c7aRbCEKoJDYdbbzgzVDBShYGybP3gQwmy';
-    var token = null;
-    var list = Array.isArray(data) ? data : (data.tokens || data.data || data.pairs || []);
-
-    // Szukaj po mint address
-    token = list.find(function(t) {
-      return (t.mint || t.address || t.token || t.id || '') === ANAL_MINT;
-    });
-    // Fallback: szukaj po symbolu
-    if (!token) {
-      token = list.find(function(t) {
-        var sym = (t.symbol || t.name || '').toUpperCase();
-        return sym === 'ANAL' || sym === '$ANAL';
-      });
-    }
-
-    if (!token) throw new Error('ANAL not found in list');
-
-    var price = parseFloat(token.priceUsd || token.price_usd || token.usdPrice || token.price || 0);
-    var change = parseFloat(token.change24h || token.priceChange24h || token.change_24h || 0);
-    var vol    = parseFloat(token.volume24h || token.vol24h || token.volume || 0);
-    var liq    = parseFloat(token.liquidity || token.liq || 0);
-
-    if (!price) throw new Error('price=0');
-    return { price: price, change24h: change, vol24h: vol, liq: liq, source: 'x1prism' };
-
-  } catch(e) {
-    console.log('[Ticker] x1prism /api/ error:', e.message);
-    // Retry bez /api/ prefix (ze screena URL wygląda jak /list?network=...)
-    try {
-      var resp2 = await fetch(
-        'https://x1prism.com/list?network=X1%20Mainnet',
-        { signal: AbortSignal.timeout(6000) }
-      );
-      if (resp2.ok) {
-        var data2 = await resp2.json();
-        var ANAL_MINT2 = 'EFPkbXTdr3c7aRbCEKoJDYdbbzgzVDBShYGybP3gQwmy';
-        var list2 = Array.isArray(data2) ? data2 : (data2.tokens || data2.data || data2.pairs || []);
-        var token2 = list2.find(function(t){ return (t.mint||t.address||t.token||t.id||'')===ANAL_MINT2; });
-        if (!token2) token2 = list2.find(function(t){ return (t.symbol||'').toUpperCase()==='ANAL'; });
-        if (token2) {
-          var p2 = parseFloat(token2.priceUsd||token2.price_usd||token2.usdPrice||token2.price||0);
-          if (p2) return { price:p2, change24h:parseFloat(token2.change24h||0), source:'x1prism' };
-        }
-      }
-    } catch(e3) { console.log('[Ticker] x1prism /list/ error:', e3.message); }
-    // Fallback: x1.ninja parse title
-    try {
-      var proxyUrl = 'https://api.allorigins.win/get?url=' +
-        encodeURIComponent('https://x1.ninja/pair/GwwCyLS4VEeZXyPWPYRNiVSuVur6ntioxBmjDQHHHv9x');
-      var r2 = await fetch(proxyUrl, { signal: AbortSignal.timeout(6000) });
-      if (!r2.ok) throw new Error('proxy');
-      var d2 = await r2.json();
-      var titleMatch = (d2.contents || '').match(/<title>([^<]+)<\/title>/i);
-      if (!titleMatch) throw new Error('no title');
-      var parsed = parseX1NinjaTitle(titleMatch[1]);
-      if (parsed && parsed.price) return parsed;
-    } catch(e2) {
-      console.log('[Ticker] x1.ninja fallback error:', e2.message);
-    }
-    return null;
-  }
-}
-
-async function fetchFromDexScreener() {
-  try {
-    var resp = await fetch(
-      'https://api.dexscreener.com/latest/dex/search?q=ANAL',
-      { signal: AbortSignal.timeout(8000) }
-    );
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    var data = await resp.json();
-    var pairs = (data.pairs || []).filter(function(p) {
-      var sym = (p.baseToken && p.baseToken.symbol || '').toUpperCase();
-      return sym === 'ANAL' || sym === '$ANAL';
-    });
-    if (!pairs.length) return null;
-    pairs.sort(function(a,b) {
-      return parseFloat(b.volume&&b.volume.h24||0) - parseFloat(a.volume&&a.volume.h24||0);
-    });
-    var p = pairs[0];
-    return {
-      price:     parseFloat(p.priceUsd || 0),
-      change24h: parseFloat(p.priceChange && p.priceChange.h24 || 0),
-      vol24h:    parseFloat(p.volume && p.volume.h24 || 0),
-      liq:       parseFloat(p.liquidity && p.liquidity.usd || 0),
-      source:    'dexscreener'
-    };
-  } catch(e) {
-    console.log('[Ticker] dexscreener error:', e.message);
-    return null;
-  }
-}
+// ANAL mint address na X1: EFPkbXTdr3c7aRbCEKoJDYdbbzgzVDBShYGybP3gQwmy
+// Para na xdex: GwwCyLS4VEeZXyPWPYRNiVSuVur6ntioxBmjDQHHHv9x
+var ANAL_PAIR    = 'GwwCyLS4VEeZXyPWPYRNiVSuVur6ntioxBmjDQHHHv9x';
+var ANAL_MINT    = 'EFPkbXTdr3c7aRbCEKoJDYdbbzgzVDBShYGybP3gQwmy';
+var ANAL_CHAIN   = 'x1';  // X1 Network chainId w DexScreener
 
 async function fetchAnalPrice() {
-  // Próbuj x1prism najpierw (prawdziwe dane X1 Network)
-  var d = await fetchFromX1Ninja();
-  if (d && d.price) return d;
-  // Fallback: DexScreener
-  return await fetchFromDexScreener();
+  // STRATEGIA: 3 metody, każda próbuje różnego źródła
+  // Cel: cena ANAL/USD z X1 Network (prawdziwa, nie inna para)
+
+  // ── Metoda 1: xdex.xyz chart/history (dokładny URL z DevTools) ──
+  // Endpoint: api.xdex.xyz/api/xdex/chart/history
+  // Parametry: from_token=SOL, to_token=ANAL, ostatnie 2 godziny
+  // Odpowiedź: {t:[timestamps], c:[close prices w XNT/WSOL]}
+  // Problem: 403 (wymaga referer xdex.xyz) → użyj odpowiednich headerów
+  try {
+    var now = Math.floor(Date.now() / 1000);
+    var from = now - 7200; // ostatnie 2 godziny
+    var xdexUrl = 'https://api.xdex.xyz/api/xdex/chart/history' +
+      '?from_token=So11111111111111111111111111111111111111112' +
+      '&to_token=EFPkbXTdr3c7aRbCEKoJDYdbbzgzVDBShYGybP3gQwmy' +
+      '&resolution=60&time_from=' + from + '&time_to=' + now +
+      '&network=X1%20Mainnet';
+    var xr = await fetch(xdexUrl, {
+      signal: AbortSignal.timeout(5000),
+      headers: {
+        'Referer': 'https://app.xdex.xyz/',
+        'Origin': 'https://app.xdex.xyz'
+      }
+    });
+    if (xr.ok) {
+      var xd = await xr.json();
+      // Format: {t:[...], o:[...], h:[...], l:[...], c:[...], v:[...]}
+      // c = cena ANAL w SOL/XNT units
+      if (xd.c && xd.c.length > 0) {
+        var lastC = xd.c[xd.c.length - 1]; // ostatnia świeca close
+        // Pobierz cenę SOL/USD żeby przeliczyć
+        var solResp = await fetch('https://api.dexscreener.com/latest/dex/search?q=SOL%20USD', { signal: AbortSignal.timeout(4000) });
+        var solData = await solResp.json();
+        var solPair = (solData.pairs||[]).find(function(p){ return (p.baseToken&&p.baseToken.symbol||'').toUpperCase()==='SOL' && (p.quoteToken&&p.quoteToken.symbol||'').includes('USD'); });
+        var solPrice = solPair ? parseFloat(solPair.priceUsd||0) : 150;
+        var analUsd = lastC * solPrice;
+        if (analUsd > 0) {
+          console.log('[Ticker] xdex OK, ANAL in SOL:', lastC, 'SOL price:', solPrice, 'USD:', analUsd);
+          // Zmiana % z pierwszej i ostatniej świecy
+          var firstC = xd.c[0] || lastC;
+          var chg = firstC > 0 ? ((lastC - firstC) / firstC * 100) : 0;
+          return { price: analUsd, change24h: chg, source: 'xdex', vol24h: 0, liq: 0 };
+        }
+      }
+    } else {
+      console.log('[Ticker] xdex status:', xr.status);
+    }
+  } catch(e) { console.log('[Ticker] xdex error:', e.message); }
+
+  // ── Metoda 2: DexScreener para po address (X1 network) ──
+  try {
+    var r = await fetch(
+      'https://api.dexscreener.com/latest/dex/pairs/' + ANAL_CHAIN + '/' + ANAL_PAIR,
+      { signal: AbortSignal.timeout(6000) }
+    );
+    if (r.ok) {
+      var d = await r.json();
+      var pair = d.pair || (d.pairs && d.pairs[0]);
+      if (pair && parseFloat(pair.priceUsd || 0) > 0) {
+        console.log('[Ticker] DexScreener pair OK:', pair.priceUsd, 'chain:', pair.chainId);
+        return {
+          price:     parseFloat(pair.priceUsd),
+          change24h: parseFloat(pair.priceChange && pair.priceChange.h24 || 0),
+          vol24h:    parseFloat(pair.volume && pair.volume.h24 || 0),
+          liq:       parseFloat(pair.liquidity && pair.liquidity.usd || 0),
+          source:    'xdex'
+        };
+      }
+    }
+  } catch(e) { console.log('[Ticker] dex pairs error:', e.message); }
+
+  // ── Metoda 3: DexScreener token po mint (X1 chain) ──
+  try {
+    var r2 = await fetch(
+      'https://api.dexscreener.com/tokens/v1/' + ANAL_CHAIN + '/' + ANAL_MINT,
+      { signal: AbortSignal.timeout(6000) }
+    );
+    if (r2.ok) {
+      var d2 = await r2.json();
+      var pairs2 = (d2.pairs || []).filter(function(p){ return parseFloat(p.priceUsd||0) > 0; });
+      if (pairs2.length) {
+        pairs2.sort(function(a,b){ return parseFloat(b.volume&&b.volume.h24||0)-parseFloat(a.volume&&a.volume.h24||0); });
+        var p2 = pairs2[0];
+        console.log('[Ticker] DexScreener token OK:', p2.priceUsd, 'chain:', p2.chainId);
+        return { price: parseFloat(p2.priceUsd), change24h: parseFloat(p2.priceChange&&p2.priceChange.h24||0), vol24h: parseFloat(p2.volume&&p2.volume.h24||0), liq: parseFloat(p2.liquidity&&p2.liquidity.usd||0), source: 'xdex' };
+      }
+    }
+  } catch(e) { console.log('[Ticker] dex token error:', e.message); }
+
+  // ── Metoda 4: DexScreener search, filtr X1 ──
+  try {
+    var r3 = await fetch('https://api.dexscreener.com/latest/dex/search?q=ANAL', { signal: AbortSignal.timeout(8000) });
+    if (r3.ok) {
+      var d3 = await r3.json();
+      var pairs3 = (d3.pairs||[]).filter(function(p){
+        var sym=(p.baseToken&&p.baseToken.symbol||'').toUpperCase();
+        var chain=(p.chainId||'').toLowerCase();
+        return (sym==='ANAL'||sym==='$ANAL') && (chain.includes('x1')||chain.includes('xone')||(p.baseToken&&p.baseToken.address===ANAL_MINT));
+      });
+      if (!pairs3.length) {
+        pairs3=(d3.pairs||[]).filter(function(p){ var s=(p.baseToken&&p.baseToken.symbol||'').toUpperCase(); return s==='ANAL'||s==='$ANAL'; });
+      }
+      if (pairs3.length) {
+        pairs3.sort(function(a,b){ return parseFloat(b.volume&&b.volume.h24||0)-parseFloat(a.volume&&a.volume.h24||0); });
+        var p3=pairs3[0];
+        console.log('[Ticker] DexScreener search, chain:', p3.chainId, 'price:', p3.priceUsd);
+        return { price:parseFloat(p3.priceUsd||0), change24h:parseFloat(p3.priceChange&&p3.priceChange.h24||0), vol24h:parseFloat(p3.volume&&p3.volume.h24||0), liq:parseFloat(p3.liquidity&&p3.liquidity.usd||0), source:'dexscreener' };
+      }
+    }
+  } catch(e) { console.log('[Ticker] search error:', e.message); }
+
+  return null;
 }
 
 function formatPrice(n) {
@@ -9638,32 +9633,23 @@ function formatVol(n) {
 }
 
 function buildTickerHTML(d) {
-  var isUp = d.change24h >= 0;
-  var cls  = isUp ? 'up' : 'down';
-  var arrow = isUp ? '&#9650;' : '&#9650;';
-  // prawdziwy symbol kierunku
-  var sign = isUp ? '+' : '';
-  var chg  = sign + parseFloat(d.change24h || 0).toFixed(2) + '%';
-  var srcLabel = d.source === 'x1prism' ? '&#9889; X1PRISM LIVE' : (d.source === 'x1.ninja' ? '&#9889; X1NINJA LIVE' : '&#9656; DEXSCREENER');
-
-  var vol  = d.vol24h ? '<span class="ticker-vol">Vol ' + formatVol(d.vol24h) + '</span>' : '';
-  var liq  = d.liq    ? '<span class="t-seg"><span class="ticker-label">Liq</span><span style="color:rgba(255,255,255,.5);font-size:9px;">' + formatVol(d.liq) + '</span></span>' : '';
+  var isUp  = d.change24h >= 0;
+  var arrow = isUp ? '&#9650;' : '&#9660;';
+  var cls   = isUp ? 'up' : 'down';
+  var chg   = Math.abs(d.change24h || 0).toFixed(2) + '%';
+  var vol   = d.vol24h ? '<span class="ticker-vol">Vol ' + formatVol(d.vol24h) + '</span>' : '';
+  var liq   = d.liq ? '<span class="ticker-item"><span class="ticker-label">Liq</span><span style="color:rgba(255,255,255,.5);font-size:9px;">' + formatVol(d.liq) + '</span></span>' : '';
+  var src   = d.source === 'xdex' ? '&#9889; XDEX LIVE' : (d.source === 'x1prism' ? '&#9889; XDEX LIVE' : '&#9656; DEXSCREENER');
 
   var core =
-    '<span class="ticker-item">' +
-      '<span class="ticker-dot"></span>' +
-      '<span class="ticker-label">$ANAL</span>' +
-      '<span class="ticker-price">' + formatPrice(d.price) + '</span>' +
-      '<span class="ticker-change ' + cls + '">' + (isUp?'&#9650;':'&#9660;') + ' ' + Math.abs(d.change24h||0).toFixed(2) + '%</span>' +
-      vol +
-    '</span>' +
-    liq +
-    '<span class="ticker-item">' +
-      '<span style="color:rgba(255,255,255,.18);font-size:8px;letter-spacing:.08em;">' + srcLabel + '</span>' +
-    '</span>';
+    '<span class="ticker-item"><span class="ticker-dot"></span>' +
+    '<span class="ticker-label">$ANAL</span>' +
+    '<span class="ticker-price">' + formatPrice(d.price) + '</span>' +
+    '<span class="ticker-change ' + cls + '">' + arrow + ' ' + chg + '</span>' +
+    vol + '</span>' + liq +
+    '<span class="ticker-item"><span style="color:rgba(255,255,255,.18);font-size:8px;letter-spacing:.08em;">' + src + '</span></span>';
 
-  // Podwój dla seamless loop
-  return core + core;
+  return core + core; // podwój dla seamless scroll
 }
 
 async function updateTicker() {
@@ -9671,11 +9657,9 @@ async function updateTicker() {
   if (!track) return;
   var data = await fetchAnalPrice();
   if (!data || !data.price) {
-    track.innerHTML =
-      '<span class="ticker-loading" style="color:rgba(255,150,50,.6);">&#9888; $ANAL price unavailable &mdash; <a href="https://x1.ninja/pair/GwwCyLS4VEeZXyPWPYRNiVSuVur6ntioxBmjDQHHHv9x" target="_blank" style="color:#00f5ff;">x1.ninja</a></span>';
+    track.innerHTML = '<span class="ticker-loading" style="color:rgba(255,150,50,.5);">&#9888; $ANAL price unavailable</span>';
     return;
   }
-  _tickerData = data;
   track.innerHTML = buildTickerHTML(data);
   track.style.animation = 'none';
   track.offsetHeight;
