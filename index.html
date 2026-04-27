@@ -2262,6 +2262,59 @@ header {
   }
 }
 
+
+/* ━━━━ FIXED BACK BUTTON dla gier na mobile ━━━━ */
+#gm-fixed-back {
+  display: none;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: rgba(8,8,20,.97);
+  border-bottom: 2px solid rgba(168,85,247,.5);
+  padding: 0 14px;
+  height: 44px;
+  align-items: center;
+  gap: 10px;
+  pointer-events: all;
+  -webkit-tap-highlight-color: rgba(168,85,247,.3);
+}
+#app.games-mode #gm-fixed-back {
+  display: flex;
+}
+#gm-fixed-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 2px solid rgba(168,85,247,.6);
+  background: rgba(168,85,247,.15);
+  color: #a855f7;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(168,85,247,.4);
+  min-height: 38px;
+  min-width: 80px;
+}
+#gm-fixed-back-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(255,255,255,.6);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+/* Przesuń games overlay żeby nie był zakryty przez fixed button */
+@media (max-width: 768px) {
+  #app.games-mode #games-center-overlay {
+    padding-top: 44px !important;
+  }
+}
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
@@ -9236,6 +9289,9 @@ function gmSelectGame(id, cardEl) {
   var meta = GM_META[id] || { name: id, emoji: '🎮' };
   var titleEl = document.getElementById('gmOverlayTitle');
   if (titleEl) titleEl.textContent = meta.name;
+  // Zaktualizuj też fixed back button title
+  var fixedTitle = document.getElementById('gm-fixed-back-title');
+  if (fixedTitle) fixedTitle.textContent = meta.name;
 
   // Upewnij się że overlay jest widoczny
   var appEl = document.getElementById('app');
@@ -9264,23 +9320,30 @@ function gmBack() {
     cancelAnimationFrame(gMarioAnimId);
     gMarioAnimId = null;
   }
-  // Usuń event listenery mario
-  var marioCanvas = document.getElementById('mario-canvas');
-  if (marioCanvas) {
-    marioCanvas.ontouchstart = null;
-    marioCanvas.onclick = null;
-  }
-  // Chowamy overlay gry, wracamy do siatki gier
+  // Usuń event listenery wszystkich gier
+  ['mario-canvas','slots-canvas','chart-canvas'].forEach(function(id) {
+    var c = document.getElementById(id);
+    if (c) { c.ontouchstart = null; c.onclick = null; }
+  });
+  // Chowamy overlay gry
   var overlay = document.getElementById('games-center-overlay');
   if (overlay) { overlay.style.display = 'none'; overlay.style.flex = '0'; }
-  // Pokaż ponownie panel-games (siatkę kart)
+  // Ukryj wszystkie gcenter
+  ['mario','slots','coinflip','chart'].forEach(function(g) {
+    var el = document.getElementById('gcenter-'+g);
+    if (el) el.style.display = 'none';
+  });
+  // Pokaż siatkę kart gier
   var panelGames = document.getElementById('panel-games');
-  if (panelGames) panelGames.style.display = 'block';
+  if (panelGames) { panelGames.style.display = 'block'; }
+  // Zaktualizuj tytuł fixed back button
+  var title = document.getElementById('gm-fixed-back-title');
+  if (title) title.textContent = '🎮 Select Game';
   // Clear active card
   document.querySelectorAll('.gm-card').forEach(function(c) {
     c.classList.remove('gm-active');
   });
-  // games-mode zostaje → canvas główny schowany przez CSS
+  // games-mode zostaje (canvas główny ukryty)
 }
 
 
@@ -9369,6 +9432,13 @@ function showGifFullscreen() {
 
 
 
+
+
+<!-- ── FIXED GAME BACK BUTTON (mobile, z-index:9999) ── -->
+<div id="gm-fixed-back">
+  <button id="gm-fixed-back-btn" onclick="gmBack()">← GAMES</button>
+  <span id="gm-fixed-back-title">🎮 Select Game</span>
+</div>
 
 </body>
 </html>
