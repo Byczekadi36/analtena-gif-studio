@@ -2186,6 +2186,24 @@ header {
   }
 }
 
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   AI LOG — compact on mobile
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 768px) {
+  .ai-log {
+    max-height: 80px !important;   /* zamiast 200px */
+    font-size: 10px !important;
+    padding: 8px 10px !important;
+    margin-top: 6px !important;
+    line-height: 1.5 !important;
+  }
+  /* Gdy aktywne generowanie — trochę więcej miejsca */
+  .ai-log.generating {
+    max-height: 110px !important;
+  }
+}
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
@@ -4408,6 +4426,7 @@ async function generateWithAI() {
 
   document.getElementById('gen-btn').disabled = true;
   document.getElementById('ai-log').innerHTML = '';
+  document.getElementById('ai-log').classList.add('generating');
   document.getElementById('progress-overlay').classList.add('show');
   setProgress(0, 'Preparing…', 'Initializing');
 
@@ -5262,6 +5281,7 @@ async function exportGIF() {
       window.scrollTo(0, 0);
       document.body.scrollTop = 0;
     }
+    document.getElementById('ai-log').classList.remove('generating');
     document.getElementById('result-modal').classList.add('show');
     // Show "Save Original Image" button if Replicate URL available
     const origBtn = document.getElementById('result-save-orig-btn');
