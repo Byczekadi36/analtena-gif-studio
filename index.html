@@ -1743,7 +1743,7 @@ header {
     flex-direction: row;
     flex: 1;
     overflow: hidden;
-    height: calc(100vh - 60px);
+    height: calc(100vh - 88px); /* header 60px + ticker 28px */
     min-height: 0;
   }
 
@@ -1960,7 +1960,7 @@ header {
   .hdr-actions { gap: 4px; }
   #hdrEditorActions { display: none; }
 
-  .app-body { flex-direction: column; overflow: hidden; height: calc(100vh - 56px); }
+  .app-body { flex-direction: column; overflow: hidden; height: calc(100vh - 84px); }
 
   .left-panel {
     width: 100%;
@@ -2077,7 +2077,7 @@ header {
   /* Overlay: fixed fullscreen nad wszystkim */
   #app.games-mode #games-center-overlay {
     position: fixed !important;
-    top: 56px !important;           /* poniżej headera (56px mobile) */
+    top: 84px !important;           /* poniżej headera (56px) + ticker (28px) */
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
@@ -2267,7 +2267,7 @@ header {
 #gm-fixed-back {
   display: none;
   position: fixed;
-  top: 56px;
+  top: 84px;
   left: 0;
   right: 0;
   z-index: 99999 !important;
@@ -2332,6 +2332,101 @@ header {
     overflow-y: auto !important;
   }
   #app.games-grid-mode #gm-fixed-back { display: none !important; }
+}
+
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   $ANAL LIVE PRICE TICKER
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#price-ticker {
+  width: 100%;
+  height: 28px;
+  background: linear-gradient(90deg, rgba(0,245,255,.06) 0%, rgba(168,85,247,.06) 100%);
+  border-bottom: 1px solid rgba(0,245,255,.12);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  position: relative;
+}
+#price-ticker::before,
+#price-ticker::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 40px;
+  z-index: 2;
+  pointer-events: none;
+}
+#price-ticker::before {
+  left: 0;
+  background: linear-gradient(90deg, #080810, transparent);
+}
+#price-ticker::after {
+  right: 0;
+  background: linear-gradient(270deg, #080810, transparent);
+}
+.ticker-track {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  white-space: nowrap;
+  animation: tickerScroll 22s linear infinite;
+  will-change: transform;
+}
+.ticker-track:hover { animation-play-state: paused; }
+@keyframes tickerScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  font-family: var(--font-d, monospace);
+  border-right: 1px solid rgba(255,255,255,.06);
+}
+.ticker-label {
+  color: rgba(255,255,255,.45);
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.ticker-price {
+  color: #00f5ff;
+  font-weight: 900;
+}
+.ticker-change {
+  font-size: 10px;
+  font-weight: 800;
+}
+.ticker-change.up   { color: #22ff88; }
+.ticker-change.down { color: #ff2d78; }
+.ticker-vol {
+  color: rgba(255,255,255,.3);
+  font-size: 9px;
+}
+.ticker-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #22ff88;
+  box-shadow: 0 0 5px #22ff88;
+  animation: tickerPulse 2s infinite;
+  flex-shrink: 0;
+}
+@keyframes tickerPulse {
+  0%,100% { opacity:1; box-shadow: 0 0 5px #22ff88; }
+  50%      { opacity:.5; box-shadow: 0 0 2px #22ff88; }
+}
+.ticker-loading {
+  color: rgba(255,255,255,.3);
+  font-size: 10px;
+  padding: 0 16px;
+  letter-spacing: .08em;
 }
 
 </style>
@@ -2513,6 +2608,13 @@ header {
     </div>
   </div>
 </header>
+
+  <!-- ── LIVE PRICE TICKER ── -->
+  <div id="price-ticker">
+    <div class="ticker-track" id="ticker-track">
+      <span class="ticker-loading">⟳ Loading $ANAL price…</span>
+    </div>
+  </div>
 
   <div class="app-body">
 
@@ -9381,6 +9483,131 @@ function showGifFullscreen() {
   document.getElementById('app').classList.add('canvas-fullscreen');
   fitCanvasToScreen();
 }
+
+
+
+// ══════════════════════════════════════════════════════════
+//  $ANAL LIVE PRICE TICKER
+//  API: DexScreener (free, no key, CORS-ok)
+// ══════════════════════════════════════════════════════════
+
+var _tickerInterval = null;
+var _tickerData = null;
+
+async function fetchAnalPrice() {
+  try {
+    // DexScreener search dla ANAL na X1 / wszystkich sieciach
+    var resp = await fetch(
+      'https://api.dexscreener.com/latest/dex/search?q=ANAL',
+      { signal: AbortSignal.timeout(8000) }
+    );
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var data = await resp.json();
+
+    // Filtruj pary ANAL — szukaj $ANAL token (nie inne z ANAL w nazwie)
+    var pairs = (data.pairs || []).filter(function(p) {
+      var sym = (p.baseToken && p.baseToken.symbol || '').toUpperCase();
+      return sym === 'ANAL' || sym === '$ANAL';
+    });
+
+    // Weź parę z największym volume 24h
+    if (!pairs.length) {
+      // Fallback: weź pierwszą parę zawierającą ANAL
+      pairs = (data.pairs || []).filter(function(p) {
+        var sym = (p.baseToken && p.baseToken.symbol || '').toUpperCase();
+        return sym.includes('ANAL');
+      });
+    }
+
+    if (!pairs.length) return null;
+
+    pairs.sort(function(a,b) {
+      return (parseFloat(b.volume && b.volume.h24 || 0)) -
+             (parseFloat(a.volume && a.volume.h24 || 0));
+    });
+
+    var p = pairs[0];
+    return {
+      price:     parseFloat(p.priceUsd || 0),
+      change24h: parseFloat(p.priceChange && p.priceChange.h24 || 0),
+      vol24h:    parseFloat(p.volume && p.volume.h24 || 0),
+      liq:       parseFloat(p.liquidity && p.liquidity.usd || 0),
+      dex:       p.dexId || '',
+      chain:     p.chainId || '',
+    };
+  } catch(e) {
+    console.log('[Ticker] fetch error:', e.message);
+    return null;
+  }
+}
+
+function formatPrice(n) {
+  if (!n || n === 0) return '$0.00';
+  if (n < 0.000001) return '$' + n.toFixed(10).replace(/\.?0+$/, '');
+  if (n < 0.0001)   return '$' + n.toFixed(8);
+  if (n < 0.01)     return '$' + n.toFixed(6);
+  if (n < 1)        return '$' + n.toFixed(4);
+  return '$' + n.toFixed(2);
+}
+
+function formatVol(n) {
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return '$' + (n/1e3).toFixed(1) + 'K';
+  return '$' + n.toFixed(0);
+}
+
+function buildTickerHTML(d) {
+  var changeClass = d.change24h >= 0 ? 'up' : 'down';
+  var changeArrow = d.change24h >= 0 ? '▲' : '▼';
+  var changeAbs   = Math.abs(d.change24h).toFixed(2);
+  var item = 
+    '<span class="ticker-item">' +
+      '<span class="ticker-dot"></span>' +
+      '<span class="ticker-label">$ANAL</span>' +
+      '<span class="ticker-price">' + formatPrice(d.price) + '</span>' +
+      '<span class="ticker-change ' + changeClass + '">' + changeArrow + ' ' + changeAbs + '%</span>' +
+      '<span class="ticker-vol">Vol ' + formatVol(d.vol24h) + '</span>' +
+    '</span>' +
+    '<span class="ticker-item">' +
+      '<span class="ticker-label">Liq</span>' +
+      '<span style="color:rgba(255,255,255,.5);font-size:10px;">' + formatVol(d.liq) + '</span>' +
+    '</span>' +
+    '<span class="ticker-item">' +
+      '<span class="ticker-label">24h</span>' +
+      '<span class="ticker-change ' + changeClass + '">' + changeArrow + ' ' + changeAbs + '%</span>' +
+    '</span>' +
+    '<span class="ticker-item" style="color:rgba(255,255,255,.2);font-size:9px;">' +
+      '⚡ ' + (d.dex || 'xdex').toUpperCase() +
+    '</span>';
+  // Podwój dla seamless loop
+  return item + item;
+}
+
+async function updateTicker() {
+  var data = await fetchAnalPrice();
+  var track = document.getElementById('ticker-track');
+  if (!track) return;
+
+  if (!data || !data.price) {
+    track.innerHTML =
+      '<span class="ticker-loading" style="color:rgba(255,100,100,.5);">⚠ $ANAL price unavailable — check xdex.xyz</span>';
+    return;
+  }
+
+  _tickerData = data;
+  track.innerHTML = buildTickerHTML(data);
+  // Zresetuj animację
+  track.style.animation = 'none';
+  track.offsetHeight; // reflow
+  track.style.animation = '';
+}
+
+// Start
+(function initTicker() {
+  updateTicker();
+  // Odświeżaj co 30 sekund
+  _tickerInterval = setInterval(updateTicker, 30000);
+})();
 
 </script>
 
