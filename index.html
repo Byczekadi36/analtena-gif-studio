@@ -7411,7 +7411,7 @@ function initMario(){
     playSound('die');
 
     canvas.onclick=function(){canvas.onclick=null;setTimeout(initMario,50);};
-    canvas.ontouchstart=function(e){e.preventDefault();canvas.ontouchstart=null;setTimeout(initMario,50);};
+    canvas.ontouchstart=function(e){var h=document.getElementById("gmOverlayHeader");if(h&&h.contains(e.target))return;e.preventDefault();canvas.ontouchstart=null;setTimeout(initMario,50);};
   }
 
   function startGame(){
