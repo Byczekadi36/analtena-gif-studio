@@ -4248,8 +4248,8 @@ function importImages(e) {
 // AI GENERATION (Claude API)
 // ════════════════════════════════
 function log(msg, cls='') {
-  // ai-log removed — log to console only
   console.log('[GIF]', msg);
+  // ai-log hidden — no DOM update needed
 }
 
 function setProgress(pct, title, sub) {
@@ -4417,7 +4417,7 @@ async function generateWithAI() {
   const sz         = parseInt(document.getElementById('resolution').value);
 
   document.getElementById('gen-btn').disabled = true;
-  document.getElementById('ai-log').innerHTML = '';
+  // ai-log hidden — const logEl removed
   document.getElementById('progress-overlay').classList.add('show');
   setProgress(0, 'Preparing…', 'Initializing');
 
