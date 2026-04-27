@@ -2284,6 +2284,9 @@ header {
 #app.games-mode #gm-fixed-back {
   display: flex !important;
 }
+#app.games-grid-mode #gm-fixed-back {
+  display: none !important;
+}
 #gm-fixed-back-btn {
   display: flex;
   align-items: center;
@@ -2316,6 +2319,19 @@ header {
   #app.games-mode #games-center-overlay {
     padding-top: 48px !important;
   }
+}
+
+
+/* ━━━━ GAMES GRID MODE (panel kart, bez gry) ━━━━ */
+@media (max-width: 768px) {
+  #app.games-grid-mode .canvas-area { display: none !important; }
+  #app.games-grid-mode .right-panel { display: none !important; }
+  #app.games-grid-mode .left-panel  { 
+    max-height: none !important;
+    height: calc(100vh - 56px) !important;
+    overflow-y: auto !important;
+  }
+  #app.games-grid-mode #gm-fixed-back { display: none !important; }
 }
 
 </style>
@@ -5638,8 +5654,8 @@ function switchPanel(name, el) {
   // ── Conditional toolbar visibility ──
   var appEl = document.getElementById('app');
   if (appEl) {
-    appEl.classList.remove('games-mode','comics-mode','nocanvas-mode','canvas-fullscreen');
-    if (name === 'games')   appEl.classList.add('games-mode');
+    appEl.classList.remove('games-mode','games-grid-mode','comics-mode','nocanvas-mode','canvas-fullscreen');
+    if (name === 'games')   appEl.classList.add('games-grid-mode');
     if (name === 'comics')  appEl.classList.add('comics-mode');
     if (name === 'roast' || name === 'credits') appEl.classList.add('nocanvas-mode');
   }
@@ -9303,8 +9319,11 @@ function gmSelectGame(id, cardEl) {
   var canvasArea = document.querySelector('.canvas-area');
   var rightPanel = document.querySelector('.right-panel');
 
-  // Dodaj games-mode do #app (potrzebne dla CSS na mobile)
-  if (appEl) appEl.classList.add('games-mode');
+  // Zmień z games-grid-mode na games-mode (wchodzimy w grę)
+  if (appEl) {
+    appEl.classList.remove('games-grid-mode');
+    appEl.classList.add('games-mode');
+  }
 
   // Pokaż overlay, schowaj canvas
   if (overlay)     { overlay.style.display = 'flex'; overlay.style.flex = '1'; }
@@ -9347,7 +9366,12 @@ function gmBack() {
   document.querySelectorAll('.gm-card').forEach(function(c) {
     c.classList.remove('gm-active');
   });
-  // games-mode zostaje (canvas główny ukryty)
+  // Wróć do trybu siatki (canvas schowany ale overlay niewidoczny)
+  var appEl2 = document.getElementById('app');
+  if (appEl2) {
+    appEl2.classList.remove('games-mode');
+    appEl2.classList.add('games-grid-mode');
+  }
 }
 
 
