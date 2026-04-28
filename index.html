@@ -8528,11 +8528,12 @@ function cpBuildLib() {
   var grid = document.getElementById('cpSeriesGrid');
   if (!grid) return;
   grid.innerHTML = '';
+  console.log('[Comics] Building library, series:', CP_LIBRARY.map(function(s){return s.id;}));
   CP_LIBRARY.forEach(function(s, si) {
     var card = document.createElement('div');
     card.className = 'cp-series-card';
     card.innerHTML =
-      '<img class="cp-series-cover" src="' + s.cover + '" alt="' + s.title + '" loading="lazy">' +
+      '<img class="cp-series-cover" src="' + s.cover + '" alt="' + s.title + '" loading="eager" onerror="this.style.background='#1a1a2e'">' +
       '<div class="cp-series-overlay">' +
         '<div class="cp-series-ep-count">' + s.episodes.length + ' Episodes</div>' +
         '<div class="cp-series-name">' + s.title + '</div>' +
@@ -8727,7 +8728,7 @@ var CP_LIBRARY = [
     id: "scammers-life-s1",
     title: "A Shitty Scammer's Life",
     subtitle: "Not every chosen one should have been chosen...",
-    cover: "./scammer-cover.jpg",
+    cover: "./scammer-ep0.jpg",
     description: "Opowieść o scammerze który próbował sprzedać swój pomysł każdemu — od City of XEN po wielbłądy. Nikt nie kupił. Psy miały rację.",
     episodes: [
       { title: "The Wrong Road",      src: "./scammer-ep1.jpg", desc: "Reached the end of the road. But this was the wrong road. City of XEN rejects him — You didn't build shit. You sold air." },
@@ -8753,6 +8754,7 @@ function cpBuildLib() {
   var grid = document.getElementById('cpSeriesGrid');
   if (!grid) return;
   grid.innerHTML = '';
+  console.log('[Comics] Building library, series:', CP_LIBRARY.map(function(s){return s.id;}));
   CP_LIBRARY.forEach(function(s, si) {
     var card = document.createElement('div');
     card.className = 'cp-series-card';
