@@ -2843,6 +2843,23 @@ header {
 .sa-del { background: none; border: none; color: rgba(255,45,120,.6);
   font-size: 16px; cursor: pointer; padding: 2px 6px; }
 .sa-tip { font-size: 10px; color: rgba(255,255,255,.25); line-height: 1.5; margin-top: 8px; }
+.sa-upload-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: rgba(168,85,247,.08);
+  border: 2px dashed rgba(168,85,247,.4);
+  border-radius: 10px;
+  color: #a855f7;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all .15s;
+  margin-top: 4px;
+}
+.sa-upload-btn:hover { background: rgba(168,85,247,.15); border-color: rgba(168,85,247,.7); }
 
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
@@ -10323,24 +10340,65 @@ function saRefresh() {
     list.appendChild(row);
   });
 }
+// Załaduj jeden plik do base64
+function saFileLoad(input, previewId, b64Id) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var b64 = e.target.result; // data:image/jpeg;base64,...
+    document.getElementById(b64Id).value = b64;
+    var preview = document.getElementById(previewId);
+    preview.src = b64;
+    preview.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+// Załaduj wiele plików (strony komiksu)
+var saLoadedPages = []; // tablica base64
+function saPagesLoad(input) {
+  var files = Array.from(input.files);
+  if (!files.length) return;
+  saLoadedPages = [];
+  var preview = document.getElementById('saPagesPreview');
+  var count = document.getElementById('saPageCount');
+  preview.innerHTML = '';
+  count.textContent = 'Ładowanie ' + files.length + ' plików...';
+
+  var loaded = 0;
+  files.forEach(function(file, i) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      saLoadedPages[i] = e.target.result;
+      loaded++;
+      // Mini podgląd
+      var thumb = document.createElement('img');
+      thumb.src = e.target.result;
+      thumb.style.cssText = 'width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid rgba(255,255,255,.15);';
+      preview.appendChild(thumb);
+      if (loaded === files.length) {
+        count.textContent = '✅ ' + loaded + ' stron załadowanych';
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function saAddSeries() {
   var title  = (document.getElementById('saTitle').value || '').trim();
-  var cover  = (document.getElementById('saCover').value || '').trim();
-  var pagesRaw = (document.getElementById('saPages').value || '').trim();
+  var cover  = document.getElementById('saCoverB64').value;
   var ok  = document.getElementById('saOk');
   var err = document.getElementById('saErr');
   ok.style.display = err.style.display = 'none';
 
   if (!title) { err.textContent = '❌ Wpisz tytuł!'; err.style.display='block'; return; }
-  if (!cover) { err.textContent = '❌ Wklej link do okładki!'; err.style.display='block'; return; }
-
-  var pages = pagesRaw.split('\n')
-    .map(function(l){ return l.trim(); })
-    .filter(function(l){ return l.length > 0; });
+  if (!cover) { err.textContent = '❌ Wybierz okładkę!'; err.style.display='block'; return; }
+  if (!saLoadedPages.length) { err.textContent = '❌ Wybierz strony komiksu!'; err.style.display='block'; return; }
 
   var id = 'custom-' + Date.now();
-  var episodes = pages.map(function(url, i) {
-    return { title: 'Strona ' + (i+1), src: url, desc: '' };
+  var episodes = saLoadedPages.filter(Boolean).map(function(b64, i) {
+    return { title: 'Strona ' + (i+1), src: b64, desc: '' };
   });
 
   var data = saLoad();
@@ -10350,9 +10408,15 @@ function saAddSeries() {
 
   ok.textContent = '✅ "' + title + '" dodany! ' + episodes.length + ' stron.';
   ok.style.display = 'block';
+  // Reset
   document.getElementById('saTitle').value = '';
-  document.getElementById('saCover').value = '';
-  document.getElementById('saPages').value = '';
+  document.getElementById('saCoverB64').value = '';
+  document.getElementById('saCoverPreview').style.display = 'none';
+  document.getElementById('saPagesPreview').innerHTML = '';
+  document.getElementById('saPageCount').textContent = '';
+  saLoadedPages = [];
+  document.getElementById('saCoverFile').value = '';
+  document.getElementById('saPagesFile').value = '';
 }
 function saDelete(i) {
   if (!confirm('Usunąć?')) return;
@@ -10472,24 +10536,38 @@ function saResetAll() {
   </div>
   <div class="sa-body">
 
-    <!-- KROK 1: Dodaj serię -->
     <div class="sa-card">
-      <div style="font-size:13px;font-weight:800;color:#a855f7;margin-bottom:12px;">➕ Nowa seria</div>
+      <div style="font-size:13px;font-weight:800;color:#a855f7;margin-bottom:14px;">➕ Nowy komiks</div>
 
+      <!-- Tytuł -->
       <label class="sa-label">Tytuł komiksu</label>
       <input class="sa-input" id="saTitle" placeholder="np. Przygody ANAL" />
 
-      <label class="sa-label" style="margin-top:10px;">Okładka — wklej link do obrazka</label>
-      <input class="sa-input" id="saCover" placeholder="https://i.imgur.com/abc123.jpg" />
+      <!-- Okładka - upload z pliku -->
+      <label class="sa-label" style="margin-top:12px;">Okładka — wybierz plik z telefonu/komputera</label>
+      <div style="position:relative;">
+        <label for="saCoverFile" class="sa-upload-btn">
+          📁 Wybierz okładkę
+        </label>
+        <input type="file" id="saCoverFile" accept="image/*" style="display:none"
+          onchange="saFileLoad(this,'saCoverPreview','saCoverB64')" />
+        <img id="saCoverPreview" style="display:none;width:100%;border-radius:8px;margin-top:8px;max-height:160px;object-fit:cover;" />
+        <input type="hidden" id="saCoverB64" />
+      </div>
 
-      <label class="sa-label" style="margin-top:10px;">Strony — wklej linki (jeden per linia)</label>
-      <textarea class="sa-input sa-textarea" id="saPages"
-        placeholder="https://i.imgur.com/strona1.jpg&#10;https://i.imgur.com/strona2.jpg&#10;https://i.imgur.com/strona3.jpg"></textarea>
+      <!-- Strony - upload wielu plików -->
+      <label class="sa-label" style="margin-top:12px;">Strony komiksu — wybierz pliki (możesz wybrać wiele naraz)</label>
+      <label for="saPagesFile" class="sa-upload-btn">
+        📁 Wybierz strony
+      </label>
+      <input type="file" id="saPagesFile" accept="image/*" multiple style="display:none"
+        onchange="saPagesLoad(this)" />
+      <div id="saPagesPreview" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+      <div id="saPageCount" style="font-size:10px;color:rgba(255,255,255,.3);margin-top:4px;"></div>
 
-      <div class="sa-tip">
-        💡 Jak wrzucić obrazki za darmo:<br>
-        1. Wejdź na <b>imgur.com</b> → wgraj zdjęcie → kliknij prawym → "Kopiuj adres obrazu"<br>
-        2. Albo GitHub: plik JPG → kliknij → "Raw" → skopiuj URL
+      <div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:10px;line-height:1.5;">
+        ✅ Obrazki są zapisywane bezpośrednio w przeglądarce — nie potrzebujesz żadnych linków ani zewnętrznych serwisów.<br>
+        ⚠️ Komiksy znikną jeśli wyczyścisz historię przeglądarki.
       </div>
 
       <button class="sa-btn" onclick="saAddSeries()">➕ DODAJ KOMIKS</button>
