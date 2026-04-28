@@ -2429,6 +2429,421 @@ header {
   letter-spacing: .08em;
 }
 
+
+/* ━━━━ MOBILE: schowaj canvas gdy zakładka nie potrzebuje canvasu ━━━━ */
+@media (max-width: 768px) {
+  #app.nocanvas-mode .canvas-area,
+  #app.nocanvas-mode .right-panel {
+    display: none !important;
+  }
+  #app.nocanvas-mode .left-panel {
+    max-height: none !important;
+    height: calc(100vh - 56px) !important;
+    overflow-y: auto !important;
+  }
+}
+
+
+/* ━━━━ FIXED BACK BUTTON dla gier na mobile ━━━━ */
+#gm-fixed-back {
+  display: none;
+  position: fixed;
+  top: 84px;
+  left: 0;
+  right: 0;
+  z-index: 99999 !important;
+  background: rgba(8,8,20,.98);
+  border-bottom: 2px solid rgba(168,85,247,.6);
+  padding: 0 14px;
+  height: 48px;
+  align-items: center;
+  gap: 10px;
+  pointer-events: all !important;
+  -webkit-tap-highlight-color: rgba(168,85,247,.3);
+  isolation: isolate;
+}
+#app.games-mode #gm-fixed-back {
+  display: flex !important;
+}
+#app.games-grid-mode #gm-fixed-back {
+  display: none !important;
+}
+#gm-fixed-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 2px solid rgba(168,85,247,.6);
+  background: rgba(168,85,247,.15);
+  color: #a855f7;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(168,85,247,.4);
+  min-height: 44px;
+  min-width: 100px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#gm-fixed-back-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(255,255,255,.6);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+/* Przesuń games overlay żeby nie był zakryty przez fixed button */
+@media (max-width: 768px) {
+  #app.games-mode #games-center-overlay {
+    padding-top: 48px !important;
+  }
+}
+
+
+/* ━━━━ GAMES GRID MODE (panel kart, bez gry) ━━━━ */
+@media (max-width: 768px) {
+  #app.games-grid-mode .canvas-area { display: none !important; }
+  #app.games-grid-mode .right-panel { display: none !important; }
+  #app.games-grid-mode .left-panel  { 
+    max-height: none !important;
+    height: calc(100vh - 56px) !important;
+    overflow-y: auto !important;
+  }
+  #app.games-grid-mode #gm-fixed-back { display: none !important; }
+}
+
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   $ANAL LIVE PRICE TICKER
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#price-ticker {
+  width: 100%;
+  height: 28px;
+  background: linear-gradient(90deg, rgba(0,245,255,.06) 0%, rgba(168,85,247,.06) 100%);
+  border-bottom: 1px solid rgba(0,245,255,.12);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  position: relative;
+}
+#price-ticker::before,
+#price-ticker::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 40px;
+  z-index: 2;
+  pointer-events: none;
+}
+#price-ticker::before {
+  left: 0;
+  background: linear-gradient(90deg, #080810, transparent);
+}
+#price-ticker::after {
+  right: 0;
+  background: linear-gradient(270deg, #080810, transparent);
+}
+.ticker-track {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  white-space: nowrap;
+  animation: tickerScroll 22s linear infinite;
+  will-change: transform;
+}
+.ticker-track:hover { animation-play-state: paused; }
+@keyframes tickerScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  font-family: var(--font-d, monospace);
+  border-right: 1px solid rgba(255,255,255,.06);
+}
+.ticker-label {
+  color: rgba(255,255,255,.45);
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.ticker-price {
+  color: #00f5ff;
+  font-weight: 900;
+}
+.ticker-change {
+  font-size: 10px;
+  font-weight: 800;
+}
+.ticker-change.up   { color: #22ff88; }
+.ticker-change.down { color: #ff2d78; }
+.ticker-vol {
+  color: rgba(255,255,255,.3);
+  font-size: 9px;
+}
+.ticker-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #22ff88;
+  box-shadow: 0 0 5px #22ff88;
+  animation: tickerPulse 2s infinite;
+  flex-shrink: 0;
+}
+@keyframes tickerPulse {
+  0%,100% { opacity:1; box-shadow: 0 0 5px #22ff88; }
+  50%      { opacity:.5; box-shadow: 0 0 2px #22ff88; }
+}
+.ticker-loading {
+  color: rgba(255,255,255,.3);
+  font-size: 10px;
+  padding: 0 16px;
+  letter-spacing: .08em;
+}
+
+
+/* ━━━━ ADMIN PANEL ━━━━ */
+#admin-panel {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(4,4,12,.98);
+  flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#admin-panel.open { display: flex; }
+.admin-header {
+  background: linear-gradient(90deg, rgba(168,85,247,.15), rgba(0,245,255,.1));
+  border-bottom: 2px solid rgba(168,85,247,.4);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.admin-title {
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #a855f7, #00f5ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.admin-close {
+  background: rgba(255,45,120,.15);
+  border: 1.5px solid rgba(255,45,120,.4);
+  color: #ff2d78;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.admin-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 700px;
+  width: 100%;
+  margin: 0 auto;
+}
+.admin-section {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  padding: 18px;
+}
+.admin-section-title {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #a855f7;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.admin-field {
+  margin-bottom: 12px;
+}
+.admin-field label {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.45);
+  margin-bottom: 5px;
+}
+.admin-field input, .admin-field textarea {
+  width: 100%;
+  background: rgba(255,255,255,.05);
+  border: 1.5px solid rgba(255,255,255,.1);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #fff;
+  font-size: 13px;
+  font-family: var(--font-d, monospace);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color .15s;
+}
+.admin-field input:focus, .admin-field textarea:focus {
+  border-color: rgba(168,85,247,.5);
+}
+.admin-field textarea { min-height: 70px; resize: vertical; }
+.admin-btn {
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: all .15s;
+  border: none;
+}
+.admin-btn-primary {
+  background: linear-gradient(135deg, #a855f7, #7b61ff);
+  color: #fff;
+  width: 100%;
+  margin-top: 4px;
+}
+.admin-btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+.admin-btn-danger {
+  background: rgba(255,45,120,.1);
+  border: 1.5px solid rgba(255,45,120,.4);
+  color: #ff2d78;
+  font-size: 11px;
+  padding: 6px 12px;
+}
+.admin-episodes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.admin-ep-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.admin-ep-row input {
+  flex: 1;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 6px;
+  padding: 7px 10px;
+  color: #fff;
+  font-size: 12px;
+  font-family: var(--font-d, monospace);
+}
+.admin-series-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.admin-series-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px;
+}
+.admin-series-item-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,.8);
+}
+.admin-series-item-info {
+  font-size: 10px;
+  color: rgba(255,255,255,.35);
+}
+.admin-msg {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  display: none;
+}
+.admin-msg.ok { background: rgba(34,255,136,.1); border: 1px solid rgba(34,255,136,.3); color: #22ff88; display: block; }
+.admin-msg.err { background: rgba(255,45,120,.1); border: 1px solid rgba(255,45,120,.3); color: #ff2d78; display: block; }
+
+
+/* ━━━━ SIMPLE ADMIN ━━━━ */
+#sadmin {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #080810;
+  flex-direction: column;
+  overflow-y: auto;
+}
+#sadmin.open { display: flex; }
+.sa-hdr {
+  background: rgba(168,85,247,.12);
+  border-bottom: 2px solid rgba(168,85,247,.3);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.sa-title { font-size: 15px; font-weight: 900; color: #a855f7; letter-spacing: .1em; }
+.sa-close { background: rgba(255,45,120,.15); border: 1.5px solid rgba(255,45,120,.4);
+  color: #ff2d78; padding: 7px 16px; border-radius: 8px; font-size: 12px;
+  font-weight: 800; cursor: pointer; }
+.sa-body { padding: 16px; display: flex; flex-direction: column; gap: 14px;
+  max-width: 600px; width: 100%; margin: 0 auto; }
+.sa-card { background: rgba(255,255,255,.03); border: 1px solid rgba(168,85,247,.2);
+  border-radius: 12px; padding: 16px; }
+.sa-label { font-size: 10px; font-weight: 800; color: rgba(255,255,255,.4);
+  letter-spacing: .1em; text-transform: uppercase; margin-bottom: 5px; display: block; }
+.sa-input { width: 100%; background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.1);
+  border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 13px; outline: none;
+  box-sizing: border-box; font-family: monospace; }
+.sa-input:focus { border-color: #a855f7; }
+.sa-textarea { min-height: 100px; resize: vertical; }
+.sa-btn { width: 100%; padding: 13px; background: linear-gradient(135deg,#a855f7,#7b61ff);
+  border: none; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 900;
+  cursor: pointer; margin-top: 8px; letter-spacing: .06em; }
+.sa-btn:active { opacity: .85; }
+.sa-ok  { background: rgba(34,255,136,.1); border: 1px solid rgba(34,255,136,.3);
+  color: #22ff88; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 700;
+  text-align: center; display: none; margin-top: 8px; }
+.sa-err { background: rgba(255,45,120,.1); border: 1px solid rgba(255,45,120,.3);
+  color: #ff2d78; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 700;
+  text-align: center; display: none; margin-top: 8px; }
+.sa-series-list { display: flex; flex-direction: column; gap: 6px; }
+.sa-series-row { display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 12px; background: rgba(255,255,255,.04); border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.07); }
+.sa-series-name { font-size: 12px; font-weight: 700; color: rgba(255,255,255,.8); }
+.sa-series-info { font-size: 10px; color: rgba(255,255,255,.3); }
+.sa-del { background: none; border: none; color: rgba(255,45,120,.6);
+  font-size: 16px; cursor: pointer; padding: 2px 6px; }
+.sa-tip { font-size: 10px; color: rgba(255,255,255,.25); line-height: 1.5; margin-top: 8px; }
+
 </style>
 <style>#gate-comics{position:absolute;top:0;left:0;width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;pointer-events:none;z-index:0;overflow:hidden}#gate-comics img{width:100%;height:100%;object-fit:cover;filter:brightness(.32);display:block}#gate-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;background:radial-gradient(ellipse 58% 62% at 50% 44%,rgba(8,8,16,.97) 0%,rgba(8,8,16,.87) 20%,rgba(8,8,16,.52) 48%,transparent 72%)}</style>
 </head>
@@ -8528,17 +8943,27 @@ function cpBuildLib() {
   var grid = document.getElementById('cpSeriesGrid');
   if (!grid) return;
   grid.innerHTML = '';
-  console.log('[Comics] Building library, series:', CP_LIBRARY.map(function(s){return s.id;}));
   CP_LIBRARY.forEach(function(s, si) {
     var card = document.createElement('div');
     card.className = 'cp-series-card';
-    card.innerHTML =
-      '<img class="cp-series-cover" src="' + s.cover + '" alt="' + s.title + '" loading="eager" onerror="this.style.background='#1a1a2e'">' +
-      '<div class="cp-series-overlay">' +
-        '<div class="cp-series-ep-count">' + s.episodes.length + ' Episodes</div>' +
-        '<div class="cp-series-name">' + s.title + '</div>' +
-        '<button class="cp-series-btn" onclick="cpOpenSeries(' + si + ');event.stopPropagation()">&#9654; Read Now</button>' +
-      '</div>';
+    // Użyj createElement zamiast innerHTML żeby uniknąć problemów z apostrofami
+    var img = document.createElement('img');
+    img.className = 'cp-series-cover';
+    img.src = s.cover;
+    img.alt = s.title;
+    img.loading = 'eager';
+    img.onerror = function(){ this.style.background = '#1a1a2e'; this.style.minHeight = '180px'; };
+    var overlay = document.createElement('div');
+    overlay.className = 'cp-series-overlay';
+    overlay.innerHTML =
+      '<div class="cp-series-ep-count">' + s.episodes.length + ' Episodes</div>' +
+      '<div class="cp-series-name">' + s.title + '</div>' +
+      '<button class="cp-series-btn">&#9654; Read Now</button>';
+    overlay.querySelector('button').onclick = function(e){
+      e.stopPropagation(); cpOpenSeries(si);
+    };
+    card.appendChild(img);
+    card.appendChild(overlay);
     card.onclick = function(){ cpOpenSeries(si); };
     grid.appendChild(card);
   });
@@ -8738,7 +9163,33 @@ var CP_LIBRARY = [
       { title: "Final Exit",          src: "./scammer-ep5.jpg", desc: "Guys... this one is different... Marat i Sowa stoją obok. No buyers left. Only targets. 1000x soon." }
     ]
   }
-  // ← ADD NEW SERIES HERE
+
+  /* ══════════════════════════════════════════════════════════════
+     ➕ JAK DODAĆ NOWY KOMIKS — SKOPIUJ BLOK PONIŻEJ:
+     
+     1. Wgraj obrazki na GitHub (główny folder repo):
+        moj-komiks-cover.jpg   ← okładka
+        moj-komiks-ep1.jpg
+        moj-komiks-ep2.jpg
+        (itd.)
+     
+     2. Skopiuj szablon poniżej i dodaj przed tym komentarzem:
+     
+     ,{
+       id: "moj-komiks-s1",           ← unikalny ID (bez spacji)
+       title: "Tytuł Komiksu",
+       subtitle: "Podtytuł...",
+       cover: "./moj-komiks-cover.jpg",
+       description: "Opis serii...",
+       episodes: [
+         { title: "Rozdział 1", src: "./moj-komiks-ep1.jpg", desc: "Opis rozdziału..." },
+         { title: "Rozdział 2", src: "./moj-komiks-ep2.jpg", desc: "Opis rozdziału..." },
+         { title: "Rozdział 3", src: "./moj-komiks-ep3.jpg", desc: "Opis rozdziału..." }
+       ]
+     }
+     
+     3. Wgraj nowy index.html na GitHub → gotowe!
+     ══════════════════════════════════════════════════════════════ */
 ];
 
 // ─── State ────────────────────────────────────────────────────
@@ -9640,6 +10091,291 @@ async function updateTicker() {
   updateTicker();
   _tickerInterval = setInterval(updateTicker, 30000);
 })();
+
+
+// ══════════════════════════════════════════════════════════
+//  COMICS ADMIN PANEL
+// ══════════════════════════════════════════════════════════
+
+var ADMIN_PASS  = 'ANAL2024admin';  // ← ZMIEŃ HASŁO!
+var ADMIN_KEY   = 'anal_custom_comics';
+var adminUnlocked = false;
+
+// Otwórz admin przez potrójne kliknięcie w tytuł komiksów
+
+
+function closeAdmin() {
+  var panel = document.getElementById('admin-panel');
+  if (panel) panel.classList.remove('open');
+}
+
+// Wczytaj zapisane komiksy z localStorage
+function adminLoadCustom() {
+  try {
+    var raw = localStorage.getItem(ADMIN_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+// Zapisz do localStorage i odśwież CP_LIBRARY
+function adminSaveCustom(custom) {
+  try {
+    localStorage.setItem(ADMIN_KEY, JSON.stringify(custom));
+    // Odśwież CP_LIBRARY - połącz domyślne z własnymi
+    CP_LIBRARY = CP_LIBRARY_DEFAULT.concat(custom);
+    cpBuilt = false; // wymuś rebuild
+    adminRefresh();
+    return true;
+  } catch(e) { return false; }
+}
+
+function adminRefresh() {
+  // Lista serii
+  var list = document.getElementById('adminSeriesList');
+  var select = document.getElementById('adminSelectSeries');
+  if (!list || !select) return;
+  var custom = adminLoadCustom();
+  
+  list.innerHTML = '';
+  select.innerHTML = '';
+  
+  CP_LIBRARY.forEach(function(s, i) {
+    var isCustom = custom.some(function(c){ return c.id === s.id; });
+    var item = document.createElement('div');
+    item.className = 'admin-series-item';
+    item.innerHTML =
+      '<div>' +
+        '<div class="admin-series-item-name">' + s.title + '</div>' +
+        '<div class="admin-series-item-info">' + s.episodes.length + ' rozdziałów • ' + (isCustom ? '🟢 własna' : '📦 domyślna') + '</div>' +
+      '</div>' +
+      (isCustom ? '<button class="admin-btn admin-btn-danger" onclick="adminDeleteSeries(\''+s.id+'\')">🗑</button>' : '');
+    list.appendChild(item);
+    
+    var opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.title;
+    select.appendChild(opt);
+  });
+}
+
+function adminAddSeries() {
+  var id       = (document.getElementById('adminId').value || '').trim().replace(/\s+/g, '-');
+  var title    = (document.getElementById('adminTitle').value || '').trim();
+  var subtitle = (document.getElementById('adminSubtitle').value || '').trim();
+  var desc     = (document.getElementById('adminDesc').value || '').trim();
+  var cover    = (document.getElementById('adminCover').value || '').trim();
+  var epRaw    = (document.getElementById('adminEpisodes').value || '').trim();
+  var msg      = document.getElementById('adminMsg');
+  
+  if (!id || !title || !cover) {
+    msg.className = 'admin-msg err';
+    msg.textContent = '❌ ID, Tytuł i URL okładki są wymagane';
+    return;
+  }
+  if (CP_LIBRARY.some(function(s){ return s.id === id; })) {
+    msg.className = 'admin-msg err';
+    msg.textContent = '❌ Seria o tym ID już istnieje';
+    return;
+  }
+  
+  var episodes = [];
+  if (epRaw) {
+    epRaw.split('\n').forEach(function(line) {
+      line = line.trim();
+      if (!line) return;
+      var parts = line.split('|');
+      if (parts.length >= 2) {
+        episodes.push({
+          title: parts[0].trim(),
+          src:   parts[1].trim(),
+          desc:  parts[2] ? parts[2].trim() : ''
+        });
+      }
+    });
+  }
+  
+  var newSeries = { id:id, title:title, subtitle:subtitle, cover:cover, description:desc, episodes:episodes };
+  var custom = adminLoadCustom();
+  custom.push(newSeries);
+  
+  if (adminSaveCustom(custom)) {
+    msg.className = 'admin-msg ok';
+    msg.textContent = '✅ Seria "' + title + '" dodana! (' + episodes.length + ' rozdziałów)';
+    // Wyczyść formularz
+    ['adminId','adminTitle','adminSubtitle','adminDesc','adminCover','adminEpisodes'].forEach(function(id){
+      document.getElementById(id).value = '';
+    });
+  } else {
+    msg.className = 'admin-msg err';
+    msg.textContent = '❌ Błąd zapisu';
+  }
+}
+
+function adminAddEpisode() {
+  var seriesId = document.getElementById('adminSelectSeries').value;
+  var epTitle  = (document.getElementById('adminEpTitle').value || '').trim();
+  var epUrl    = (document.getElementById('adminEpUrl').value || '').trim();
+  var epDesc   = (document.getElementById('adminEpDesc').value || '').trim();
+  var msg      = document.getElementById('adminEpMsg');
+  
+  if (!seriesId || !epTitle || !epUrl) {
+    msg.className = 'admin-msg err';
+    msg.textContent = '❌ Wybierz serię, wpisz tytuł i URL';
+    return;
+  }
+  
+  var custom = adminLoadCustom();
+  var found = custom.find(function(s){ return s.id === seriesId; });
+  
+  if (!found) {
+    // Seria domyślna — skopiuj ją do custom żeby móc edytować
+    var def = CP_LIBRARY_DEFAULT.find(function(s){ return s.id === seriesId; });
+    if (def) {
+      found = JSON.parse(JSON.stringify(def));
+      custom.push(found);
+    } else {
+      msg.className = 'admin-msg err';
+      msg.textContent = '❌ Seria nie znaleziona';
+      return;
+    }
+  }
+  
+  found.episodes.push({ title: epTitle, src: epUrl, desc: epDesc });
+  
+  if (adminSaveCustom(custom)) {
+    msg.className = 'admin-msg ok';
+    msg.textContent = '✅ Rozdział "' + epTitle + '" dodany!';
+    document.getElementById('adminEpTitle').value = '';
+    document.getElementById('adminEpUrl').value = '';
+    document.getElementById('adminEpDesc').value = '';
+  } else {
+    msg.className = 'admin-msg err';
+    msg.textContent = '❌ Błąd zapisu';
+  }
+}
+
+function adminDeleteSeries(id) {
+  if (!confirm('Usunąć serię "' + id + '"?')) return;
+  var custom = adminLoadCustom().filter(function(s){ return s.id !== id; });
+  adminSaveCustom(custom);
+}
+
+function adminResetCustom() {
+  if (!confirm('Usunąć wszystkie własne serie?')) return;
+  localStorage.removeItem(ADMIN_KEY);
+  CP_LIBRARY = CP_LIBRARY_DEFAULT.slice();
+  cpBuilt = false;
+  adminRefresh();
+}
+
+// Wczytaj własne komiksy przy starcie
+(function initAdminComics() {
+  // Zachowaj kopię domyślnych
+  window.CP_LIBRARY_DEFAULT = CP_LIBRARY.slice();
+  // Załaduj własne z localStorage
+  var custom = adminLoadCustom();
+  if (custom.length > 0) {
+    CP_LIBRARY = CP_LIBRARY_DEFAULT.concat(custom);
+  }
+})();
+
+
+
+// ── SIMPLE ADMIN ──────────────────────────────────────────
+var SA_PASS = 'ANAL2024';
+var SA_KEY  = 'anal_my_comics';
+
+function saOpen() {
+  var p = prompt('Hasło admina:');
+  if (p !== SA_PASS) { alert('Złe hasło ❌'); return; }
+  document.getElementById('sadmin').classList.add('open');
+  saRefresh();
+}
+function saClose() {
+  document.getElementById('sadmin').classList.remove('open');
+}
+function saLoad() {
+  try { return JSON.parse(localStorage.getItem(SA_KEY) || '[]'); } catch(e) { return []; }
+}
+function saSave(data) {
+  localStorage.setItem(SA_KEY, JSON.stringify(data));
+  window.CP_LIBRARY_DEFAULT = window.CP_LIBRARY_DEFAULT || CP_LIBRARY.slice();
+  CP_LIBRARY = window.CP_LIBRARY_DEFAULT.concat(data);
+  cpBuilt = false;
+}
+function saRefresh() {
+  var data = saLoad();
+  var card = document.getElementById('saMySeriesCard');
+  var list = document.getElementById('saSeriesList');
+  if (!list) return;
+  if (data.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  list.innerHTML = '';
+  data.forEach(function(s, i) {
+    var row = document.createElement('div');
+    row.className = 'sa-series-row';
+    row.innerHTML =
+      '<div>' +
+        '<div class="sa-series-name">' + s.title + '</div>' +
+        '<div class="sa-series-info">' + s.episodes.length + ' stron</div>' +
+      '</div>' +
+      '<button class="sa-del" onclick="saDelete(' + i + ')">🗑</button>';
+    list.appendChild(row);
+  });
+}
+function saAddSeries() {
+  var title  = (document.getElementById('saTitle').value || '').trim();
+  var cover  = (document.getElementById('saCover').value || '').trim();
+  var pagesRaw = (document.getElementById('saPages').value || '').trim();
+  var ok  = document.getElementById('saOk');
+  var err = document.getElementById('saErr');
+  ok.style.display = err.style.display = 'none';
+
+  if (!title) { err.textContent = '❌ Wpisz tytuł!'; err.style.display='block'; return; }
+  if (!cover) { err.textContent = '❌ Wklej link do okładki!'; err.style.display='block'; return; }
+
+  var pages = pagesRaw.split('\n')
+    .map(function(l){ return l.trim(); })
+    .filter(function(l){ return l.length > 0; });
+
+  var id = 'custom-' + Date.now();
+  var episodes = pages.map(function(url, i) {
+    return { title: 'Strona ' + (i+1), src: url, desc: '' };
+  });
+
+  var data = saLoad();
+  data.push({ id:id, title:title, subtitle:'', cover:cover, description:'', episodes:episodes });
+  saSave(data);
+  saRefresh();
+
+  ok.textContent = '✅ "' + title + '" dodany! ' + episodes.length + ' stron.';
+  ok.style.display = 'block';
+  document.getElementById('saTitle').value = '';
+  document.getElementById('saCover').value = '';
+  document.getElementById('saPages').value = '';
+}
+function saDelete(i) {
+  if (!confirm('Usunąć?')) return;
+  var data = saLoad();
+  data.splice(i, 1);
+  saSave(data);
+  saRefresh();
+}
+function saResetAll() {
+  if (!confirm('Usunąć wszystkie własne komiksy?')) return;
+  localStorage.removeItem(SA_KEY);
+  window.CP_LIBRARY_DEFAULT = window.CP_LIBRARY_DEFAULT || CP_LIBRARY.slice();
+  CP_LIBRARY = window.CP_LIBRARY_DEFAULT.slice();
+  cpBuilt = false;
+  saRefresh();
+}
+// Załaduj własne komiksy przy starcie
+(function() {
+  window.CP_LIBRARY_DEFAULT = CP_LIBRARY.slice();
+  var saved = saLoad();
+  if (saved.length) CP_LIBRARY = window.CP_LIBRARY_DEFAULT.concat(saved);
+})();
+
 </script>
 
 <!-- ══════════════════════════════════════════════
@@ -9650,7 +10386,7 @@ async function updateTicker() {
 
   <!-- Sticky header -->
   <div class="comics-panel-header">
-    <div class="comics-panel-title">
+    <div class="comics-panel-title" ondblclick="saOpen()" title="2x klik = Admin">
       📚 $ANAL COMICS
     </div>
     <button class="comics-panel-close" onclick="closeComics()">✕ Close</button>
@@ -9724,6 +10460,52 @@ async function updateTicker() {
 <div id="gm-fixed-back">
   <button id="gm-fixed-back-btn" onclick="gmBack()">← GAMES</button>
   <span id="gm-fixed-back-title">🎮 Select Game</span>
+</div>
+
+
+
+<!-- ── SIMPLE ADMIN PANEL ── -->
+<div id="sadmin">
+  <div class="sa-hdr">
+    <span class="sa-title">📚 Dodaj Komiks</span>
+    <button class="sa-close" onclick="saClose()">✕</button>
+  </div>
+  <div class="sa-body">
+
+    <!-- KROK 1: Dodaj serię -->
+    <div class="sa-card">
+      <div style="font-size:13px;font-weight:800;color:#a855f7;margin-bottom:12px;">➕ Nowa seria</div>
+
+      <label class="sa-label">Tytuł komiksu</label>
+      <input class="sa-input" id="saTitle" placeholder="np. Przygody ANAL" />
+
+      <label class="sa-label" style="margin-top:10px;">Okładka — wklej link do obrazka</label>
+      <input class="sa-input" id="saCover" placeholder="https://i.imgur.com/abc123.jpg" />
+
+      <label class="sa-label" style="margin-top:10px;">Strony — wklej linki (jeden per linia)</label>
+      <textarea class="sa-input sa-textarea" id="saPages"
+        placeholder="https://i.imgur.com/strona1.jpg&#10;https://i.imgur.com/strona2.jpg&#10;https://i.imgur.com/strona3.jpg"></textarea>
+
+      <div class="sa-tip">
+        💡 Jak wrzucić obrazki za darmo:<br>
+        1. Wejdź na <b>imgur.com</b> → wgraj zdjęcie → kliknij prawym → "Kopiuj adres obrazu"<br>
+        2. Albo GitHub: plik JPG → kliknij → "Raw" → skopiuj URL
+      </div>
+
+      <button class="sa-btn" onclick="saAddSeries()">➕ DODAJ KOMIKS</button>
+      <div class="sa-ok" id="saOk"></div>
+      <div class="sa-err" id="saErr"></div>
+    </div>
+
+    <!-- Lista własnych serii -->
+    <div class="sa-card" id="saMySeriesCard" style="display:none">
+      <div style="font-size:13px;font-weight:800;color:#a855f7;margin-bottom:12px;">📖 Twoje komiksy</div>
+      <div class="sa-series-list" id="saSeriesList"></div>
+      <button class="sa-btn" style="background:rgba(255,45,120,.15);color:#ff2d78;border:1.5px solid rgba(255,45,120,.3);margin-top:12px;"
+        onclick="saResetAll()">🗑 Usuń wszystkie własne</button>
+    </div>
+
+  </div>
 </div>
 
 </body>
