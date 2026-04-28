@@ -9181,6 +9181,35 @@ var CP_LIBRARY = [
     ]
   }
 
+  ,
+  {
+    id: "marask-s1",
+    title: "Last Mission of Marask",
+    subtitle: "Retired legionnaire. Blockchain analyst. Last mission.",
+    cover: "./marask-ep0.jpg",
+    description: "Marask — 50-letni emerytowany legionista i niezależny analityk blockchain. Jego ostatnia misja: znaleźć scammerów Analteny. Zanim ktoś inny to zrobi.",
+    episodes: [
+      { title: "Last Mission of Marask", src: "./marask-ep0.jpg", desc: "Marask, 50-year-old retired legionnaire, mutters under his breath about those trying to ruin his blockchain..." },
+      { title: "Return to Duty",         src: "./marask-ep1.jpg", desc: "3 days later. Time to clean the room... and the world. Military Data Centre, Gdańsk. Finally... X1. Time for the Analtena code." },
+      { title: "Orders from the Past",   src: "./marask-ep2.jpg", desc: "You MUST destroy ALL the data! Wipe every server! The Legion's secret... the core of the Analtena project! Do it now!" },
+      { title: "Confrontation",          src: "./marask-ep3.jpg", desc: "I ORDER YOU, LEGIONNAIRE MARASK... Find the ANAL-TENA scammers! They will NOT escape! EXECUTE!" },
+      { title: "Destruction and Release",src: "./marask-ep4.jpg", desc: "But there was no back door. Fine. Then no one gets it. If I can't find it, I'll bury it. He gave the final order. He was free." },
+      { title: "Mission Complete",        src: "./marask-ep5.jpg", desc: "Mission complete my soldiers. Waiting for the next mission... The money is done. But this... this just waiting... is the real hell." }
+    ]
+  },
+  {
+    id: "tracker-s1",
+    title: "The Anonymous Tracker",
+    subtitle: "Hunt for the Capybara — A New Mystery Unfolds",
+    cover: "./tracker-ep0.jpg",
+    description: "Anonimowy tropiciel w fioletowym płaszczu i masce. Dwa cele: firmowy maskotka X1 i kapibara dziecka. Ślad prowadzi na Hawaje. Polowanie trwa.",
+    episodes: [
+      { title: "The Beachside Trail",          src: "./tracker-ep0.jpg", desc: "Issue #1. He was here. The trail is fresh. Hunt for the Capybara begins." },
+      { title: "The First Scent",              src: "./tracker-ep1.jpg", desc: "A complete disaster! Byte the X1 mascot AND my capybara, gone! Two targets. A double abduction. Count me in. The real trail starts at Resort 404." },
+      { title: "The Sun-Powered Trail",        src: "./tracker-ep2.jpg", desc: "The coordinates from Resort 404 brought me all the way to Hawaii. An isolated stronghold. Photovoltaic farm. The encounter at the power-plant!" },
+      { title: "A Friendly Interrogation",     src: "./tracker-ep3.jpg", desc: "Just as I thought. Minimal security. We actually did it! One million and still going! ANALTENA STOCK 1,000,000! A party unlike any other. And so many sausages." }
+    ]
+  }
   /* ══════════════════════════════════════════════════════════════
      ➕ JAK DODAĆ NOWY KOMIKS — SKOPIUJ BLOK PONIŻEJ:
      
@@ -10408,8 +10437,11 @@ function saAddSeries() {
   saSave(data);
   saRefresh();
 
-  ok.textContent = '✅ "' + title + '" dodany! ' + episodes.length + ' stron. Wróć do Comics żeby zobaczyć!';
+  // Pokaż info
+  ok.innerHTML = '✅ "<b>' + title + '</b>" dodany na tym urządzeniu! (' + episodes.length + ' stron)<br>' +
+    '<span style="font-size:10px;color:rgba(255,255,255,.5);">Widoczny tylko na tej przeglądarce. Wyślij Claudowi te pliki żeby dodał do aplikacji na stałe.</span>';
   ok.style.display = 'block';
+
   // Reset formularza
   document.getElementById('saTitle').value = '';
   document.getElementById('saCoverB64').value = '';
