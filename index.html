@@ -10319,6 +10319,8 @@ function saSave(data) {
   window.CP_LIBRARY_DEFAULT = window.CP_LIBRARY_DEFAULT || CP_LIBRARY.slice();
   CP_LIBRARY = window.CP_LIBRARY_DEFAULT.concat(data);
   cpBuilt = false;
+  // Natychmiast odśwież siatkę komiksów
+  setTimeout(function(){ cpBuildLib(); }, 50);
 }
 function saRefresh() {
   var data = saLoad();
@@ -10406,9 +10408,9 @@ function saAddSeries() {
   saSave(data);
   saRefresh();
 
-  ok.textContent = '✅ "' + title + '" dodany! ' + episodes.length + ' stron.';
+  ok.textContent = '✅ "' + title + '" dodany! ' + episodes.length + ' stron. Wróć do Comics żeby zobaczyć!';
   ok.style.display = 'block';
-  // Reset
+  // Reset formularza
   document.getElementById('saTitle').value = '';
   document.getElementById('saCoverB64').value = '';
   document.getElementById('saCoverPreview').style.display = 'none';
@@ -10417,6 +10419,9 @@ function saAddSeries() {
   saLoadedPages = [];
   document.getElementById('saCoverFile').value = '';
   document.getElementById('saPagesFile').value = '';
+  // Odśwież siatkę komiksów natychmiast
+  cpBuilt = false;
+  cpBuildLib();
 }
 function saDelete(i) {
   if (!confirm('Usunąć?')) return;
@@ -10437,7 +10442,10 @@ function saResetAll() {
 (function() {
   window.CP_LIBRARY_DEFAULT = CP_LIBRARY.slice();
   var saved = saLoad();
-  if (saved.length) CP_LIBRARY = window.CP_LIBRARY_DEFAULT.concat(saved);
+  if (saved.length) {
+    CP_LIBRARY = window.CP_LIBRARY_DEFAULT.concat(saved);
+    console.log('[Admin] Załadowano', saved.length, 'własnych komiksów');
+  }
 })();
 
 </script>
