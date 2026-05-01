@@ -3295,6 +3295,7 @@ header {
 @keyframes jpTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 @keyframes jpSpin{to{transform:rotate(360deg)}}
 @keyframes jpCoin{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(60px) rotate(480deg)}}
+@keyframes jpBtnShine{0%{background-position:0% center}100%{background-position:200% center}}
 </style>
 </head>
 <body>
@@ -3836,75 +3837,71 @@ header {
     <!-- 🎮 GAMES PANEL (mini - left panel) -->
     <div class="panel-content" id="panel-games" style="display:none;">
 
-    <!-- ══ JACKPOT WIDGET ══ -->
-    <div id="jackpot-widget" style="margin-bottom:16px;background:#14100a;border-radius:14px;overflow:hidden;border:1px solid rgba(255,170,0,.5);">
+    <!-- ══ JACKPOT WIDGET NEW ══ -->
+    <div id="jackpot-widget" style="margin-bottom:12px;border-radius:14px;overflow:hidden;border:2px solid #ffaa00;background:linear-gradient(160deg,#1a0f00 0%,#0f0800 60%,#1a0500 100%);box-shadow:0 0 24px rgba(255,170,0,.3),0 0 48px rgba(255,100,0,.1);position:relative;">
 
-      <!-- ticker -->
-      <div style="background:#09080000;border-bottom:1px solid rgba(255,170,0,.15);padding:5px 0;overflow:hidden;display:flex;">
-        <div id="jp-ticker" style="display:flex;gap:24px;white-space:nowrap;animation:jpTicker 18s linear infinite;">
-          <span style="font-size:9px;color:#ffaa00;letter-spacing:1px;">🏆 <span style="color:#ffaa00;">JACKPOT</span> GROWS WITH EVERY GAME</span>
-          <span style="font-size:9px;color:#ffaa00;letter-spacing:1px;">🔥 <span style="color:#ffaa00;">WEEKLY WINNER</span> TAKES 40% OF POOL</span>
-          <span style="font-size:9px;color:#ffaa00;letter-spacing:1px;">💀 <span style="color:#ffaa00;">20%</span> BURNS EVERY WEEK</span>
-          <span style="font-size:9px;color:#ffaa00;letter-spacing:1px;">🏆 <span style="color:#ffaa00;">JACKPOT</span> GROWS WITH EVERY GAME</span>
-          <span style="font-size:9px;color:#ffaa00;letter-spacing:1px;">🔥 <span style="color:#ffaa00;">WEEKLY WINNER</span> TAKES 40% OF POOL</span>
-          <span style="font-size:9px;color:#ffaa00;letter-spacing:1px;">💀 <span style="color:#ffaa00;">20%</span> BURNS EVERY WEEK</span>
+      <!-- animated border glow -->
+      <div style="position:absolute;inset:0;border-radius:12px;background:linear-gradient(90deg,transparent,rgba(255,170,0,.06),transparent);animation:jpGlow 2s ease-in-out infinite;pointer-events:none;"></div>
+
+      <!-- header -->
+      <div style="background:linear-gradient(90deg,#ff8800,#ffcc00,#ff6600);padding:6px 12px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:11px;font-weight:900;letter-spacing:2px;color:#000;text-transform:uppercase;">🏆 JACKPOT POOL</span>
+        <div style="display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.3);border-radius:10px;padding:2px 8px;">
+          <span style="width:5px;height:5px;border-radius:50%;background:#ff4444;display:inline-block;animation:jpFlash .7s infinite;"></span>
+          <span style="font-size:8px;color:#fff;font-weight:700;letter-spacing:1px;">LIVE</span>
         </div>
       </div>
 
-      <!-- main jackpot display -->
-      <div style="padding:10px 12px 8px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(255,160,0,.1) 0%,transparent 70%);">
-        <div style="font-size:9px;letter-spacing:3px;color:rgba(255,200,80,1);text-transform:uppercase;margin-bottom:6px;">// COMMUNITY JACKPOT POOL</div>
-        <div id="jp-amount" style="font-size:26px;font-weight:900;color:#ffdd00;letter-spacing:1px;line-height:1.1;min-height:34px;display:flex;align-items:center;justify-content:center;animation:jpGlow 2.5s ease-in-out infinite;">
-          <span style="width:20px;height:20px;border:2px solid rgba(255,170,0,.3);border-top-color:#ffaa00;border-radius:50%;display:inline-block;animation:jpSpin .8s linear infinite;"></span>
+      <!-- main number -->
+      <div style="padding:12px 12px 8px;text-align:center;position:relative;">
+        <div style="font-size:8px;letter-spacing:2px;color:#ffaa0099;text-transform:uppercase;margin-bottom:4px;">COMMUNITY POOL — SOLANA</div>
+        <div id="jp-amount" style="font-size:32px;font-weight:900;color:#ffdd00;letter-spacing:1px;line-height:1;min-height:38px;display:flex;align-items:center;justify-content:center;text-shadow:0 0 20px rgba(255,220,0,.6);">
+          <span style="width:22px;height:22px;border:2px solid rgba(255,170,0,.4);border-top-color:#ffaa00;border-radius:50%;display:inline-block;animation:jpSpin .8s linear infinite;"></span>
         </div>
-        <div id="jp-usd" style="font-size:13px;font-weight:700;color:#ff9900;margin-top:3px;letter-spacing:1px;"></div>
-        <div id="jp-sub" style="font-size:8px;color:#886633;letter-spacing:1.5px;margin-top:2px;">$ANAL — LIVE FROM SOLANA BLOCKCHAIN</div>
-        <div style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.2);border-radius:20px;padding:3px 9px;font-size:8px;color:#ff6666;letter-spacing:2px;margin-top:8px;">
-          <span style="width:5px;height:5px;border-radius:50%;background:#ff4444;display:inline-block;animation:jpFlash .9s infinite;"></span>LIVE ON-CHAIN
-        </div>
-        <div style="font-size:8px;color:rgba(255,170,0,.6);margin-top:5px;">
-          wallet: <a href="https://solscan.io/account/QvDfw6DEVFeVEhsu86auE7wwj1BMp7isBjqEd6MANAL" target="_blank" style="color:rgba(255,170,0,.8);text-decoration:none;">QvDfw6...ANAL</a>
-        </div>
-        <div id="jp-err" style="font-size:9px;color:#ff6666;margin-top:4px;"></div>
+        <div id="jp-usd" style="font-size:12px;font-weight:700;color:#ff9900;margin-top:4px;"></div>
+        <div id="jp-err" style="font-size:8px;color:#ff8888;margin-top:2px;min-height:0;"></div>
       </div>
 
-      <!-- coins rain -->
-      <div id="jp-coins" style="height:36px;position:relative;overflow:hidden;"></div>
+      <!-- coins -->
+      <div id="jp-coins" style="height:28px;position:relative;overflow:hidden;"></div>
 
-      <!-- stats -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:0 8px 8px;">
-        <div style="background:#1a1200;border:1px solid rgba(255,170,0,.3);border-radius:8px;padding:8px 6px;text-align:center;">
-          <div id="jp-players" style="font-size:13px;font-weight:900;color:#ffaa00;">—</div>
-          <div style="font-size:7px;color:#aa8844;letter-spacing:1px;margin-top:1px;">PLAYING NOW</div>
+      <!-- stats row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:0 8px 8px;">
+        <div style="background:rgba(255,170,0,.1);border:1px solid rgba(255,170,0,.3);border-radius:7px;padding:6px 4px;text-align:center;">
+          <div id="jp-players" style="font-size:13px;font-weight:900;color:#ffcc00;">—</div>
+          <div style="font-size:7px;color:#ffaa0099;letter-spacing:.5px;margin-top:1px;">ONLINE</div>
         </div>
-        <div style="background:#1a1200;border:1px solid rgba(255,170,0,.3);border-radius:8px;padding:8px 6px;text-align:center;">
-          <div id="jp-rate" style="font-size:13px;font-weight:900;color:#ff6b35;">—</div>
-          <div style="font-size:7px;color:#aa8844;letter-spacing:1px;margin-top:1px;">$ANAL/MIN</div>
+        <div style="background:rgba(255,100,0,.1);border:1px solid rgba(255,100,0,.3);border-radius:7px;padding:6px 4px;text-align:center;">
+          <div id="jp-rate" style="font-size:13px;font-weight:900;color:#ff8844;">—</div>
+          <div style="font-size:7px;color:#ff880099;letter-spacing:.5px;margin-top:1px;">$ANAL/M</div>
         </div>
-        <div style="background:#1a1200;border:1px solid rgba(255,170,0,.3);border-radius:8px;padding:8px 6px;text-align:center;">
-          <div style="font-size:13px;font-weight:900;color:#a855f7;">143</div>
-          <div style="font-size:7px;color:#aa8844;letter-spacing:1px;margin-top:1px;">WINNERS</div>
+        <div style="background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.3);border-radius:7px;padding:6px 4px;text-align:center;">
+          <div style="font-size:13px;font-weight:900;color:#c084fc;">143</div>
+          <div style="font-size:7px;color:#a855f799;letter-spacing:.5px;margin-top:1px;">WINNERS</div>
         </div>
       </div>
 
-      <!-- how it works -->
-      <div style="margin:0 12px 12px;background:#1a1200;border:1px solid rgba(255,170,0,.25);border-radius:8px;padding:10px 12px;">
-        <div style="font-size:8px;letter-spacing:2px;color:rgba(255,170,0,.8);text-transform:uppercase;margin-bottom:6px;">// how it works</div>
-        <div style="font-size:9px;color:#cc9944;line-height:1.8;">
-          🎮 Play any game → 10% of entry goes to pool<br>
-          🏆 Top scorer each week wins <span style="color:#ffaa00;">40% of pool</span><br>
-          🔄 40% rolls over to next week<br>
-          🔥 20% permanently burned
+      <!-- CTA button -->
+      <div style="padding:0 8px 8px;">
+        <div style="background:linear-gradient(90deg,#ff6600,#ffcc00,#ff6600);background-size:200% auto;border-radius:8px;padding:8px;text-align:center;cursor:pointer;animation:jpBtnShine 2s linear infinite;" onclick="gmSelectGame('shooter',document.getElementById('gmcard-shooter'))">
+          <div style="font-size:11px;font-weight:900;color:#000;letter-spacing:1px;">🔫 PLAY &amp; WIN JACKPOT</div>
+          <div style="font-size:8px;color:rgba(0,0,0,.6);margin-top:1px;">10% of every kill → pool</div>
         </div>
       </div>
 
-      <!-- status bar -->
-      <div style="background:#1a1200;border-top:1px solid rgba(255,170,0,.2);padding:6px 12px;display:flex;justify-content:space-between;align-items:center;">
-        <div style="display:flex;align-items:center;gap:5px;">
-          <span id="jp-status-dot" style="width:6px;height:6px;border-radius:50%;background:#ffaa00;display:inline-block;animation:jpFlash 2s infinite;"></span>
-          <span id="jp-status" style="font-size:8px;color:#88aa66;letter-spacing:1px;">CONNECTING...</span>
+      <!-- rules compact -->
+      <div style="margin:0 8px 8px;background:rgba(255,170,0,.06);border:1px solid rgba(255,170,0,.15);border-radius:7px;padding:7px 10px;">
+        <div style="font-size:8px;color:#ffcc77;line-height:1.8;">
+          🏆 Top scorer wins <b style="color:#ffdd00;">40%</b> weekly<br>
+          🔄 40% rolls to next week<br>
+          🔥 20% burned forever
         </div>
-        <span onclick="jpFetch()" style="font-size:8px;color:#aa8844;cursor:pointer;letter-spacing:1px;">↺ REFRESH</span>
+      </div>
+
+      <!-- status -->
+      <div style="border-top:1px solid rgba(255,170,0,.15);padding:4px 10px;display:flex;justify-content:space-between;align-items:center;">
+        <span id="jp-status" style="font-size:7px;color:#ffaa0088;letter-spacing:.5px;">CONNECTING...</span>
+        <span onclick="jpFetch()" style="font-size:7px;color:#ffaa0066;cursor:pointer;letter-spacing:.5px;">↺ REFRESH</span>
       </div>
     </div>
     <!-- ══ END JACKPOT ══ -->
@@ -8152,10 +8149,18 @@ function selectGameCenter(id,btn){
   if(id==='mario') setTimeout(initMario,120);
   if(id==='slots') setTimeout(initSlotsCanvas,120);
   if(id==='chart') setTimeout(initChartGame,120);
-  if(id==='shooter') setTimeout(function(){
+  if(id==='shooter'){
     var sc=document.getElementById('gcenter-shooter');
-    if(sc) window.initShooterGame(sc);
-  },150);
+    if(sc){
+      sc.style.display='flex';
+      // Wait 2 frames for layout to settle then init
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          window.initShooterGame(sc);
+        });
+      });
+    }
+  }
   initGamesPanel();
 }
 
@@ -11279,18 +11284,16 @@ window.initShooterGame=function(container){
   container._shooterInit=true;
   container.innerHTML='';
 
-  // Force container to fill available space
-  container.style.width='100%';
-  container.style.height='100%';
-  container.style.minHeight='400px';
+  // Force container to fill
+  container.style.cssText += ';width:100%;height:100%;min-height:400px;position:relative;';
 
-  // Get real dimensions after layout
-  // Force full size
-  var parentRect = container.getBoundingClientRect();
-  var W = parentRect.width > 10 ? Math.floor(parentRect.width) : (window.innerWidth - 320) || 800;
-  var H = parentRect.height > 10 ? Math.floor(parentRect.height) : (window.innerHeight - 100) || 600;
-  if(W < 200) W = window.innerWidth > 600 ? window.innerWidth - 340 : window.innerWidth;
-  if(H < 300) H = window.innerHeight - 100;
+  // Get dimensions - use window as reliable fallback
+  var panelW = 320; // left panel width
+  var headerH = 90; // overlay header height
+  var W = Math.max(window.innerWidth - panelW - 2, 400);
+  var H = Math.max(window.innerHeight - headerH, 400);
+  // On mobile full width
+  if(window.innerWidth < 700){ W = window.innerWidth; H = window.innerHeight - headerH; }
 
   var cv=document.createElement('canvas');
   cv.width=W; cv.height=H;
