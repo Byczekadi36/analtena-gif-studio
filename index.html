@@ -105,7 +105,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 #games-center-overlay.active{display:flex!important;}
 
 /* ── LEFT PANEL ── */
-.left-panel{width:440px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+.left-panel{width:520px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
   display:flex;flex-direction:column;overflow:hidden;}
 .panel-tabs{display:flex;border-bottom:1px solid var(--border);}
 .ptab{flex:1;padding:10px 2px;background:transparent;border:none;font-family:var(--font-d);
@@ -2340,9 +2340,9 @@ header {
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 #price-ticker {
   width: 100%;
-  height: 28px;
-  background: linear-gradient(90deg, rgba(0,245,255,.06) 0%, rgba(168,85,247,.06) 100%);
-  border-bottom: 1px solid rgba(0,245,255,.12);
+  height: 36px;
+  background: linear-gradient(90deg, rgba(0,10,20,1) 0%, rgba(5,0,20,1) 50%, rgba(0,10,20,1) 100%);
+  border-bottom: 2px solid rgba(0,245,255,.25);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -2371,7 +2371,7 @@ header {
   align-items: center;
   gap: 0;
   white-space: nowrap;
-  animation: tickerScroll 22s linear infinite;
+  animation: tickerScroll 35s linear infinite;
   will-change: transform;
 }
 .ticker-track:hover { animation-play-state: paused; }
@@ -2382,39 +2382,42 @@ header {
 .ticker-item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 20px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .04em;
+  gap: 7px;
+  padding: 0 18px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .05em;
   font-family: var(--font-d, monospace);
-  border-right: 1px solid rgba(255,255,255,.06);
+  border-right: 1px solid rgba(255,255,255,.08);
+  color: rgba(255,255,255,.9);
 }
 .ticker-label {
-  color: rgba(255,255,255,.45);
-  font-size: 9px;
-  letter-spacing: .1em;
+  color: rgba(0,245,255,.7);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .12em;
   text-transform: uppercase;
 }
 .ticker-price {
-  color: #00f5ff;
+  color: #ffffff;
   font-weight: 900;
+  font-size: 13px;
 }
 .ticker-change {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
 }
 .ticker-change.up   { color: #22ff88; }
 .ticker-change.down { color: #ff2d78; }
 .ticker-vol {
-  color: rgba(255,255,255,.3);
-  font-size: 9px;
+  color: rgba(255,255,255,.4);
+  font-size: 10px;
 }
 .ticker-dot {
-  width: 5px; height: 5px;
+  width: 7px; height: 7px;
   border-radius: 50%;
   background: #22ff88;
-  box-shadow: 0 0 5px #22ff88;
+  box-shadow: 0 0 8px #22ff88;
   animation: tickerPulse 2s infinite;
   flex-shrink: 0;
 }
@@ -2521,9 +2524,9 @@ header {
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 #price-ticker {
   width: 100%;
-  height: 28px;
-  background: linear-gradient(90deg, rgba(0,245,255,.06) 0%, rgba(168,85,247,.06) 100%);
-  border-bottom: 1px solid rgba(0,245,255,.12);
+  height: 36px;
+  background: linear-gradient(90deg, rgba(0,10,20,1) 0%, rgba(5,0,20,1) 50%, rgba(0,10,20,1) 100%);
+  border-bottom: 2px solid rgba(0,245,255,.25);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -2552,7 +2555,7 @@ header {
   align-items: center;
   gap: 0;
   white-space: nowrap;
-  animation: tickerScroll 22s linear infinite;
+  animation: tickerScroll 35s linear infinite;
   will-change: transform;
 }
 .ticker-track:hover { animation-play-state: paused; }
@@ -2563,39 +2566,42 @@ header {
 .ticker-item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 20px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .04em;
+  gap: 7px;
+  padding: 0 18px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .05em;
   font-family: var(--font-d, monospace);
-  border-right: 1px solid rgba(255,255,255,.06);
+  border-right: 1px solid rgba(255,255,255,.08);
+  color: rgba(255,255,255,.9);
 }
 .ticker-label {
-  color: rgba(255,255,255,.45);
-  font-size: 9px;
-  letter-spacing: .1em;
+  color: rgba(0,245,255,.7);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .12em;
   text-transform: uppercase;
 }
 .ticker-price {
-  color: #00f5ff;
+  color: #ffffff;
   font-weight: 900;
+  font-size: 13px;
 }
 .ticker-change {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
 }
 .ticker-change.up   { color: #22ff88; }
 .ticker-change.down { color: #ff2d78; }
 .ticker-vol {
-  color: rgba(255,255,255,.3);
-  font-size: 9px;
+  color: rgba(255,255,255,.4);
+  font-size: 10px;
 }
 .ticker-dot {
-  width: 5px; height: 5px;
+  width: 7px; height: 7px;
   border-radius: 50%;
   background: #22ff88;
-  box-shadow: 0 0 5px #22ff88;
+  box-shadow: 0 0 8px #22ff88;
   animation: tickerPulse 2s infinite;
   flex-shrink: 0;
 }
@@ -10672,9 +10678,9 @@ function buildTickerHTML(d) {
   var jpStr = jpAmt > 1e6 ? (jpAmt/1e6).toFixed(2)+'M' : jpAmt > 1e3 ? (jpAmt/1e3).toFixed(1)+'K' : Math.round(jpAmt).toLocaleString();
   var jpItem = jpAmt > 0
     ? '<span class="ticker-item" style="cursor:pointer;" onclick="document.querySelector(\'.ptab-games\')&&document.querySelector(\'.ptab-games\').click()">' +
-      '<span style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(90deg,rgba(255,140,0,.25),rgba(255,200,0,.15));border:1px solid rgba(255,170,0,.5);border-radius:12px;padding:2px 8px;margin:0 6px;">' +
+      '<span style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(90deg,rgba(255,140,0,.4),rgba(255,200,0,.3));border:1.5px solid rgba(255,200,0,.8);border-radius:12px;padding:3px 10px;margin:0 6px;">' +
       '<span style="width:5px;height:5px;border-radius:50%;background:#ff4444;display:inline-block;animation:jpFlash .7s infinite;"></span>' +
-      '<span style="font-size:9px;font-weight:900;color:#ffdd00;letter-spacing:1px;">🏆 JACKPOT: ' + jpStr + ' $ANAL</span>' +
+      '<span style="font-size:11px;font-weight:900;color:#ffee00;letter-spacing:1px;">🏆 JACKPOT: ' + jpStr + ' $ANAL</span>' +
       '</span></span>'
     : '';
 
