@@ -10700,6 +10700,8 @@ async function updateTicker() {
     track.innerHTML = '<span class="ticker-loading" style="color:rgba(255,150,50,.5);">&#9888; $ANAL price unavailable</span>';
     return;
   }
+  // Save live price globally for jackpot USD calculation
+  window._analLivePrice = data.price;
   track.innerHTML = buildTickerHTML(data);
   track.style.animation = 'none';
   track.offsetHeight;
@@ -11223,7 +11225,7 @@ function saResetAll() {
 // ══ JACKPOT LIVE WIDGET ══
 (function(){
   var WALLET='QvDfw6DEVFeVEhsu86auE7wwj1BMp7isBjqEd6MANAL';
-  var PRICE=0.000591*0.3929;
+  var PRICE=window._analLivePrice||0.0011;
   var jpBal=0, jpFetchOk=false;
 
   function jpFmt(n){
@@ -11253,7 +11255,7 @@ function saResetAll() {
 
   // JACKPOT starts at 0, grows only from real wallet data
   // Starting pool: ~$100 USD worth of ANAL
-  var JP_START = 169000; // ~$100 at current price, update manually
+  var JP_START = 10000; // 10,000 $ANAL = ~$11 USD at $0.0011
 
   window.jpFetch=function(){
     var st=document.getElementById('jp-status');
@@ -11287,7 +11289,7 @@ function saResetAll() {
       // RPC failed — show starting pool, not fake millions
       jpSet(JP_START);
       var st=document.getElementById('jp-status');
-      if(st) st.textContent='POOL: $100 USD';
+      if(st) st.textContent='STARTING POOL';
     });
   };
 
@@ -11843,7 +11845,7 @@ window.initWheelGame=function(container){
   function mkAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();}
   function beep(f,d,v,t){mkAC();var o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(v||.07,AC.currentTime);g.gain.linearRampToValueAtTime(0,AC.currentTime+d);o.start();o.stop(AC.currentTime+d+.02);}
 
-  var jp=((window._jpBalanceForTicker||169000)/1000).toFixed(1);
+  var jp=((window._jpBalanceForTicker||10000)/1000).toFixed(1);
   container.innerHTML='<div style="background:linear-gradient(90deg,#8b0000,#cc2200,#ff4400,#cc2200,#8b0000);padding:10px 16px;text-align:center;width:100%;border-radius:10px 10px 0 0;"><div style="font-size:9px;letter-spacing:3px;color:rgba(255,215,0,.7);">LAS VEGAS PRESENTS</div><div style="font-size:20px;font-weight:900;color:#ffd700;letter-spacing:3px;">🎰 WHEEL OF FORTUNE</div></div>'+
     '<div style="background:#1a0800;padding:8px;text-align:center;width:100%;border-bottom:1px solid #cc880030;"><div style="font-size:9px;letter-spacing:2px;color:#cc8800;">🏆 JACKPOT POOL</div><div id="wjp" style="font-size:24px;font-weight:900;color:#ffd700;">'+jp+'K $ANAL</div><div style="font-size:9px;color:#ff9900;"><span style="color:#ff4444;">● LIVE</span></div></div>'+
     '<div style="position:relative;padding:20px 0 8px;text-align:center;width:100%;"><div style="position:absolute;top:4px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:28px solid #ffd700;z-index:10;"></div><canvas id="wh-cv" width="280" height="280" style="border-radius:50%;border:5px solid #ffd700;box-shadow:0 0 20px rgba(255,215,0,.3);margin-top:22px;display:block;margin-left:auto;margin-right:auto;"></canvas></div>'+
@@ -11971,7 +11973,7 @@ window.initPokerGame=function(container){
   var cardsH='';
   for(var ci=0;ci<5;ci++)cardsH+='<div id="pk-c'+ci+'" onclick="pkToggle('+ci+')" style="width:60px;height:90px;border-radius:7px;background:#fff;border:2px solid #ddd;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:all .15s;flex-shrink:0;"><div id="pk-cv'+ci+'" style="font-size:15px;font-weight:900;line-height:1;">?</div><div id="pk-cs'+ci+'" style="font-size:19px;line-height:1;">?</div></div>';
 
-  var jp2=((window._jpBalanceForTicker||169000)/1000).toFixed(1);
+  var jp2=((window._jpBalanceForTicker||10000)/1000).toFixed(1);
   container.innerHTML='<div style="background:linear-gradient(90deg,#002200,#004400,#006600,#004400,#002200);padding:10px 16px;text-align:center;width:100%;border-radius:10px 10px 0 0;"><div style="font-size:9px;letter-spacing:3px;color:rgba(0,255,80,.5);">HIGH STAKES CASINO</div><div style="font-size:20px;font-weight:900;color:#00ff44;letter-spacing:3px;">♠ VIDEO POKER ♠</div></div>'+
     '<div style="background:#001a00;padding:8px;text-align:center;width:100%;border-bottom:1px solid #00660030;"><div style="font-size:9px;letter-spacing:2px;color:#009900;">🏆 ROYAL FLUSH JACKPOT</div><div id="pkjp" style="font-size:22px;font-weight:900;color:#00ff44;">'+jp2+'K $ANAL</div><div style="font-size:9px;color:#009900;"><span style="color:#ff4444;">● LIVE</span> — Royal Flush only with 2000+ bet</div></div>'+
     '<div id="pk-rank" style="min-height:30px;display:flex;align-items:center;justify-content:center;padding:7px;font-family:Courier New,monospace;font-size:11px;color:rgba(0,200,60,.4);letter-spacing:1px;">PLACE YOUR BET AND DEAL</div>'+
