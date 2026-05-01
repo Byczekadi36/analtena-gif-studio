@@ -105,7 +105,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 #games-center-overlay.active{display:flex!important;}
 
 /* ── LEFT PANEL ── */
-.left-panel{width:320px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+.left-panel{width:380px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
   display:flex;flex-direction:column;overflow:hidden;}
 .panel-tabs{display:flex;border-bottom:1px solid var(--border);}
 .ptab{flex:1;padding:10px 2px;background:transparent;border:none;font-family:var(--font-d);
@@ -8153,12 +8153,10 @@ function selectGameCenter(id,btn){
     var sc=document.getElementById('gcenter-shooter');
     if(sc){
       sc.style.display='flex';
-      // Wait 2 frames for layout to settle then init
-      requestAnimationFrame(function(){
-        requestAnimationFrame(function(){
-          window.initShooterGame(sc);
-        });
-      });
+      // Reset if previously initialized so it can reinit with correct size
+      if(sc._shooterInit){ sc._stopShooter&&sc._stopShooter(); sc._shooterInit=false; sc.innerHTML=''; }
+      // Use setTimeout to allow browser full paint cycle
+      setTimeout(function(){ window.initShooterGame(sc); }, 200);
     }
   }
   initGamesPanel();
@@ -10641,10 +10639,20 @@ function buildTickerHTML(d) {
   var arrow = isUp ? '&#9650;' : '&#9660;';
   var cls   = isUp ? 'up' : 'down';
   var chg   = Math.abs(d.change24h || 0).toFixed(2) + '%';
-  // Kolor zielony gdy połączony z live source, szary gdy fallback
   var srcColor = (d.source === 'xdex' || d.source === 'x1rpc' || d.source === 'x1ninja')
     ? '#22ff88' : 'rgba(255,255,255,.3)';
   var src = '&#9889; XDEX LIVE';
+
+  // Jackpot amount from global
+  var jpAmt = window._jpBalanceForTicker || 0;
+  var jpStr = jpAmt > 1e6 ? (jpAmt/1e6).toFixed(2)+'M' : jpAmt > 1e3 ? (jpAmt/1e3).toFixed(1)+'K' : Math.round(jpAmt).toLocaleString();
+  var jpItem = jpAmt > 0
+    ? '<span class="ticker-item" style="cursor:pointer;" onclick="document.querySelector(\'.ptab-games\')&&document.querySelector(\'.ptab-games\').click()">' +
+      '<span style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(90deg,rgba(255,140,0,.25),rgba(255,200,0,.15));border:1px solid rgba(255,170,0,.5);border-radius:12px;padding:2px 8px;margin:0 6px;">' +
+      '<span style="width:5px;height:5px;border-radius:50%;background:#ff4444;display:inline-block;animation:jpFlash .7s infinite;"></span>' +
+      '<span style="font-size:9px;font-weight:900;color:#ffdd00;letter-spacing:1px;">🏆 JACKPOT: ' + jpStr + ' $ANAL</span>' +
+      '</span></span>'
+    : '';
 
   var core =
     '<span class="ticker-item"><span class="ticker-dot"></span>' +
@@ -10652,7 +10660,10 @@ function buildTickerHTML(d) {
     '<span class="ticker-price">' + formatPrice(d.price) + '</span>' +
     '<span class="ticker-change ' + cls + '">' + arrow + ' ' + chg + '</span>' +
     '</span>' +
-    '<span class="ticker-item"><span style="color:' + srcColor + ';font-size:8px;font-weight:800;letter-spacing:.08em;">' + src + '</span></span>';
+    '<span class="ticker-item"><span style="color:' + srcColor + ';font-size:8px;font-weight:800;letter-spacing:.08em;">' + src + '</span></span>' +
+    jpItem +
+    '<span class="ticker-item"><span style="font-size:8px;color:#ff8844;letter-spacing:.5px;">🔥 10% of every game → JACKPOT POOL</span></span>' +
+    '<span class="ticker-item"><span style="font-size:8px;color:#aa88ff;letter-spacing:.5px;">🏆 TOP SCORER WINS 40% WEEKLY</span></span>';
 
   return core + core;
 }
@@ -11200,10 +11211,11 @@ function saResetAll() {
 
   function jpSet(bal){
     jpBal=bal;
+    window._jpBalanceForTicker=bal; // expose for ticker
     var el=document.getElementById('jp-amount');
     if(!el) return;
     el.textContent=jpFmt(jpBal);
-    el.style.animation='jpGlow 2.5s ease-in-out infinite,jpPulse 2.5s ease-in-out infinite';
+    el.style.animation='jpGlow 2.5s ease-in-out infinite';
     var usd=(jpBal*PRICE);
     var usdEl=document.getElementById('jp-usd');
     if(usdEl) usdEl.textContent='≈ $'+(usd<1?usd.toFixed(4):Math.round(usd).toLocaleString())+' USD';
@@ -11211,6 +11223,8 @@ function saResetAll() {
     if(pl) pl.textContent=(800+Math.floor(Math.random()*120)).toLocaleString();
     var rt=document.getElementById('jp-rate');
     if(rt) rt.textContent='+'+(5000+Math.floor(Math.random()*5000)).toLocaleString();
+    var st=document.getElementById('jp-status');
+    if(st&&st.textContent==='CONNECTING...') st.textContent='LIVE — SOLANA ✓';
   }
 
   window.jpFetch=function(){
@@ -11284,16 +11298,21 @@ window.initShooterGame=function(container){
   container._shooterInit=true;
   container.innerHTML='';
 
-  // Force container to fill
-  container.style.cssText += ';width:100%;height:100%;min-height:400px;position:relative;';
+  // Force container fill
+  container.style.width='100%';
+  container.style.height='100%';
+  container.style.position='relative';
+  container.style.minHeight='400px';
 
-  // Get dimensions - use window as reliable fallback
-  var panelW = 320; // left panel width
-  var headerH = 90; // overlay header height
-  var W = Math.max(window.innerWidth - panelW - 2, 400);
-  var H = Math.max(window.innerHeight - headerH, 400);
-  // On mobile full width
-  if(window.innerWidth < 700){ W = window.innerWidth; H = window.innerHeight - headerH; }
+  // Compute real available area
+  var overlay = document.getElementById('games-center-overlay');
+  var header  = document.getElementById('gmOverlayHeader');
+  var overlayW = overlay ? overlay.offsetWidth  : (window.innerWidth - 380);
+  var overlayH = overlay ? overlay.offsetHeight : (window.innerHeight - 90);
+  var headerH2 = header  ? header.offsetHeight  : 44;
+  var W = Math.max(overlayW, 300);
+  var H = Math.max(overlayH - headerH2, 300);
+  if(window.innerWidth < 700){ W = window.innerWidth; H = window.innerHeight - headerH2 - 56; }
 
   var cv=document.createElement('canvas');
   cv.width=W; cv.height=H;
