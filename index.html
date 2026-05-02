@@ -3746,54 +3746,169 @@ header {
 
       <!-- FRAMES PANEL -->
       <div class="panel-content" id="panel-credits" style="display:none">
-      <div style="text-align:center;padding:8px 0 16px;">
-        <div style="font-size:22px;font-weight:800;background:linear-gradient(90deg,var(--amber),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">ANAL Credits</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Top up and spend in the app</div>
-      </div>
 
-      <!-- BALANCE + VIP -->
-      <div style="background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.3);border-radius:12px;padding:14px;text-align:center;margin-bottom:14px;">
-        <div style="font-size:11px;color:var(--amber);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Your balance</div>
-        <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
-          <div style="font-size:28px;font-weight:800;color:var(--amber)" id="credits-balance">0</div>
-          <div id="vip-badge" style="display:none;background:linear-gradient(90deg,#ff6600,#ffaa00);border-radius:8px;padding:2px 8px;font-size:10px;font-weight:900;color:#000;letter-spacing:1px;">🔥 VIP</div>
+      <!-- ══ CREDITS FULLSCREEN DASHBOARD ══ -->
+      <style>
+        #credits-dash{padding:20px;max-width:100%;font-family:'Courier New',monospace;background:#0a0600;min-height:100%;}
+        #credits-dash .cd-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(204,136,0,.2);}
+        #credits-dash .cd-topbar h1{font-size:20px;font-weight:900;color:#ffd700;letter-spacing:3px;margin:0;}
+        #credits-dash .cd-topbar .cd-sub{font-size:9px;color:rgba(255,170,0,.4);letter-spacing:2px;margin-top:3px;}
+        #credits-dash .cd-live{display:flex;align-items:center;gap:5px;font-size:9px;color:rgba(255,100,100,.6);letter-spacing:1px;}
+        #credits-dash .cd-live-dot{width:7px;height:7px;border-radius:50%;background:#ff4444;animation:jpFlash .8s infinite;}
+        #credits-dash .cd-hero{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+        @media(max-width:600px){#credits-dash .cd-hero{grid-template-columns:1fr;}}
+        #credits-dash .cd-bal-card{background:linear-gradient(135deg,#1c1000,#120a00);border:2px solid #cc8800;border-radius:14px;padding:20px;text-align:center;position:relative;overflow:hidden;}
+        #credits-dash .cd-bal-label{font-size:9px;letter-spacing:3px;color:rgba(255,170,0,.5);text-transform:uppercase;margin-bottom:8px;}
+        #credits-dash .cd-bal-num{font-size:40px;font-weight:900;color:#ffd700;line-height:1;}
+        #credits-dash .cd-bal-sub{font-size:10px;color:rgba(255,170,0,.4);margin-top:5px;letter-spacing:1px;}
+        #credits-dash .cd-vip{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(90deg,#cc4400,#ff8800);border-radius:8px;padding:4px 12px;font-size:10px;font-weight:900;color:#fff;margin-top:8px;letter-spacing:1px;}
+        #credits-dash .cd-burned{font-size:9px;color:rgba(255,130,0,.4);margin-top:5px;}
+        #credits-dash .cd-jp-card{background:linear-gradient(135deg,#1a0800,#100500);border:2px solid #ffd700;border-radius:14px;padding:20px;text-align:center;position:relative;overflow:hidden;}
+        #credits-dash .cd-jp-label{font-size:9px;letter-spacing:3px;color:rgba(255,215,0,.5);text-transform:uppercase;margin-bottom:6px;}
+        #credits-dash .cd-jp-prize{font-size:38px;font-weight:900;color:#ffd700;line-height:1;}
+        #credits-dash .cd-jp-anal{font-size:13px;color:#ffaa00;font-weight:700;margin-top:4px;}
+        #credits-dash .cd-jp-usd{font-size:11px;color:rgba(255,150,0,.5);margin-top:3px;}
+        #credits-dash .cd-jp-sponsor{font-size:9px;color:rgba(255,170,0,.35);margin-top:8px;letter-spacing:1px;}
+        #credits-dash .cd-jp-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+        #credits-dash .cd-btn-gold{padding:9px;border-radius:8px;font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1px;border:none;font-family:'Courier New',monospace;background:linear-gradient(90deg,#cc5500,#ff8800,#cc5500);color:#fff;}
+        #credits-dash .cd-btn-green{padding:9px;border-radius:8px;font-size:11px;font-weight:900;cursor:pointer;letter-spacing:1px;font-family:'Courier New',monospace;background:transparent;border:1px solid #00aa44;color:#00ff88;}
+        #credits-dash .cd-mid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+        @media(max-width:600px){#credits-dash .cd-mid{grid-template-columns:1fr;}}
+        #credits-dash .cd-card{background:#110900;border:1px solid rgba(204,136,0,.2);border-radius:12px;padding:16px;}
+        #credits-dash .cd-card-title{font-size:9px;font-weight:700;letter-spacing:2px;color:#cc8800;text-transform:uppercase;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid rgba(204,136,0,.15);}
+        #credits-dash .cd-rate-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(204,136,0,.08);font-size:11px;}
+        #credits-dash .cd-rate-row:last-child{border-bottom:none;}
+        #credits-dash .cd-rate-lbl{color:rgba(255,200,100,.6);}
+        #credits-dash .cd-rate-val{color:#ffd700;font-weight:700;}
+        #credits-dash .cd-bonus{font-size:9px;background:rgba(255,170,0,.1);color:#ffaa00;border-radius:4px;padding:1px 5px;margin-left:4px;}
+        #credits-dash .cd-addr{background:#0d0700;border:1px solid rgba(204,136,0,.3);border-radius:8px;padding:9px 11px;font-size:10px;color:#ff8844;word-break:break-all;margin:8px 0;cursor:pointer;font-family:'Courier New',monospace;}
+        #credits-dash .cd-addr:hover{border-color:#ff8844;}
+        #credits-dash .cd-input{width:100%;background:#0d0700;border:1px solid rgba(204,136,0,.3);border-radius:8px;padding:10px 12px;color:#ffd700;font-size:11px;font-family:'Courier New',monospace;outline:none;margin-bottom:10px;box-sizing:border-box;}
+        #credits-dash .cd-input:focus{border-color:#cc8800;}
+        #credits-dash .cd-verify-btn{width:100%;padding:12px;background:linear-gradient(90deg,#664400,#cc8800,#664400);border:none;border-radius:8px;color:#000;font-size:13px;font-weight:900;cursor:pointer;font-family:'Courier New',monospace;letter-spacing:1px;}
+        #credits-dash .cd-verify-btn:hover{background:linear-gradient(90deg,#885500,#ffaa00,#885500);}
+        #credits-dash .cd-note{font-size:9px;color:rgba(255,100,0,.35);text-align:center;margin-top:8px;line-height:1.5;}
+        #credits-dash .cd-bets{background:#110900;border:1px solid rgba(204,136,0,.2);border-radius:12px;padding:16px;margin-bottom:14px;}
+        #credits-dash .cd-bet-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;}
+        @media(max-width:500px){#credits-dash .cd-bet-grid{grid-template-columns:1fr 1fr;}}
+        #credits-dash .cd-bet{border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;}
+        #credits-dash .cd-bet-t{font-size:13px;font-weight:900;}
+        #credits-dash .cd-bet-s{font-size:9px;margin-top:4px;line-height:1.4;}
+        #credits-dash .cd-bet-mini{background:#1a0f00;border:1px solid rgba(204,136,0,.2);}
+        #credits-dash .cd-bet-mini .cd-bet-t{color:rgba(255,170,0,.5);}
+        #credits-dash .cd-bet-mini .cd-bet-s{color:rgba(255,150,0,.3);}
+        #credits-dash .cd-bet-std{background:#1a0f00;border:1px solid rgba(204,136,0,.3);}
+        #credits-dash .cd-bet-std .cd-bet-t{color:#ffaa00;}
+        #credits-dash .cd-bet-std .cd-bet-s{color:rgba(255,170,0,.4);}
+        #credits-dash .cd-bet-jp{background:rgba(255,215,0,.07);border:2px solid #ffd700;}
+        #credits-dash .cd-bet-jp .cd-bet-t{color:#ffd700;}
+        #credits-dash .cd-bet-jp .cd-bet-s{color:#cc9900;}
+        #credits-dash .cd-bet-hr{background:rgba(255,80,0,.08);border:2px solid #ff6600;}
+        #credits-dash .cd-bet-hr .cd-bet-t{color:#ff8844;}
+        #credits-dash .cd-bet-hr .cd-bet-s{color:#cc4400;}
+        #credits-dash .cd-hist{background:#110900;border:1px solid rgba(204,136,0,.2);border-radius:12px;padding:16px;}
+        #credits-dash .cd-hist-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(204,136,0,.08);font-size:10px;}
+        #credits-dash .cd-hist-row:last-child{border-bottom:none;}
+        #credits-dash .cd-hist-empty{font-size:11px;color:rgba(255,170,0,.3);text-align:center;padding:16px 0;}
+      </style>
+
+      <div id="credits-dash">
+
+        <!-- TOP BAR -->
+        <div class="cd-topbar">
+          <div>
+            <h1>ANAL CREDITS</h1>
+            <div class="cd-sub">BURN $ANAL — EARN GAME POINTS — WIN JACKPOT</div>
+          </div>
+          <div class="cd-live">
+            <span class="cd-live-dot"></span>SOLANA MAINNET
+          </div>
         </div>
-        <div style="font-size:11px;color:var(--muted)">$ANAL Game Points</div>
-        <div id="vip-total-burned" style="font-size:10px;color:rgba(255,170,0,.4);margin-top:4px;display:none;"></div>
-      </div>
 
-      <!-- POINTS INFO -->
-      <div style="background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.15);border-radius:10px;padding:10px 12px;margin-bottom:12px;">
-        <div style="font-size:9px;font-weight:700;color:#ffd700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px;">🎮 HOW POINTS WORK</div>
-        <div style="font-size:9px;color:rgba(255,200,100,.7);line-height:1.8;">
-          🔥 Burn $ANAL → get game points<br>
-          <span style="color:#ffaa00;font-weight:700;">1 $ANAL = 10 points</span><br>
-          <span style="color:#ffd700;">1,000 $ANAL = 10,000 pts (+bonus)</span><br>
-          <span style="color:#ff9900;">5,000 $ANAL = 60,000 pts (+20%)</span><br>
-          <span style="color:#ff6600;">10,000 $ANAL = 130,000 pts (+30%)</span>
+        <!-- HERO ROW: balance + jackpot -->
+        <div class="cd-hero">
+
+          <div class="cd-bal-card">
+            <div class="cd-bal-label">YOUR GAME POINTS</div>
+            <div class="cd-bal-num" id="credits-balance">0</div>
+            <div class="cd-bal-sub">game points available</div>
+            <div id="vip-badge" style="display:none;" class="cd-vip">🔥 VIP — Enhanced odds active</div>
+            <div id="vip-total-burned" style="display:none;" class="cd-burned"></div>
+          </div>
+
+          <div class="cd-jp-card">
+            <div class="cd-jp-label">🏆 JACKPOT PRIZE</div>
+            <div class="cd-jp-prize">100,000</div>
+            <div class="cd-jp-anal">$ANAL TOKENS</div>
+            <div class="cd-jp-usd" id="cd-jp-usd">≈ $110 USD</div>
+            <div class="cd-jp-sponsor">Sponsored by Analtena Team • All bets burned 🔥</div>
+            <div class="cd-jp-btns">
+              <button class="cd-btn-gold" onclick="switchPanel('games',document.querySelector('.ptab-games'));setTimeout(()=>gmSelectGame('wheel',document.getElementById('gmcard-wheel')),300);">🎰 SPIN WHEEL</button>
+              <button class="cd-btn-green" onclick="switchPanel('games',document.querySelector('.ptab-games'));setTimeout(()=>gmSelectGame('poker',document.getElementById('gmcard-poker')),300);">♠ VIDEO POKER</button>
+            </div>
+          </div>
+
         </div>
-        <div style="margin-top:8px;border-top:1px solid rgba(255,215,0,.1);padding-top:7px;font-size:9px;color:rgba(255,170,0,.5);line-height:1.7;">
-          🎰 Jackpot spin costs <b style="color:#ffd700;">2,500 pts</b><br>
-          🃏 Jackpot poker hand costs <b style="color:#00ff88;">2,500 pts</b><br>
-          🏆 HIGH ROLLER costs <b style="color:#ff6644;">10,000 pts</b> (3x chance)
+
+        <!-- MID ROW: rates + burn -->
+        <div class="cd-mid">
+
+          <div class="cd-card">
+            <div class="cd-card-title">Exchange Rate</div>
+            <div class="cd-rate-row"><span class="cd-rate-lbl">1 $ANAL burned</span><span><span class="cd-rate-val">10 pts</span></span></div>
+            <div class="cd-rate-row"><span class="cd-rate-lbl">500 $ANAL</span><span><span class="cd-rate-val">5,000 pts</span></span></div>
+            <div class="cd-rate-row"><span class="cd-rate-lbl">1,000 $ANAL</span><span><span class="cd-rate-val">11,000 pts</span><span class="cd-bonus">+10%</span></span></div>
+            <div class="cd-rate-row"><span class="cd-rate-lbl">5,000 $ANAL</span><span><span class="cd-rate-val">60,000 pts</span><span class="cd-bonus">+20%</span></span></div>
+            <div class="cd-rate-row"><span class="cd-rate-lbl">10,000 $ANAL</span><span><span class="cd-rate-val">130,000 pts</span><span class="cd-bonus">+30%</span></span></div>
+          </div>
+
+          <div class="cd-card">
+            <div class="cd-card-title">Burn $ANAL → Get Points</div>
+            <div style="font-size:10px;color:rgba(255,150,0,.5);margin-bottom:4px;">Send $ANAL to burn address:</div>
+            <div class="cd-addr" id="addr-box" onclick="copyAddress()">1nc1nerator11111111111111111111111111111111</div>
+            <button onclick="copyAddress()" id="copy-addr-btn" style="width:100%;padding:8px;background:rgba(255,170,0,.08);border:1px solid rgba(255,170,0,.25);border-radius:7px;color:#ffaa00;font-size:11px;font-family:'Courier New',monospace;cursor:pointer;margin-bottom:10px;">📋 Copy burn address</button>
+            <div style="font-size:10px;color:rgba(255,150,0,.5);margin-bottom:6px;">Paste TX Hash after sending:</div>
+            <input id="tx-hash-input" type="text" placeholder="Paste transaction hash..." class="cd-input"/>
+            <button id="verify-btn" onclick="verifyDeposit()" class="cd-verify-btn">🔥 VERIFY BURN &amp; CLAIM POINTS</button>
+            <div id="deposit-status" style="font-size:11px;color:rgba(255,200,100,.7);text-align:center;margin-top:8px;min-height:16px;"></div>
+            <div class="cd-note">All tokens permanently destroyed on Solana blockchain.<br>Verifiable on <a href="https://solscan.io/account/1nc1nerator11111111111111111111111111111111" target="_blank" style="color:rgba(255,100,0,.5);">Solscan</a></div>
+          </div>
+
         </div>
+
+        <!-- BET SIZES -->
+        <div class="cd-bets">
+          <div class="cd-card-title">Bet Sizes — What Can You Play</div>
+          <div class="cd-bet-grid">
+            <div class="cd-bet cd-bet-mini">
+              <div class="cd-bet-t">500 pts</div>
+              <div class="cd-bet-s">Mini bet<br>No jackpot</div>
+            </div>
+            <div class="cd-bet cd-bet-std">
+              <div class="cd-bet-t">1,000 pts</div>
+              <div class="cd-bet-s">Standard<br>No jackpot</div>
+            </div>
+            <div class="cd-bet cd-bet-jp">
+              <div class="cd-bet-t">2,500 pts 🏆</div>
+              <div class="cd-bet-s">Jackpot eligible<br>Normal odds</div>
+            </div>
+            <div class="cd-bet cd-bet-hr">
+              <div class="cd-bet-t">10,000 pts 👑</div>
+              <div class="cd-bet-s">HIGH ROLLER<br>3x jackpot chance</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BURN HISTORY -->
+        <div class="cd-hist">
+          <div class="cd-card-title">Your Burn History</div>
+          <div id="cd-burn-history">
+            <div class="cd-hist-empty">No burns yet — send $ANAL to get started!</div>
+          </div>
+        </div>
+
       </div>
-
-      <!-- DEPOSIT -->
-      <div style="background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:14px;">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">🔥 Burn $ANAL → Get Game Points</div><div style="font-size:9px;color:rgba(255,170,0,.5);margin-bottom:8px;">All tokens sent to Solana Burn Address — permanently destroyed 🔥</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Send $ANAL to this address:</div>
-        <div id="addr-box" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--font-m);font-size:10px;color:var(--neon);word-break:break-all;margin-bottom:10px;cursor:pointer;transition:all .2s;" onclick="copyAddress()">1nc1nerator11111111111111111111111111111111</div>
-        <button id="copy-addr-btn" onclick="copyAddress()" style="width:100%;padding:8px;background:rgba(0,255,204,0.1);border:1px solid rgba(0,255,204,0.3);border-radius:8px;color:var(--neon);font-size:12px;font-family:var(--font-d);cursor:pointer;margin-bottom:12px;transition:all .2s;">📋 Copy address</button>
-
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Paste TX Hash after sending:</div>
-        <input id="tx-hash-input" type="text" placeholder="Paste transaction hash..." style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text);font-family:var(--font-m);font-size:11px;outline:none;box-sizing:border-box;margin-bottom:8px;"/>
-        <button id="verify-btn" onclick="verifyDeposit()" style="width:100%;padding:10px;background:linear-gradient(135deg,var(--neon3),var(--neon2));border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;font-family:var(--font-d);cursor:pointer;transition:all .2s;">✅ Verify deposit</button>
-        <div id="deposit-status" style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px;min-height:16px;"></div>
-      </div>
-
-      <!-- SHOP -->
-      
+      <!-- ══ END CREDITS DASHBOARD ══ -->
 
           </div>
 
@@ -8199,6 +8314,28 @@ body.celebration-active {
     max-width: 100% !important;
   }
 }
+
+/* Credits fullscreen override */
+#panel-credits {
+  position: fixed !important;
+  top: 56px !important;
+  left: 46px !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 50 !important;
+  overflow-y: auto !important;
+  background: #0a0600 !important;
+  display: none;
+}
+#panel-credits.active-panel {
+  display: block !important;
+}
+@media (max-width: 767px) {
+  #panel-credits {
+    left: 0 !important;
+    top: 100px !important;
+  }
+}
 </style>
 
 
@@ -12164,6 +12301,36 @@ window.gmBack=function(){
   if(sc&&sc._stopShooter){sc._stopShooter();sc._shooterInit=false;sc.innerHTML='';}
   if(typeof _origGmBack==='function') _origGmBack();
 };
+
+// ══ CREDITS DASHBOARD HELPERS ══
+function updateCdJpUsd() {
+  var price = window._analLivePrice || 0.0011;
+  var usd = (100000 * price).toFixed(0);
+  var el = document.getElementById('cd-jp-usd');
+  if (el) el.textContent = '≈ $' + parseInt(usd).toLocaleString() + ' USD at current price';
+}
+
+function renderBurnHistory() {
+  var el = document.getElementById('cd-burn-history');
+  if (!el) return;
+  var vip = JSON.parse(localStorage.getItem('anal_vip_data') || '{"burns":[]}');
+  var burns = (vip.burns || []).slice().reverse().slice(0, 10);
+  if (!burns.length) {
+    el.innerHTML = '<div style="font-size:11px;color:rgba(255,170,0,.3);text-align:center;padding:16px 0;">No burns yet — send $ANAL to get started!</div>';
+    return;
+  }
+  el.innerHTML = burns.map(function(b) {
+    var d = new Date(b.ts || Date.now());
+    var ds = d.toISOString().slice(0, 10);
+    var shortHash = (b.hash || '').slice(0, 6) + '...' + (b.hash || '').slice(-4);
+    return '<div class="cd-hist-row">' +
+      '<span style="color:rgba(255,170,0,.4);font-size:10px;">' + shortHash + '</span>' +
+      '<span style="color:#ffd700;font-weight:700;font-size:11px;">' + (b.amount||0).toLocaleString() + ' $ANAL</span>' +
+      '<span style="color:#ff9900;font-size:10px;">+' + Math.floor((b.amount||0) * (b.amount>=10000?13:b.amount>=5000?12:b.amount>=1000?11:10)).toLocaleString() + ' pts</span>' +
+      '<span style="color:rgba(255,170,0,.3);font-size:10px;">' + ds + '</span>' +
+      '</div>';
+  }).join('');
+}
 
 // ══════════════════════════════════════════════
 // VIP SYSTEM — Hidden jackpot multiplier
