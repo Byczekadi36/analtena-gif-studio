@@ -3817,7 +3817,7 @@ header {
         <!-- TOP BAR -->
         <div class="cd-topbar">
           <div style="display:flex;align-items:center;gap:12px;">
-            <button onclick="document.querySelector('.ptab-games')&&document.querySelector('.ptab-games').click()" style="display:none;background:rgba(255,170,0,.12);border:1px solid rgba(255,170,0,.4);border-radius:8px;padding:6px 12px;color:#ffaa00;font-family:'Courier New',monospace;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;" id="cd-back-btn">← GAMES</button>
+            <button onclick="history.back()||document.querySelector('.ptab-games')&&document.querySelector('.ptab-games').click()" style="display:none;background:rgba(255,170,0,.12);border:1px solid rgba(255,170,0,.4);border-radius:8px;padding:6px 12px;color:#ffaa00;font-family:'Courier New',monospace;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;" id="cd-back-btn">← BACK</button>
             <div>
               <h1>ANAL CREDITS</h1>
               <div class="cd-sub">BURN $ANAL — EARN GAME POINTS — WIN JACKPOT</div>
@@ -11415,7 +11415,7 @@ function saResetAll() {
 
 <!-- ── FIXED GAME BACK BUTTON (mobile, z-index:9999) ── -->
 <div id="gm-fixed-back">
-  <button id="gm-fixed-back-btn" onclick="gmBack()">← GAMES</button>
+  <button id="gm-fixed-back-btn" onclick="gmBack()">← BACK</button>
   <span id="gm-fixed-back-title">🎮 Select Game</span>
 </div>
 
@@ -12103,7 +12103,7 @@ window.initWheelGame=function(container){
   var TW=SEGS.reduce(function(s,g){return s+g.w;},0);
   var NSEG=SEGS.length;
   var SA=Math.PI*2/NSEG;
-  var bet=2500,spinning=false,curA=0,AC=null;
+  var bet=500,spinning=false,curA=0,AC=null;
 
   function mkAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();}
   function beep(f,d,v,t){mkAC();var o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(v||.07,AC.currentTime);g.gain.linearRampToValueAtTime(0,AC.currentTime+d);o.start();o.stop(AC.currentTime+d+.02);}
@@ -12135,12 +12135,12 @@ window.initWheelGame=function(container){
       // bet selector
       '<div style="font-size:10px;letter-spacing:2px;color:#cc8800;margin-bottom:8px;font-family:Courier New,monospace;">CHOOSE BET</div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;" id="wh-bets">'+
-        '<button onclick="wSetBet(500,this)" style="background:#1a0800;border:1px solid rgba(204,136,0,.4);color:#ffaa00;font-family:Courier New,monospace;font-size:12px;font-weight:700;padding:10px;border-radius:8px;cursor:pointer;">500 pts<br><span style="font-size:9px;opacity:.5;">no jackpot</span></button>'+
-        '<button onclick="wSetBet(1000,this)" style="background:#1a0800;border:1px solid rgba(204,136,0,.4);color:#ffaa00;font-family:Courier New,monospace;font-size:12px;font-weight:700;padding:10px;border-radius:8px;cursor:pointer;">1,000 pts<br><span style="font-size:9px;opacity:.5;">no jackpot</span></button>'+
-        '<button onclick="wSetBet(2500,this)" style="background:rgba(255,215,0,.18);border:2px solid #ffd700;color:#ffd700;font-family:Courier New,monospace;font-size:12px;font-weight:700;padding:10px;border-radius:8px;cursor:pointer;">2,500 pts 🏆<br><span style="font-size:9px;color:#cc9900;">jackpot eligible</span></button>'+
-        '<button onclick="wSetBet(10000,this)" style="background:rgba(255,80,0,.15);border:1px solid #ff6600;color:#ff9944;font-family:Courier New,monospace;font-size:12px;font-weight:700;padding:10px;border-radius:8px;cursor:pointer;">10,000 pts 👑<br><span style="font-size:9px;color:#cc4400;">3x jackpot chance</span></button>'+
+        '<button onclick="wSetBet(100,this)" style="background:#1a0800;border:1px solid rgba(204,136,0,.4);color:#ffaa00;font-family:Courier New,monospace;font-size:12px;font-weight:700;padding:10px;border-radius:8px;cursor:pointer;">500 pts<br><span style="font-size:9px;opacity:.5;">no jackpot</span></button>'+
+        '<button onclick="wSetBet(250,this)" style="background:#1a0800;border:1px solid rgba(204,136,0,.4);color:#ffaa00;font-family:Courier New,monospace;font-size:12px;font-weight:700;padding:10px;border-radius:8px;cursor:pointer;">1,000 pts<br><span style="font-size:9px;opacity:.5;">no jackpot</span></button>'+
+        '<button onclick="wSetBet(500,this)" style="background:rgba(255,215,0,.18);border:2px solid #ffd700;color:#ffd700;font-family:Courier New,monospace;font-size:12px;font-weight:700;padding:10px;border-radius:8px;cursor:pointer;">2,500 pts 🏆<br><span style="font-size:9px;color:#cc9900;">jackpot eligible</span></button>'+
+        '<button onclick="wSetBet(2000,this)" style="background:rgba(255,80,0,.15);border:1px solid #ff6600;color:#ff9944;font-family:Courier New,monospace;font-size:12px;font-weight:700;padding:10px;border-radius:8px;cursor:pointer;">10,000 pts 👑<br><span style="font-size:9px;color:#cc4400;">3x jackpot chance</span></button>'+
       '</div>'+
-      '<button id="wh-spin" onclick="wSpin()" style="width:100%;padding:16px;background:linear-gradient(90deg,#cc4400,#ff6600,#cc4400);border:none;border-radius:10px;color:#fff;font-family:Courier New,monospace;font-size:16px;font-weight:900;cursor:pointer;letter-spacing:2px;margin-bottom:16px;">🎰 SPIN — 2,500 pts</button>'+
+      '<button id="wh-spin" onclick="wSpin()" style="width:100%;padding:16px;background:linear-gradient(90deg,#cc4400,#ff6600,#cc4400);border:none;border-radius:10px;color:#fff;font-family:Courier New,monospace;font-size:16px;font-weight:900;cursor:pointer;letter-spacing:2px;margin-bottom:16px;">🎰 SPIN — 500 pts</button>'+
       // prize table — big and readable
       '<div style="background:#110800;border:1px solid rgba(204,136,0,.25);border-radius:10px;padding:14px;font-family:Courier New,monospace;">'+
         '<div style="font-size:11px;color:#cc8800;margin-bottom:10px;text-align:center;letter-spacing:2px;font-weight:700;">PRIZE TABLE</div>'+
@@ -12241,7 +12241,7 @@ window.initWheelGame=function(container){
     if(spinning)return;
     if(window.spendPoints&&!window.spendPoints(bet)){return;}
     // Show info if jackpot not available yet
-    if(bet>=2500){
+    if(bet>=500){
       var vipMult=window.getVipMultiplier?window.getVipMultiplier():0;
       if(vipMult===0){
         var res=document.getElementById('wh-result');
@@ -12377,7 +12377,7 @@ window.initPokerGame=function(container){
       '<div style="display:flex;justify-content:center;gap:'+(isMobile?'6px':'10px')+';margin-bottom:16px;padding:0 4px;" id="pk-cards"></div>'+
       // Bets
       '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;" id="pk-bets">'+
-        '<button onclick="pkSetBet(500,this)" style="background:#001a00;border:1px solid rgba(0,100,0,.5);color:#009900;font-family:Courier New,monospace;font-size:'+(isMobile?'10px':'11px')+';font-weight:700;padding:8px 4px;border-radius:8px;cursor:pointer;">500 pts<br><span style="font-size:8px;opacity:.5;">no JP</span></button>'+
+        '<button onclick="pkSetBet(500,this)" style="background:#001a00;border:1px solid rgba(0,100,0,.5);color:#009900;font-family:Courier New,monospace;font-size:'+(isMobile?'10px':'11px')+';font-weight:700;padding:8px 4px;border-radius:8px;cursor:pointer;">100 pts<br><span style="font-size:8px;opacity:.5;">no JP</span></button>'+
         '<button onclick="pkSetBet(1000,this)" style="background:#001a00;border:1px solid rgba(0,100,0,.5);color:#009900;font-family:Courier New,monospace;font-size:'+(isMobile?'10px':'11px')+';font-weight:700;padding:8px 4px;border-radius:8px;cursor:pointer;">1,000<br><span style="font-size:8px;opacity:.5;">no JP</span></button>'+
         '<button onclick="pkSetBet(2500,this)" style="background:rgba(0,255,68,.1);border:2px solid #00ff44;color:#00ff44;font-family:Courier New,monospace;font-size:'+(isMobile?'10px':'11px')+';font-weight:700;padding:8px 4px;border-radius:8px;cursor:pointer;">2,500 🏆<br><span style="font-size:8px;color:#00aa44;">jackpot</span></button>'+
         '<button onclick="pkSetBet(10000,this)" style="background:rgba(0,150,50,.1);border:1px solid #00aa44;color:#00ff88;font-family:Courier New,monospace;font-size:'+(isMobile?'10px':'11px')+';font-weight:700;padding:8px 4px;border-radius:8px;cursor:pointer;">10K 👑<br><span style="font-size:8px;color:#007733;">3x</span></button>'+
