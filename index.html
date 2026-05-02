@@ -12304,7 +12304,9 @@ window.initWheelGame=function(container){
 // ══ VIDEO POKER GAME ══
 window.initPokerGame=function(container){
   container.innerHTML='';
-  container.style.cssText='width:100%;height:100%;display:flex;background:#020b02;overflow:hidden;';
+  container.style.cssText='width:100%;height:100%;display:flex;flex-direction:column;background:#020b02;overflow-y:auto;';
+
+  var isMobile=window.innerWidth<700;
 
   var VALS=['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
   var SUITS=['♠','♥','♦','♣'],RED=['♥','♦'];
@@ -12351,65 +12353,67 @@ window.initPokerGame=function(container){
   // ── Build layout ──
   var jp2=((window._jpBalanceForTicker||100000)/1000).toFixed(1);
   container.innerHTML=
+    '<div style="display:flex;flex-direction:'+(isMobile?'column':'row')+';width:100%;min-height:100%;">'+
     // LEFT — table + cards
-    '<div style="flex:1;display:flex;flex-direction:column;padding:20px 24px;min-width:0;">'+
+    '<div style="flex:1;display:flex;flex-direction:column;padding:'+(isMobile?'12px':'20px 24px')+';min-width:0;">'+
       // Header
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'+
-        '<div style="font-size:22px;font-weight:900;color:#00ff44;font-family:Courier New,monospace;letter-spacing:3px;">♠ VIDEO POKER ♠</div>'+
-        '<div style="background:rgba(0,255,68,.08);border:1px solid rgba(0,255,68,.25);border-radius:8px;padding:6px 14px;text-align:center;">'+
-          '<div style="font-size:9px;color:rgba(0,200,60,.5);font-family:Courier New,monospace;letter-spacing:1px;">YOUR BALANCE</div>'+
-          '<div id="pk-saldo" style="font-size:18px;font-weight:900;color:#00ff44;font-family:Courier New,monospace;">0 pts</div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">'+
+        '<div style="font-size:'+(isMobile?'16px':'22px')+';font-weight:900;color:#00ff44;font-family:Courier New,monospace;letter-spacing:2px;">♠ VIDEO POKER ♠</div>'+
+        '<div style="background:rgba(0,255,68,.08);border:1px solid rgba(0,255,68,.25);border-radius:8px;padding:5px 12px;text-align:center;">'+
+          '<div style="font-size:8px;color:rgba(0,200,60,.5);font-family:Courier New,monospace;letter-spacing:1px;">BALANCE</div>'+
+          '<div id="pk-saldo" style="font-size:16px;font-weight:900;color:#00ff44;font-family:Courier New,monospace;">0 pts</div>'+
         '</div>'+
       '</div>'+
-      // Result box — big and visible
-      '<div id="pk-rank" style="min-height:56px;background:rgba(0,0,0,.4);border:2px solid rgba(0,170,68,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;padding:8px 16px;font-family:Courier New,monospace;font-size:20px;font-weight:900;color:rgba(0,200,60,.4);text-align:center;">PLACE YOUR BET AND DEAL</div>'+
-      // Cards — big and clear
-      '<div style="display:flex;justify-content:center;gap:10px;margin-bottom:20px;" id="pk-cards">'+
+      // Result box
+      '<div id="pk-rank" style="min-height:50px;background:rgba(0,0,0,.4);border:2px solid rgba(0,170,68,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;padding:8px 12px;font-family:Courier New,monospace;font-size:'+(isMobile?'14px':'18px')+';font-weight:900;color:rgba(0,200,60,.4);text-align:center;">PLACE YOUR BET AND DEAL</div>'+
+      // Cards
+      '<div style="display:flex;justify-content:center;gap:'+(isMobile?'6px':'10px')+';margin-bottom:16px;padding:0 4px;" id="pk-cards"></div>'+
+      // Bets
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;" id="pk-bets">'+
+        '<button onclick="pkSetBet(500,this)" style="background:#001a00;border:1px solid rgba(0,100,0,.5);color:#009900;font-family:Courier New,monospace;font-size:'+(isMobile?'10px':'11px')+';font-weight:700;padding:8px 4px;border-radius:8px;cursor:pointer;">500 pts<br><span style="font-size:8px;opacity:.5;">no JP</span></button>'+
+        '<button onclick="pkSetBet(1000,this)" style="background:#001a00;border:1px solid rgba(0,100,0,.5);color:#009900;font-family:Courier New,monospace;font-size:'+(isMobile?'10px':'11px')+';font-weight:700;padding:8px 4px;border-radius:8px;cursor:pointer;">1,000<br><span style="font-size:8px;opacity:.5;">no JP</span></button>'+
+        '<button onclick="pkSetBet(2500,this)" style="background:rgba(0,255,68,.1);border:2px solid #00ff44;color:#00ff44;font-family:Courier New,monospace;font-size:'+(isMobile?'10px':'11px')+';font-weight:700;padding:8px 4px;border-radius:8px;cursor:pointer;">2,500 🏆<br><span style="font-size:8px;color:#00aa44;">jackpot</span></button>'+
+        '<button onclick="pkSetBet(10000,this)" style="background:rgba(0,150,50,.1);border:1px solid #00aa44;color:#00ff88;font-family:Courier New,monospace;font-size:'+(isMobile?'10px':'11px')+';font-weight:700;padding:8px 4px;border-radius:8px;cursor:pointer;">10K 👑<br><span style="font-size:8px;color:#007733;">3x</span></button>'+
       '</div>'+
-      // Bet + Deal
-      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;" id="pk-bets">'+
-        '<button onclick="pkSetBet(500,this)" style="background:#001a00;border:1px solid rgba(0,100,0,.5);color:#009900;font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:10px 4px;border-radius:8px;cursor:pointer;">500 pts<br><span style="font-size:9px;opacity:.5;">no jackpot</span></button>'+
-        '<button onclick="pkSetBet(1000,this)" style="background:#001a00;border:1px solid rgba(0,100,0,.5);color:#009900;font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:10px 4px;border-radius:8px;cursor:pointer;">1,000 pts<br><span style="font-size:9px;opacity:.5;">no jackpot</span></button>'+
-        '<button onclick="pkSetBet(2500,this)" style="background:rgba(0,255,68,.1);border:2px solid #00ff44;color:#00ff44;font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:10px 4px;border-radius:8px;cursor:pointer;">2,500 pts 🏆<br><span style="font-size:9px;color:#00aa44;">jackpot eligible</span></button>'+
-        '<button onclick="pkSetBet(10000,this)" style="background:rgba(0,150,50,.1);border:1px solid #00aa44;color:#00ff88;font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:10px 4px;border-radius:8px;cursor:pointer;">10,000 pts 👑<br><span style="font-size:9px;color:#007733;">3x jackpot</span></button>'+
-      '</div>'+
-      '<button id="pk-action" onclick="pkAction()" style="width:100%;padding:16px;background:linear-gradient(90deg,#004400,#007700,#004400);border:2px solid #00aa44;border-radius:12px;color:#00ff44;font-family:Courier New,monospace;font-size:18px;font-weight:900;cursor:pointer;letter-spacing:2px;">🃏 DEAL — 2,500 pts</button>'+
+      '<button id="pk-action" onclick="pkAction()" style="width:100%;padding:'+(isMobile?'13px':'16px')+';background:linear-gradient(90deg,#004400,#007700,#004400);border:2px solid #00aa44;border-radius:12px;color:#00ff44;font-family:Courier New,monospace;font-size:'+(isMobile?'15px':'18px')+';font-weight:900;cursor:pointer;letter-spacing:2px;">🃏 DEAL — 2,500 pts</button>'+
     '</div>'+
-    // RIGHT — jackpot + pay table
-    '<div style="flex:0 0 260px;display:flex;flex-direction:column;padding:20px 16px 20px 0;overflow-y:auto;">'+
-      // Jackpot card
-      '<div style="background:linear-gradient(135deg,#001a00,#000f00);border:2px solid #ffd700;border-radius:12px;padding:14px;text-align:center;margin-bottom:14px;">'+
+    // RIGHT — jackpot + pay table (below on mobile, right column on desktop)
+    '<div style="'+(isMobile?'padding:12px;':'flex:0 0 280px;display:flex;flex-direction:column;padding:20px 16px 20px 0;')+';overflow-y:auto;">'+
+      // Jackpot
+      '<div style="background:linear-gradient(135deg,#001a00,#000f00);border:2px solid #ffd700;border-radius:12px;padding:14px;text-align:center;margin-bottom:12px;">'+
         '<div style="font-size:9px;letter-spacing:2px;color:rgba(255,215,0,.5);font-family:Courier New,monospace;">🏆 JACKPOT</div>'+
-        '<div style="font-size:28px;font-weight:900;color:#ffd700;font-family:Courier New,monospace;">100,000</div>'+
-        '<div style="font-size:12px;color:#ffaa00;font-family:Courier New,monospace;">$ANAL TOKENS</div>'+
-        '<div style="font-size:9px;color:rgba(255,100,0,.5);margin-top:4px;font-family:Courier New,monospace;">Royal Flush + 2,500+ pts bet<br>+ burned $55+ in $ANAL</div>'+
+        '<div style="font-size:'+(isMobile?'22px':'28px')+';font-weight:900;color:#ffd700;font-family:Courier New,monospace;">100,000</div>'+
+        '<div style="font-size:11px;color:#ffaa00;font-family:Courier New,monospace;">$ANAL TOKENS</div>'+
+        '<div style="font-size:9px;color:rgba(255,100,0,.5);margin-top:4px;font-family:Courier New,monospace;">Royal Flush + 2,500+ pts + burned $55+</div>'+
       '</div>'+
-      // Pay table — readable
+      // Pay table — big readable font
       '<div style="background:#001200;border:1px solid rgba(0,170,68,.2);border-radius:10px;padding:14px;font-family:Courier New,monospace;">'+
-        '<div style="font-size:10px;color:#009900;margin-bottom:10px;text-align:center;letter-spacing:2px;font-weight:700;">PAY TABLE</div>'+
-        '<div style="display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:11px;">'+
+        '<div style="font-size:11px;color:#00cc44;margin-bottom:10px;text-align:center;letter-spacing:2px;font-weight:700;">PAY TABLE</div>'+
+        '<div style="display:grid;grid-template-columns:1fr auto;gap:7px 14px;font-size:13px;">'+
           '<span style="color:#ffd700;font-weight:900;">Royal Flush</span><span style="color:#ffd700;font-weight:900;text-align:right;">JACKPOT 🏆</span>'+
-          '<span style="color:#00ffcc;">Straight Flush</span><span style="color:#00ffcc;text-align:right;">50x</span>'+
-          '<span style="color:#00ff88;">Four of a Kind</span><span style="color:#00ff88;text-align:right;">25x</span>'+
-          '<span style="color:#00ee66;">Full House</span><span style="color:#00ee66;text-align:right;">9x</span>'+
-          '<span style="color:#00cc44;">Flush</span><span style="color:#00cc44;text-align:right;">6x</span>'+
-          '<span style="color:#00aa33;">Straight</span><span style="color:#00aa33;text-align:right;">4x</span>'+
-          '<span style="color:#008822;">Three of a Kind</span><span style="color:#008822;text-align:right;">3x</span>'+
-          '<span style="color:#006611;">Two Pair</span><span style="color:#006611;text-align:right;">2x</span>'+
-          '<span style="color:#004400;">Jacks or Better</span><span style="color:#004400;text-align:right;">1x</span>'+
-          '<span style="color:#330000;">No Hand</span><span style="color:#330000;text-align:right;">Lose</span>'+
+          '<span style="color:#00ffcc;">Straight Flush</span><span style="color:#00ffcc;text-align:right;">50×</span>'+
+          '<span style="color:#00ff88;">Four of a Kind</span><span style="color:#00ff88;text-align:right;">25×</span>'+
+          '<span style="color:#00ee66;">Full House</span><span style="color:#00ee66;text-align:right;">9×</span>'+
+          '<span style="color:#00cc44;">Flush</span><span style="color:#00cc44;text-align:right;">6×</span>'+
+          '<span style="color:#00aa33;">Straight</span><span style="color:#00aa33;text-align:right;">4×</span>'+
+          '<span style="color:#008822;">Three of a Kind</span><span style="color:#008822;text-align:right;">3×</span>'+
+          '<span style="color:#006611;">Two Pair</span><span style="color:#006611;text-align:right;">2×</span>'+
+          '<span style="color:#004d00;">Jacks or Better</span><span style="color:#004d00;text-align:right;">1×</span>'+
+          '<span style="color:#440000;">No Hand</span><span style="color:#440000;text-align:right;">Lose</span>'+
         '</div>'+
       '</div>'+
+    '</div>'+
     '</div>'+
     '<div id="pk-coins" style="position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:999;"></div>';
 
   // ── Build card elements ──
+  var cardW=isMobile?56:80, cardH=isMobile?84:120, cardFs=isMobile?14:20, suitFs=isMobile?20:28;
   var cardsDiv=container.querySelector('#pk-cards');
   for(var ci=0;ci<5;ci++){
     var card=document.createElement('div');
     card.id='pk-c'+ci;
-    card.style.cssText='width:80px;height:120px;border-radius:10px;background:#fff;border:3px solid #ccc;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:all .2s;flex-shrink:0;box-shadow:0 4px 8px rgba(0,0,0,.3);';
-    card.innerHTML='<div id="pk-cv'+ci+'" style="font-size:20px;font-weight:900;line-height:1;">?</div><div id="pk-cs'+ci+'" style="font-size:28px;line-height:1;">?</div>';
+    card.style.cssText='width:'+cardW+'px;height:'+cardH+'px;border-radius:8px;background:#fff;border:3px solid #ccc;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:all .2s;flex-shrink:0;box-shadow:0 4px 8px rgba(0,0,0,.3);';
+    card.innerHTML='<div id="pk-cv'+ci+'" style="font-size:'+cardFs+'px;font-weight:900;line-height:1;">?</div><div id="pk-cs'+ci+'" style="font-size:'+suitFs+'px;line-height:1;">?</div>';
     card.onclick=(function(idx){return function(){pkToggle(idx);};})(ci);
     cardsDiv.appendChild(card);
   }
