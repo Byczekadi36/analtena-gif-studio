@@ -7010,14 +7010,13 @@ async function verifyDeposit() {
     // Fallback: direct RPC (may work if CORS allowed)
     if (!txFound) {
       status.textContent = '🔍 Łączę z X1 RPC...';
-      // CORS-friendly RPC endpoints for Solana mainnet
+      // X1 Network first (ANAL token is on X1), Solana as fallback
       const RPC_ENDPOINTS = [
-        'https://solana-mainnet.g.alchemy.com/v2/demo',
-        'https://api.mainnet-beta.solana.com',
-        'https://rpc.ankr.com/solana',
-        'https://solana-api.projectserum.com',
         'https://rpc.mainnet.x1.xyz',
-        'https://xolana.xen.network'
+        'https://xolana.xen.network',
+        'https://rpc2.mainnet.x1.xyz',
+        'https://api.mainnet-beta.solana.com',
+        'https://rpc.ankr.com/solana'
       ];
 
       for (const rpc of RPC_ENDPOINTS) {
