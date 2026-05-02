@@ -7010,7 +7010,7 @@ async function verifyDeposit() {
     // Fallback: direct RPC (may work if CORS allowed)
     if (!txFound) {
       status.textContent = '🔍 Łączę z X1 RPC...';
-      const RPC_ENDPOINTS = ['https://rpc.mainnet.x1.xyz', 'https://xolana.xen.network'];
+      const RPC_ENDPOINTS = ['https://api.mainnet-beta.solana.com', 'https://solana-api.projectserum.com', 'https://rpc.mainnet.x1.xyz', 'https://xolana.xen.network'];
 
       for (const rpc of RPC_ENDPOINTS) {
         try {
@@ -7032,6 +7032,8 @@ async function verifyDeposit() {
           // Check postTokenBalances (most reliable)
           const pre = tx?.meta?.preTokenBalances || [];
           const post = tx?.meta?.postTokenBalances || [];
+
+          // Method 1: Check if tokens arrived at burn address
           for (const p of post) {
             if (p.owner === ANAL_DEPOSIT_ADDRESS) {
               const preEntry = pre.find(e=>e.accountIndex===p.accountIndex);
@@ -7044,7 +7046,22 @@ async function verifyDeposit() {
             }
           }
 
-          // Fallback: check instructions
+          // Method 2: Check balance changes — look for decrease in sender's balance
+          // This catches burns where destination = incinerator
+          if (amount === 0 && pre.length > 0) {
+            // Find accounts that lost tokens (sender)
+            for (const preB of pre) {
+              const postB = post.find(p => p.accountIndex === preB.accountIndex);
+              const preAmt = parseFloat(preB?.uiTokenAmount?.uiAmount || 0);
+              const postAmt = parseFloat(postB?.uiTokenAmount?.uiAmount || 0);
+              if (preAmt > postAmt && preAmt - postAmt > 0) {
+                const diff = preAmt - postAmt;
+                if (diff > amount) amount = Math.floor(diff);
+              }
+            }
+          }
+
+          // Method 3: Fallback check instructions for transfer/transferChecked
           if (amount === 0) {
             const allIx = [
               ...(tx?.transaction?.message?.instructions||[]),
@@ -7053,10 +7070,20 @@ async function verifyDeposit() {
             for (const ix of allIx) {
               const t = ix.parsed?.type||'';
               const info = ix.parsed?.info||{};
-              if ((t==='transferChecked'||t==='transfer') && info.destination===ANAL_DEPOSIT_ADDRESS) {
+              // Accept transfer TO burn address OR any burn instruction
+              if ((t==='transferChecked'||t==='transfer') && 
+                  (info.destination===ANAL_DEPOSIT_ADDRESS || info.destination?.includes('1nc1nerator'))) {
                 const raw = parseInt(info.tokenAmount?.amount||info.amount||'0');
                 const dec = parseInt(info.tokenAmount?.decimals||9);
-                amount = Math.floor(raw/Math.pow(10,dec));
+                const parsed = Math.floor(raw/Math.pow(10,dec));
+                if (parsed > amount) amount = parsed;
+              }
+              // Also catch spl burn instruction
+              if (t === 'burn' || t === 'burnChecked') {
+                const raw = parseInt(info.tokenAmount?.amount||info.amount||'0');
+                const dec = parseInt(info.tokenAmount?.decimals||9);
+                const parsed = Math.floor(raw/Math.pow(10,dec));
+                if (parsed > amount) amount = parsed;
               }
             }
           }
