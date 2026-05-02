@@ -3816,9 +3816,12 @@ header {
 
         <!-- TOP BAR -->
         <div class="cd-topbar">
-          <div>
-            <h1>ANAL CREDITS</h1>
-            <div class="cd-sub">BURN $ANAL — EARN GAME POINTS — WIN JACKPOT</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <button onclick="document.querySelector('.ptab-games')&&document.querySelector('.ptab-games').click()" style="display:none;background:rgba(255,170,0,.12);border:1px solid rgba(255,170,0,.4);border-radius:8px;padding:6px 12px;color:#ffaa00;font-family:'Courier New',monospace;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;" id="cd-back-btn">← GAMES</button>
+            <div>
+              <h1>ANAL CREDITS</h1>
+              <div class="cd-sub">BURN $ANAL — EARN GAME POINTS — WIN JACKPOT</div>
+            </div>
           </div>
           <div class="cd-live">
             <span class="cd-live-dot"></span>SOLANA MAINNET
@@ -8357,7 +8360,11 @@ body.celebration-active {
 @media (max-width: 767px) {
   #panel-credits {
     left: 0 !important;
-    top: 100px !important;
+    top: 0 !important;
+    z-index: 200 !important;
+  }
+  #cd-back-btn {
+    display: inline-block !important;
   }
 }
 
@@ -12075,7 +12082,8 @@ window.initShooterGame=function(container){
 // ══ WHEEL OF FORTUNE GAME ══
 window.initWheelGame=function(container){
   container.innerHTML='';
-  container.style.cssText='width:100%;height:100%;display:flex;background:#0a0300;overflow:hidden;';
+  var isMobileW = window.innerWidth < 700;
+  container.style.cssText='width:100%;height:100%;display:flex;flex-direction:'+(isMobileW?'column':'row')+';background:#0a0300;overflow-y:auto;overflow-x:hidden;';
 
   // ── Segments — wskaźnik na górze = index 0 przy kącie 0 ──
   var SEGS=[
@@ -12103,7 +12111,7 @@ window.initWheelGame=function(container){
   // ── Layout: left=wheel, right=controls ──
   container.innerHTML=
     // Left panel — wheel
-    '<div id="wh-left" style="flex:0 0 420px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;background:#0a0300;">'+
+    '<div id="wh-left" style="'+(isMobileW?'width:100%;':'flex:0 0 420px;')+';display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:'+(isMobileW?'12px':'20px')+';background:#0a0300;">'+
       '<div style="font-size:11px;letter-spacing:3px;color:rgba(255,215,0,.5);margin-bottom:6px;font-family:Courier New,monospace;">LAS VEGAS PRESENTS</div>'+
       '<div style="font-size:22px;font-weight:900;color:#ffd700;letter-spacing:3px;font-family:Courier New,monospace;margin-bottom:8px;">🎰 WHEEL OF FORTUNE</div>'+
       '<div style="background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.25);border-radius:8px;padding:6px 16px;text-align:center;margin-bottom:10px;">'+
@@ -12111,15 +12119,13 @@ window.initWheelGame=function(container){
         '<div id="wh-saldo" style="font-size:18px;font-weight:900;color:#ffd700;font-family:Courier New,monospace;">0 pts</div>'+
       '</div>'+
       // pointer
-      '<div style="position:relative;width:340px;height:340px;flex-shrink:0;">'+
-        '<div style="position:absolute;top:-2px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:32px solid #ffd700;filter:drop-shadow(0 0 8px rgba(255,215,0,.8));z-index:10;"></div>'+
-        '<canvas id="wh-cv" width="340" height="340" style="border-radius:50%;border:6px solid #ffd700;box-shadow:0 0 30px rgba(255,215,0,.4);display:block;margin-top:28px;"></canvas>'+
+      '<div style="position:relative;width:'+(isMobileW?'280':'340')+'px;height:'+(isMobileW?'280':'340')+'px;flex-shrink:0;">'+
+        '<div style="position:absolute;top:-2px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:'+(isMobileW?'12':'16')+'px solid transparent;border-right:'+(isMobileW?'12':'16')+'px solid transparent;border-top:'+(isMobileW?'24':'32')+'px solid #ffd700;z-index:10;"></div>'+
+        '<canvas id="wh-cv" width="'+(isMobileW?'280':'340')+'" height="'+(isMobileW?'280':'340')+'" style="border-radius:50%;border:6px solid #ffd700;box-shadow:0 0 30px rgba(255,215,0,.4);display:block;margin-top:'+(isMobileW?'20':'28')+'px;"></canvas>'+
       '</div>'+
-      // result — big and visible
-      '<div id="wh-result" style="margin-top:16px;min-height:50px;text-align:center;font-family:Courier New,monospace;font-size:20px;font-weight:900;color:#ffd700;width:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,170,0,.06);border-radius:10px;border:1px solid rgba(255,170,0,.15);padding:10px;">SPIN TO WIN</div>'+
+      '<div id="wh-result" style="margin-top:12px;min-height:44px;text-align:center;font-family:Courier New,monospace;font-size:'+(isMobileW?'16':'20')+'px;font-weight:900;color:#ffd700;width:100%;display:flex;align-items:center;justify-content:center;background:rgba(255,170,0,.06);border-radius:10px;border:1px solid rgba(255,170,0,.15);padding:8px;">SPIN TO WIN</div>'+
     '</div>'+
-    // Right panel — controls
-    '<div style="flex:1;display:flex;flex-direction:column;padding:20px;overflow-y:auto;background:#0d0500;">'+
+    '<div style="'+(isMobileW?'width:100%;':'flex:1;')+';display:flex;flex-direction:column;padding:'+(isMobileW?'12px':'20px')+';overflow-y:auto;background:#0d0500;">'+
       // jackpot
       '<div style="background:linear-gradient(135deg,#1a0800,#100500);border:2px solid #ffd700;border-radius:12px;padding:16px;text-align:center;margin-bottom:16px;">'+
         '<div style="font-size:10px;letter-spacing:2px;color:rgba(255,215,0,.5);font-family:Courier New,monospace;">🏆 JACKPOT POOL</div>'+
@@ -12154,7 +12160,8 @@ window.initWheelGame=function(container){
   // ── Draw wheel ──
   function drawW(rot){
     var cv=document.getElementById('wh-cv');if(!cv)return;
-    var ctx=cv.getContext('2d'),cx=170,cy=170,r=162;
+    var sz=cv.width,cx=sz/2,cy=sz/2,r=sz/2-8;
+    var ctx=cv.getContext('2d');
     ctx.clearRect(0,0,340,340);
     SEGS.forEach(function(seg,i){
       var sa=rot+i*SA-Math.PI/2,ea=sa+SA;
@@ -12173,11 +12180,11 @@ window.initWheelGame=function(container){
     ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
     ctx.strokeStyle='rgba(255,215,0,.5)';ctx.lineWidth=3;ctx.stroke();
     // Center
-    var cg=ctx.createRadialGradient(cx,cy,0,cx,cy,28);
+    var cg=ctx.createRadialGradient(cx,cy,0,cx,cy,sz*0.08);
     cg.addColorStop(0,'#ffd700');cg.addColorStop(1,'#885500');
-    ctx.beginPath();ctx.arc(cx,cy,28,0,Math.PI*2);ctx.fillStyle=cg;ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy,sz*0.08,0,Math.PI*2);ctx.fillStyle=cg;ctx.fill();
     ctx.strokeStyle='rgba(255,215,0,.8)';ctx.lineWidth=2;ctx.stroke();
-    ctx.fillStyle='#0a0300';ctx.font='bold 9px Courier New';
+    ctx.fillStyle='#0a0300';ctx.font='bold '+(sz<300?'7':'9')+'px Courier New';
     ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('$ANAL',cx,cy);
   }
   drawW(0);
