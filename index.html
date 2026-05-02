@@ -105,7 +105,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);
 #games-center-overlay.active{display:flex!important;}
 
 /* ── LEFT PANEL ── */
-.left-panel{width:520px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+.left-panel{width:600px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
   display:flex;flex-direction:column;overflow:hidden;}
 .panel-tabs{display:flex;border-bottom:1px solid var(--border);}
 .ptab{flex:1;padding:10px 2px;background:transparent;border:none;font-family:var(--font-d);
@@ -3844,71 +3844,80 @@ header {
     <div class="panel-content" id="panel-games" style="display:none;">
 
     <!-- ══ JACKPOT WIDGET NEW ══ -->
-    <div id="jackpot-widget" style="margin-bottom:12px;border-radius:14px;overflow:hidden;border:2px solid #ffaa00;background:linear-gradient(160deg,#1a0f00 0%,#0f0800 60%,#1a0500 100%);box-shadow:0 0 24px rgba(255,170,0,.3),0 0 48px rgba(255,100,0,.1);position:relative;">
+    <div id="jackpot-widget" style="margin-bottom:12px;border-radius:14px;overflow:hidden;border:2px solid #ffd700;background:linear-gradient(160deg,#1c1000 0%,#110900 60%,#1c0800 100%);box-shadow:0 0 30px rgba(255,200,0,.25),inset 0 1px 0 rgba(255,220,0,.15);">
 
-      <!-- animated border glow -->
-      <div style="position:absolute;inset:0;border-radius:12px;background:linear-gradient(90deg,transparent,rgba(255,170,0,.06),transparent);animation:jpGlow 2s ease-in-out infinite;pointer-events:none;"></div>
-
-      <!-- header -->
-      <div style="background:linear-gradient(90deg,#ff8800,#ffcc00,#ff6600);padding:6px 12px;display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:11px;font-weight:900;letter-spacing:2px;color:#000;text-transform:uppercase;">🏆 JACKPOT POOL</span>
-        <div style="display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.3);border-radius:10px;padding:2px 8px;">
-          <span style="width:5px;height:5px;border-radius:50%;background:#ff4444;display:inline-block;animation:jpFlash .7s infinite;"></span>
+      <!-- gold header -->
+      <div style="background:linear-gradient(90deg,#8b4500,#cc7700,#ffaa00,#ffd700,#ffaa00,#cc7700,#8b4500);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:12px;font-weight:900;letter-spacing:2px;color:#000;text-transform:uppercase;">🏆 WIN 100,000 $ANAL</span>
+        <div style="display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.4);border-radius:10px;padding:2px 8px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:#ff4444;display:inline-block;animation:jpFlash .7s infinite;"></span>
           <span style="font-size:8px;color:#fff;font-weight:700;letter-spacing:1px;">LIVE</span>
         </div>
       </div>
 
-      <!-- main number -->
-      <div style="padding:12px 12px 8px;text-align:center;position:relative;">
-        <div style="font-size:8px;letter-spacing:2px;color:#ffaa0099;text-transform:uppercase;margin-bottom:4px;">COMMUNITY POOL — SOLANA</div>
-        <div id="jp-amount" style="font-size:32px;font-weight:900;color:#ffdd00;letter-spacing:1px;line-height:1;min-height:38px;display:flex;align-items:center;justify-content:center;text-shadow:0 0 20px rgba(255,220,0,.6);">
-          <span style="width:22px;height:22px;border:2px solid rgba(255,170,0,.4);border-top-color:#ffaa00;border-radius:50%;display:inline-block;animation:jpSpin .8s linear infinite;"></span>
-        </div>
-        <div id="jp-usd" style="font-size:12px;font-weight:700;color:#ff9900;margin-top:4px;"></div>
-        <div id="jp-err" style="font-size:8px;color:#ff8888;margin-top:2px;min-height:0;"></div>
+      <!-- jackpot amount BIG -->
+      <div style="padding:14px 14px 8px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(255,180,0,.1) 0%,transparent 70%);">
+        <div style="font-size:10px;letter-spacing:2px;color:rgba(255,200,80,.6);text-transform:uppercase;margin-bottom:4px;">JACKPOT PRIZE</div>
+        <div style="font-size:38px;font-weight:900;color:#ffd700;letter-spacing:1px;line-height:1;text-shadow:0 0 20px rgba(255,200,0,.5);">100K</div>
+        <div style="font-size:14px;font-weight:700;color:#ffaa00;margin-top:2px;">$ANAL TOKENS</div>
+        <div id="jp-usd" style="font-size:12px;color:#ff9900;margin-top:3px;font-weight:600;"></div>
+        <div style="font-size:8px;color:rgba(255,170,0,.5);margin-top:3px;letter-spacing:1px;">SPONSORED BY ANALTENA TEAM</div>
       </div>
 
-      <!-- coins -->
-      <div id="jp-coins" style="height:28px;position:relative;overflow:hidden;"></div>
+      <!-- coins rain -->
+      <div id="jp-coins" style="height:24px;position:relative;overflow:hidden;"></div>
 
-      <!-- stats row -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:0 8px 8px;">
-        <div style="background:rgba(255,170,0,.1);border:1px solid rgba(255,170,0,.3);border-radius:7px;padding:6px 4px;text-align:center;">
+      <!-- current pool from wallet -->
+      <div style="margin:0 10px 8px;background:rgba(0,0,0,.3);border:1px solid rgba(255,170,0,.2);border-radius:8px;padding:8px 10px;text-align:center;">
+        <div style="font-size:8px;color:rgba(255,170,0,.5);letter-spacing:1px;margin-bottom:2px;">CURRENT JACKPOT WALLET</div>
+        <div id="jp-amount" style="font-size:20px;font-weight:900;color:#ffcc44;display:flex;align-items:center;justify-content:center;min-height:26px;">
+          <span style="width:16px;height:16px;border:2px solid rgba(255,170,0,.3);border-top-color:#ffaa00;border-radius:50%;display:inline-block;animation:jpSpin .8s linear infinite;"></span>
+        </div>
+        <div style="font-size:8px;color:rgba(255,170,0,.4);margin-top:1px;">$ANAL in pool wallet</div>
+      </div>
+
+      <!-- stats -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:0 10px 8px;">
+        <div style="background:rgba(255,170,0,.08);border:1px solid rgba(255,170,0,.2);border-radius:7px;padding:6px 4px;text-align:center;">
           <div id="jp-players" style="font-size:13px;font-weight:900;color:#ffcc00;">—</div>
-          <div style="font-size:7px;color:#ffaa0099;letter-spacing:.5px;margin-top:1px;">ONLINE</div>
+          <div style="font-size:7px;color:rgba(255,170,0,.5);letter-spacing:.5px;margin-top:1px;">ONLINE</div>
         </div>
-        <div style="background:rgba(255,100,0,.1);border:1px solid rgba(255,100,0,.3);border-radius:7px;padding:6px 4px;text-align:center;">
+        <div style="background:rgba(255,100,0,.08);border:1px solid rgba(255,100,0,.2);border-radius:7px;padding:6px 4px;text-align:center;">
           <div id="jp-rate" style="font-size:13px;font-weight:900;color:#ff8844;">—</div>
-          <div style="font-size:7px;color:#ff880099;letter-spacing:.5px;margin-top:1px;">$ANAL/M</div>
+          <div style="font-size:7px;color:rgba(255,100,0,.5);letter-spacing:.5px;margin-top:1px;">$ANAL/M</div>
         </div>
-        <div style="background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.3);border-radius:7px;padding:6px 4px;text-align:center;">
+        <div style="background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.2);border-radius:7px;padding:6px 4px;text-align:center;">
           <div style="font-size:13px;font-weight:900;color:#c084fc;">143</div>
-          <div style="font-size:7px;color:#a855f799;letter-spacing:.5px;margin-top:1px;">WINNERS</div>
+          <div style="font-size:7px;color:rgba(168,85,247,.5);letter-spacing:.5px;margin-top:1px;">PLAYED</div>
         </div>
       </div>
 
-      <!-- CTA button -->
-      <div style="padding:0 8px 8px;">
-        <div style="background:linear-gradient(90deg,#ff6600,#ffcc00,#ff6600);background-size:200% auto;border-radius:8px;padding:8px;text-align:center;cursor:pointer;animation:jpBtnShine 2s linear infinite;" onclick="gmSelectGame('wheel',document.getElementById('gmcard-wheel'))">
-          <div style="font-size:11px;font-weight:900;color:#000;letter-spacing:1px;">🏆 WIN 50,000 $ANAL</div>
-          <div style="font-size:8px;color:rgba(0,0,0,.6);margin-top:1px;">10% of every kill → pool</div>
+      <!-- CTA -->
+      <div style="padding:0 10px 8px;">
+        <div onclick="gmSelectGame('wheel',document.getElementById('gmcard-wheel'))" style="background:linear-gradient(90deg,#cc6600,#ffaa00,#ffd700,#ffaa00,#cc6600);background-size:200% auto;border-radius:8px;padding:9px;text-align:center;cursor:pointer;animation:jpBtnShine 2s linear infinite;">
+          <div style="font-size:12px;font-weight:900;color:#000;letter-spacing:1px;">🎰 SPIN WHEEL OF FORTUNE</div>
+        </div>
+        <div onclick="gmSelectGame('poker',document.getElementById('gmcard-poker'))" style="margin-top:5px;background:linear-gradient(90deg,#003300,#006600,#009900,#006600,#003300);border-radius:8px;padding:8px;text-align:center;cursor:pointer;border:1px solid #00aa44;">
+          <div style="font-size:11px;font-weight:900;color:#00ff44;letter-spacing:1px;">♠ PLAY VIDEO POKER</div>
         </div>
       </div>
 
-      <!-- rules compact -->
-      <div style="margin:0 8px 8px;background:rgba(255,170,0,.06);border:1px solid rgba(255,170,0,.15);border-radius:7px;padding:7px 10px;">
-        <div style="font-size:8px;color:#ffcc77;line-height:1.8;">
-          🏆 JACKPOT: <b style="color:#ffdd00;">50,000 $ANAL</b> sponsored by Analtena<br>
-          🔥 All bets burned to <b style="color:#ff6644;">Solana Burn Address</b><br>
-          🏅 Best score this week wins the jackpot
+      <!-- rules -->
+      <div style="margin:0 10px 8px;background:rgba(255,170,0,.05);border:1px solid rgba(255,170,0,.12);border-radius:7px;padding:7px 10px;">
+        <div style="font-size:9px;color:#ffcc77;line-height:1.9;">
+          🏆 <b style="color:#ffd700;">100,000 $ANAL</b> prize from Analtena<br>
+          🔥 All bets → <b style="color:#ff8844;">Burn Address</b> (verifiable)<br>
+          🏅 Best score this week wins jackpot
         </div>
       </div>
 
-      <!-- status -->
-      <div style="border-top:1px solid rgba(255,170,0,.15);padding:4px 10px;display:flex;justify-content:space-between;align-items:center;">
-        <a href="https://solscan.io/account/1nc1nerator11111111111111111111111111111111" target="_blank" style="font-size:7px;color:#ff884488;letter-spacing:.5px;text-decoration:none;">🔥 BURN: 1nc1nerator...1111</a>
-        <span onclick="jpFetch()" style="font-size:7px;color:#ffaa0066;cursor:pointer;letter-spacing:.5px;">↺ REFRESH</span>
+      <!-- burn address -->
+      <div style="border-top:1px solid rgba(255,170,0,.12);padding:5px 10px;display:flex;justify-content:space-between;align-items:center;">
+        <a href="https://solscan.io/account/1nc1nerator11111111111111111111111111111111" target="_blank" style="font-size:7px;color:rgba(255,100,0,.6);letter-spacing:.5px;text-decoration:none;">🔥 BURN: 1nc1nerator...1111</a>
+        <span onclick="jpFetch()" style="font-size:7px;color:rgba(255,170,0,.4);cursor:pointer;">↺</span>
       </div>
+      <div id="jp-err" style="font-size:8px;color:#ff8888;text-align:center;padding:0 10px 4px;min-height:0;"></div>
+      <div id="jp-status" style="display:none;"></div>
     </div>
     <!-- ══ END JACKPOT ══ -->
 
@@ -4327,10 +4336,10 @@ header {
       <div id="gcenter-shooter" style="display:none;width:100%;height:100%;flex-direction:column;overflow:hidden;background:#06080d;position:relative;"></div>
 
       <!-- WHEEL OF FORTUNE CENTER -->
-      <div id="gcenter-wheel" style="display:none;width:100%;height:100%;flex-direction:column;overflow-y:auto;align-items:center;background:#0a0300;"></div>
+      <div id="gcenter-wheel" style="display:none;width:100%;height:100%;flex-direction:column;overflow-y:auto;align-items:center;background:#0a0300;min-height:0;"></div>
 
       <!-- VIDEO POKER CENTER -->
-      <div id="gcenter-poker" style="display:none;width:100%;height:100%;flex-direction:column;overflow-y:auto;align-items:center;background:#030a03;"></div>
+      <div id="gcenter-poker" style="display:none;width:100%;height:100%;flex-direction:column;overflow-y:auto;align-items:center;background:#030a03;min-height:0;"></div>
 
     </div>
 
@@ -8130,6 +8139,17 @@ body.celebration-active {
   position:fixed;
   width:100%;
 }
+
+/* Desktop: casino games fill full area */
+@media (min-width: 768px) {
+  #gcenter-wheel, #gcenter-poker {
+    justify-content: flex-start !important;
+  }
+  #gcenter-wheel > div, #gcenter-poker > div {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
 </style>
 
 
@@ -10693,7 +10713,7 @@ function buildTickerHTML(d) {
     '<span class="ticker-item"><span style="color:' + srcColor + ';font-size:8px;font-weight:800;letter-spacing:.08em;">' + src + '</span></span>' +
     jpItem +
     '<span class="ticker-item"><span style="font-size:11px;font-weight:800;color:#ff8844;letter-spacing:.5px;">🔥 ALL BETS → BURN ADDRESS</span></span>' +
-    '<span class="ticker-item"><span style="font-size:11px;font-weight:800;color:#ffd700;letter-spacing:.5px;">🏆 JACKPOT: 50,000 $ANAL — SPONSORED BY ANALTENA</span></span>' +
+    '<span class="ticker-item"><span style="font-size:11px;font-weight:800;color:#ffd700;letter-spacing:.5px;">🏆 JACKPOT: 100,000 $ANAL — SPONSORED BY ANALTENA</span></span>' +
     '<span class="ticker-item"><span style="font-size:11px;font-weight:800;color:#aa88ff;letter-spacing:.5px;">♠ WHEEL OF FORTUNE & VIDEO POKER — PLAY NOW</span></span>';
 
   return core + core;
@@ -11262,7 +11282,7 @@ function saResetAll() {
 
   // JACKPOT starts at 0, grows only from real wallet data
   // Starting pool: ~$100 USD worth of ANAL
-  var JP_START = 10000; // 10,000 $ANAL = ~$11 USD at $0.0011
+  var JP_START = 100000; // 10,000 $ANAL = ~$11 USD at $0.0011
 
   window.jpFetch=function(){
     var st=document.getElementById('jp-status');
@@ -11626,7 +11646,7 @@ window.initShooterGame=function(container){
     ctx.textAlign='center'; ctx.fillStyle='#ffd700'; ctx.font='bold 10px Courier New';
     var jp=window._jpBalanceForTicker||0;
     var jpStr=jp>1e6?(jp/1e6).toFixed(2)+'M $ANAL':jp>1e3?(jp/1e3).toFixed(1)+'K $ANAL':Math.round(jp)+' $ANAL';
-    ctx.fillText('🏆 JACKPOT: 50,000 $ANAL — ALL BETS BURNED 🔥',W/2,H-9);
+    ctx.fillText('🏆 JACKPOT: 100,000 $ANAL — ALL BETS BURNED 🔥',W/2,H-9);
   }
 
   // ── Draw Menu ──
@@ -11655,7 +11675,7 @@ window.initShooterGame=function(container){
     ctx.font='11px Courier New'; ctx.fillStyle='#ffcc88';
     ctx.fillText('Entry: 2,000 $ANAL per week',W/2,H*.35+22);
     ctx.fillStyle='rgba(255,150,0,.7)';
-    ctx.fillText('WIN 50,000 $ANAL — Sponsored by Analtena Team',W/2,H*.35+38);
+    ctx.fillText('WIN 100,000 $ANAL — Sponsored by Analtena Team',W/2,H*.35+38);
 
     // Token legend
     var items=[['💰','100 pts'],['💎','300 pts'],['🔥','50 pts'],['⚡','NITRO!'],['🛡','Shield'],['💀','HAZARD']];
@@ -11852,7 +11872,7 @@ window.initWheelGame=function(container){
   function mkAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();}
   function beep(f,d,v,t){mkAC();var o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(v||.07,AC.currentTime);g.gain.linearRampToValueAtTime(0,AC.currentTime+d);o.start();o.stop(AC.currentTime+d+.02);}
 
-  var jp=((window._jpBalanceForTicker||10000)/1000).toFixed(1);
+  var jp=((window._jpBalanceForTicker||100000)/1000).toFixed(1);
   container.innerHTML='<div style="background:linear-gradient(90deg,#8b0000,#cc2200,#ff4400,#cc2200,#8b0000);padding:10px 16px;text-align:center;width:100%;border-radius:10px 10px 0 0;"><div style="font-size:9px;letter-spacing:3px;color:rgba(255,215,0,.7);">LAS VEGAS PRESENTS</div><div style="font-size:20px;font-weight:900;color:#ffd700;letter-spacing:3px;">🎰 WHEEL OF FORTUNE</div></div>'+
     '<div style="background:#1a0800;padding:8px;text-align:center;width:100%;border-bottom:1px solid #cc880030;"><div style="font-size:9px;letter-spacing:2px;color:#cc8800;">🏆 JACKPOT POOL</div><div id="wjp" style="font-size:24px;font-weight:900;color:#ffd700;">'+jp+'K $ANAL</div><div style="font-size:9px;color:#ff9900;"><span style="color:#ff4444;">● LIVE</span></div></div>'+
     '<div style="position:relative;padding:20px 0 8px;text-align:center;width:100%;"><div style="position:absolute;top:4px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:28px solid #ffd700;z-index:10;"></div><canvas id="wh-cv" width="280" height="280" style="border-radius:50%;border:5px solid #ffd700;box-shadow:0 0 20px rgba(255,215,0,.3);margin-top:22px;display:block;margin-left:auto;margin-right:auto;"></canvas></div>'+
@@ -11867,7 +11887,7 @@ window.initWheelGame=function(container){
     '<div style="margin:0 16px 16px;background:#100600;border:1px solid #cc880020;border-radius:8px;padding:8px 12px;width:calc(100% - 32px);font-family:Courier New,monospace;">'+
     '<div style="font-size:9px;color:#cc8800;margin-bottom:5px;text-align:center;letter-spacing:1px;">PRIZE TABLE</div>'+
     '<div style="display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:9px;">'+
-    '<span style="color:#ffd700;font-weight:700;">🏆 JACKPOT</span><span style="color:#ffd700;text-align:right;">50,000 $ANAL (2000+ only)</span>'+
+    '<span style="color:#ffd700;font-weight:700;">🏆 JACKPOT</span><span style="color:#ffd700;text-align:right;">100,000 $ANAL (2000+ only)</span>'+
     '<span style="color:#ff8866;">10x WIN</span><span style="color:#ff8866;text-align:right;">10x your bet</span>'+
     '<span style="color:#ffaa88;">5x WIN</span><span style="color:#ffaa88;text-align:right;">5x your bet</span>'+
     '<span style="color:#cc8844;">3x WIN</span><span style="color:#cc8844;text-align:right;">3x your bet</span>'+
@@ -11980,7 +12000,7 @@ window.initPokerGame=function(container){
   var cardsH='';
   for(var ci=0;ci<5;ci++)cardsH+='<div id="pk-c'+ci+'" onclick="pkToggle('+ci+')" style="width:60px;height:90px;border-radius:7px;background:#fff;border:2px solid #ddd;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:all .15s;flex-shrink:0;"><div id="pk-cv'+ci+'" style="font-size:15px;font-weight:900;line-height:1;">?</div><div id="pk-cs'+ci+'" style="font-size:19px;line-height:1;">?</div></div>';
 
-  var jp2=((window._jpBalanceForTicker||10000)/1000).toFixed(1);
+  var jp2=((window._jpBalanceForTicker||100000)/1000).toFixed(1);
   container.innerHTML='<div style="background:linear-gradient(90deg,#002200,#004400,#006600,#004400,#002200);padding:10px 16px;text-align:center;width:100%;border-radius:10px 10px 0 0;"><div style="font-size:9px;letter-spacing:3px;color:rgba(0,255,80,.5);">HIGH STAKES CASINO</div><div style="font-size:20px;font-weight:900;color:#00ff44;letter-spacing:3px;">♠ VIDEO POKER ♠</div></div>'+
     '<div style="background:#001a00;padding:8px;text-align:center;width:100%;border-bottom:1px solid #00660030;"><div style="font-size:9px;letter-spacing:2px;color:#009900;">🏆 ROYAL FLUSH JACKPOT</div><div id="pkjp" style="font-size:22px;font-weight:900;color:#00ff44;">'+jp2+'K $ANAL</div><div style="font-size:9px;color:#009900;"><span style="color:#ff4444;">● LIVE</span> — Royal Flush only with 2000+ bet</div></div>'+
     '<div id="pk-rank" style="min-height:30px;display:flex;align-items:center;justify-content:center;padding:7px;font-family:Courier New,monospace;font-size:11px;color:rgba(0,200,60,.4);letter-spacing:1px;">PLACE YOUR BET AND DEAL</div>'+
@@ -11995,7 +12015,7 @@ window.initPokerGame=function(container){
     '<div style="margin:0 16px 16px;background:#001200;border:1px solid #00440020;border-radius:8px;padding:8px 12px;width:calc(100% - 32px);font-family:Courier New,monospace;">'+
     '<div style="font-size:9px;color:#009900;margin-bottom:5px;text-align:center;">PAY TABLE</div>'+
     '<div style="display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:9px;">'+
-    '<span style="color:#00ff44;font-weight:700;">Royal Flush</span><span style="color:#ffd700;text-align:right;">50,000 $ANAL 🏆</span>'+
+    '<span style="color:#00ff44;font-weight:700;">Royal Flush</span><span style="color:#ffd700;text-align:right;">100,000 $ANAL 🏆</span>'+
     '<span style="color:#00cc44;">Straight Flush</span><span style="color:#00ff88;text-align:right;">50x</span>'+
     '<span style="color:#00aa44;">Four of a Kind</span><span style="color:#00dd66;text-align:right;">25x</span>'+
     '<span style="color:#009933;">Full House</span><span style="color:#00bb44;text-align:right;">9x</span>'+
