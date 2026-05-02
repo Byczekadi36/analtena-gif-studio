@@ -6986,7 +6986,7 @@ async function verifyDeposit() {
   // Loading state
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Weryfikuję...'; btn.style.background = 'rgba(123,97,255,0.5)'; }
   status.style.color = 'var(--muted)';
-  status.textContent = '🔍 Connecting to Solana mainnet...';
+  status.textContent = '🔍 Checking transaction on X1 blockchain...';
 
   let amount = 0;
   let txFound = false;
@@ -7009,8 +7009,12 @@ async function verifyDeposit() {
 
     // Fallback: direct RPC (may work if CORS allowed)
     if (!txFound) {
+      status.textContent = '🔍 Łączę z X1 RPC...';
+      // CORS-friendly RPC endpoints for Solana mainnet
       const RPC_ENDPOINTS = [
+        'https://solana-mainnet.g.alchemy.com/v2/demo',
         'https://api.mainnet-beta.solana.com',
+        'https://rpc.ankr.com/solana',
         'https://solana-api.projectserum.com',
         'https://rpc.mainnet.x1.xyz',
         'https://xolana.xen.network'
@@ -7018,94 +7022,74 @@ async function verifyDeposit() {
 
       for (const rpc of RPC_ENDPOINTS) {
         try {
-          const rpcName = rpc.includes('mainnet-beta') ? 'Solana mainnet' : 
-                         rpc.includes('serum') ? 'Solana backup' :
-                         rpc.includes('x1.xyz') ? 'X1 Network' : 'X1 backup';
-          status.textContent = '🔍 Trying ' + rpcName + '...';
+          status.textContent = '🔍 Checking Solana blockchain...';
           const resp = await fetch(rpc, {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
             body: JSON.stringify({
               jsonrpc:'2.0', id:1,
               method:'getTransaction',
-              params:[hash, {encoding:'jsonParsed', commitment:'confirmed', maxSupportedTransactionVersion:0}]
+              params:[hash, {encoding:'jsonParsed', commitment:'finalized', maxSupportedTransactionVersion:0}]
             })
           });
+          if (!resp.ok) continue;
           const data = await resp.json();
           if (!data.result) continue;
 
           const tx = data.result;
           txFound = true;
 
-          // ══ UNIVERSAL TOKEN DETECTION ══
-          // Detects ANY $ANAL token movement in TX — works with burn address, 
-          // regular transfers, spl burns etc.
-          const pre = tx?.meta?.preTokenBalances || [];
+          const pre  = tx?.meta?.preTokenBalances  || [];
           const post = tx?.meta?.postTokenBalances || [];
 
-          // Method 1: Find largest token DECREASE (sender spent tokens)
-          // This works regardless of destination address
+          // ── Metoda 1: Spadek salda nadawcy (najlepsza dla burn address) ──
+          // Szukamy konta które STRACIŁO tokeny — niezależnie dokąd poszły
           for (const preB of pre) {
             const postB = post.find(p => p.accountIndex === preB.accountIndex);
-            const preAmt = parseFloat(preB?.uiTokenAmount?.uiAmount || 0);
+            const preAmt  = parseFloat(preB?.uiTokenAmount?.uiAmount || 0);
             const postAmt = parseFloat(postB?.uiTokenAmount?.uiAmount || 0);
             const diff = preAmt - postAmt;
-            if (diff > 0 && diff > amount) {
+            if (diff > 0 && Math.floor(diff) > amount) {
               amount = Math.floor(diff);
             }
           }
 
-          // Method 2: Find largest token INCREASE (receiver got tokens)
-          // Backup if decrease method fails
+          // ── Metoda 2: Wzrost salda odbiorcy ──
           if (amount === 0) {
             for (const postB of post) {
               const preB = pre.find(p => p.accountIndex === postB.accountIndex);
-              const preAmt = parseFloat(preB?.uiTokenAmount?.uiAmount || 0);
+              const preAmt  = parseFloat(preB?.uiTokenAmount?.uiAmount || 0);
               const postAmt = parseFloat(postB?.uiTokenAmount?.uiAmount || 0);
               const diff = postAmt - preAmt;
-              if (diff > 0 && diff > amount) {
+              if (diff > 0 && Math.floor(diff) > amount) {
                 amount = Math.floor(diff);
               }
             }
           }
 
-          // Method 3: Parse instructions — any transfer or burn
+          // ── Metoda 3: Instrukcje transfer/burn ──
           if (amount === 0) {
             const allIx = [
-              ...(tx?.transaction?.message?.instructions||[]),
-              ...(tx?.meta?.innerInstructions?.flatMap(i=>i.instructions)||[])
+              ...(tx?.transaction?.message?.instructions || []),
+              ...(tx?.meta?.innerInstructions?.flatMap(i => i.instructions) || [])
             ];
             for (const ix of allIx) {
-              const t = ix.parsed?.type||'';
-              const info = ix.parsed?.info||{};
-              if (t==='transferChecked'||t==='transfer'||t==='burn'||t==='burnChecked') {
-                const raw = parseInt(info.tokenAmount?.amount||info.amount||'0');
-                const dec = parseInt(info.tokenAmount?.decimals||info.tokenAmount?.decimals||9);
-                const parsed = dec > 0 ? Math.floor(raw/Math.pow(10,dec)) : raw;
+              const t    = ix.parsed?.type || '';
+              const info = ix.parsed?.info || {};
+              if (['transfer','transferChecked','burn','burnChecked'].includes(t)) {
+                const raw = parseInt(info.tokenAmount?.amount || info.amount || '0');
+                const dec = parseInt(info.tokenAmount?.decimals ?? 9);
+                const parsed = dec > 0 ? Math.floor(raw / Math.pow(10, dec)) : raw;
                 if (parsed > amount) amount = parsed;
               }
             }
           }
-          // Debug: log what we found
-          console.log('[Verify] TX found on', rpc, '| amount:', amount, '| pre:', pre.length, 'post:', post.length);
-          if (amount === 0) {
-            console.log('[Verify] pre balances:', JSON.stringify(pre));
-            console.log('[Verify] post balances:', JSON.stringify(post));
-            // Show all instructions for debug
-            const allIxDebug = [
-              ...(tx?.transaction?.message?.instructions||[]),
-              ...(tx?.meta?.innerInstructions?.flatMap(i=>i.instructions)||[])
-            ];
-            console.log('[Verify] instructions:', JSON.stringify(allIxDebug.slice(0,5)));
-          }
+
           break;
-        } catch(e) { 
-          console.log('[Verify] RPC error:', rpc, e.message);
-          continue; 
-        }
+        } catch(e) { continue; }
       }
     }
-  } catch(e) { console.log('[Verify] outer error:', e); }
+  } catch(e) {}
 
   // Restore button
   if (btn) { btn.disabled = false; btn.textContent = '✅ Verify deposit'; btn.style.background = 'linear-gradient(135deg,var(--neon3),var(--neon2))'; }
@@ -7113,20 +7097,6 @@ async function verifyDeposit() {
   if (!txFound) {
     status.style.color = 'var(--neon2)';
     status.textContent = '❌ Cannot connect to blockchain. Check your internet or try again.';
-    return;
-  }
-
-  // If TX found but amount=0, show manual entry option
-  if (txFound && amount === 0) {
-    status.style.color = '#ffaa00';
-    status.innerHTML = '⚠️ TX found but could not read amount automatically.<br>' +
-      '<small style="color:rgba(255,200,100,.6);">Check browser console (F12) for details.<br>' +
-      'How many $ANAL did you send? Enter manually:</small><br>' +
-      '<div style="display:flex;gap:6px;margin-top:6px;">' +
-      '<input id="manual-amount" type="number" placeholder="e.g. 10000" style="flex:1;background:#0d0700;border:1px solid #cc880050;border-radius:6px;padding:6px 8px;color:#ffd700;font-family:Courier New,monospace;font-size:12px;outline:none;">' +
-      '<button onclick="manualVerify('' + hash + '')" style="padding:6px 12px;background:linear-gradient(90deg,#664400,#cc8800);border:none;border-radius:6px;color:#000;font-weight:900;font-size:11px;cursor:pointer;font-family:Courier New,monospace;">CLAIM</button>' +
-      '</div>';
-    if (btn) { btn.disabled = false; btn.textContent = '✅ Verify deposit'; btn.style.background = 'linear-gradient(135deg,var(--neon3),var(--neon2))'; }
     return;
   }
 
@@ -7172,7 +7142,7 @@ async function verifyDeposit() {
     if (balEl) { balEl.style.transform='scale(1.3)'; balEl.style.color='#fff'; setTimeout(()=>{balEl.style.transform='';balEl.style.color='var(--amber)';},600); }
   } else {
     status.style.color = 'var(--neon2)';
-    status.textContent = '❌ No $ANAL token transfer found in this TX. Make sure this is a $ANAL token transaction on Solana mainnet.';
+    status.textContent = '❌ No $ANAL transfer to our address found in this TX. Make sure you sent to the correct address.';
   }
 }
 
@@ -12456,55 +12426,6 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(updateVipStatus, 500);
 });
 
-
-// Manual amount entry fallback
-window.manualVerify = function(hash) {
-  const manualAmt = parseInt(document.getElementById('manual-amount')?.value || 0);
-  if (!manualAmt || manualAmt < 1) {
-    toast('❌ Enter valid amount!');
-    return;
-  }
-  
-  const used = JSON.parse(localStorage.getItem('anal_used_tx') || '[]');
-  if (used.includes(hash)) {
-    toast('❌ TX already used!');
-    return;
-  }
-  
-  // Calculate points with bonus
-  var points = 0;
-  if (manualAmt >= 10000)      points = Math.floor(manualAmt * 13);
-  else if (manualAmt >= 5000)  points = Math.floor(manualAmt * 12);
-  else if (manualAmt >= 1000)  points = Math.floor(manualAmt * 11);
-  else                          points = manualAmt * 10;
-
-  // VIP tracking
-  var vipData = JSON.parse(localStorage.getItem('anal_vip_data') || '{"totalAnal":0,"totalUsd":0,"burns":[]}');
-  var analPrice = window._analLivePrice || 0.0011;
-  vipData.totalAnal += manualAmt;
-  vipData.totalUsd = (vipData.totalUsd || 0) + manualAmt * analPrice;
-  vipData.burns.push({hash, amount: manualAmt, usd: (manualAmt * analPrice).toFixed(2), ts: Date.now()});
-  localStorage.setItem('anal_vip_data', JSON.stringify(vipData));
-
-  used.push(hash);
-  localStorage.setItem('anal_used_tx', JSON.stringify(used));
-
-  const newBal = getCredits() + points;
-  setCredits(newBal);
-
-  const status = document.getElementById('deposit-status');
-  if (status) {
-    status.style.color = 'var(--neon)';
-    status.textContent = '✅ Manually verified! +' + points.toLocaleString() + ' pts for ' + manualAmt.toLocaleString() + ' $ANAL burned';
-  }
-  toast('🔥 +' + points.toLocaleString() + ' game points added!');
-  document.getElementById('tx-hash-input').value = '';
-  updateVipStatus && updateVipStatus();
-  renderBurnHistory && renderBurnHistory();
-  
-  const balEl = document.getElementById('credits-balance');
-  if (balEl) { balEl.style.transform='scale(1.3)'; balEl.style.color='#fff'; setTimeout(()=>{balEl.style.transform='';balEl.style.color='var(--amber)';},600); }
-};
 </script>
 
 </body>
