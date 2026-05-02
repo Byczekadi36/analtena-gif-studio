@@ -3751,16 +3751,37 @@ header {
         <div style="font-size:11px;color:var(--muted);margin-top:4px;">Top up and spend in the app</div>
       </div>
 
-      <!-- BALANCE -->
+      <!-- BALANCE + VIP -->
       <div style="background:rgba(255,183,0,0.08);border:1px solid rgba(255,183,0,0.3);border-radius:12px;padding:14px;text-align:center;margin-bottom:14px;">
         <div style="font-size:11px;color:var(--amber);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Your balance</div>
-        <div style="font-size:28px;font-weight:800;color:var(--amber)" id="credits-balance">0</div>
-        <div style="font-size:11px;color:var(--muted)">$ANAL Credits</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+          <div style="font-size:28px;font-weight:800;color:var(--amber)" id="credits-balance">0</div>
+          <div id="vip-badge" style="display:none;background:linear-gradient(90deg,#ff6600,#ffaa00);border-radius:8px;padding:2px 8px;font-size:10px;font-weight:900;color:#000;letter-spacing:1px;">🔥 VIP</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted)">$ANAL Game Points</div>
+        <div id="vip-total-burned" style="font-size:10px;color:rgba(255,170,0,.4);margin-top:4px;display:none;"></div>
+      </div>
+
+      <!-- POINTS INFO -->
+      <div style="background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.15);border-radius:10px;padding:10px 12px;margin-bottom:12px;">
+        <div style="font-size:9px;font-weight:700;color:#ffd700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px;">🎮 HOW POINTS WORK</div>
+        <div style="font-size:9px;color:rgba(255,200,100,.7);line-height:1.8;">
+          🔥 Burn $ANAL → get game points<br>
+          <span style="color:#ffaa00;font-weight:700;">1 $ANAL = 10 points</span><br>
+          <span style="color:#ffd700;">1,000 $ANAL = 10,000 pts (+bonus)</span><br>
+          <span style="color:#ff9900;">5,000 $ANAL = 60,000 pts (+20%)</span><br>
+          <span style="color:#ff6600;">10,000 $ANAL = 130,000 pts (+30%)</span>
+        </div>
+        <div style="margin-top:8px;border-top:1px solid rgba(255,215,0,.1);padding-top:7px;font-size:9px;color:rgba(255,170,0,.5);line-height:1.7;">
+          🎰 Jackpot spin costs <b style="color:#ffd700;">2,500 pts</b><br>
+          🃏 Jackpot poker hand costs <b style="color:#00ff88;">2,500 pts</b><br>
+          🏆 HIGH ROLLER costs <b style="color:#ff6644;">10,000 pts</b> (3x chance)
+        </div>
       </div>
 
       <!-- DEPOSIT -->
       <div style="background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:14px;">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🔥 Top Up Account</div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">🔥 Burn $ANAL → Get Game Points</div><div style="font-size:9px;color:rgba(255,170,0,.5);margin-bottom:8px;">All tokens sent to Solana Burn Address — permanently destroyed 🔥</div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Send $ANAL to this address:</div>
         <div id="addr-box" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:var(--font-m);font-size:10px;color:var(--neon);word-break:break-all;margin-bottom:10px;cursor:pointer;transition:all .2s;" onclick="copyAddress()">1nc1nerator11111111111111111111111111111111</div>
         <button id="copy-addr-btn" onclick="copyAddress()" style="width:100%;padding:8px;background:rgba(0,255,204,0.1);border:1px solid rgba(0,255,204,0.3);border-radius:8px;color:var(--neon);font-size:12px;font-family:var(--font-d);cursor:pointer;margin-bottom:12px;transition:all .2s;">📋 Copy address</button>
@@ -6942,12 +6963,40 @@ async function verifyDeposit() {
   if (amount > 0) {
     used.push(hash);
     localStorage.setItem('anal_used_tx', JSON.stringify(used));
-    const newBal = getCredits() + amount;
+
+    // ── POINT BONUS SYSTEM ──
+    var points = 0;
+    if (amount >= 10000)     points = Math.floor(amount * 13); // +30%
+    else if (amount >= 5000) points = Math.floor(amount * 12); // +20%
+    else if (amount >= 1000) points = Math.floor(amount * 11); // +10%
+    else                     points = amount * 10;              // base 10pts/$ANAL
+
+    // ── VIP TRACKING — track total burned per wallet ──
+    var vipData = JSON.parse(localStorage.getItem('anal_vip_data') || '{"totalAnal":0,"totalUsd":0,"burns":[]}');
+    var analPrice = window._analLivePrice || 0.0011;
+    var usdValue = amount * analPrice;
+    vipData.totalAnal += amount;
+    vipData.totalUsd = (vipData.totalUsd || 0) + usdValue;
+    vipData.burns.push({hash: hash, amount: amount, usd: usdValue.toFixed(2), ts: Date.now()});
+    localStorage.setItem('anal_vip_data', JSON.stringify(vipData));
+
+    // ── JACKPOT THRESHOLD — show VIP badge after 50% of jackpot value ──
+    // Jackpot = 100,000 $ANAL ≈ $110 USD. 50% = $55 USD
+    var JP_THRESHOLD_USD = 55;
+    if (vipData.totalUsd >= JP_THRESHOLD_USD) {
+      var vipBadge = document.getElementById('vip-badge');
+      var vipInfo = document.getElementById('vip-total-burned');
+      if (vipBadge) vipBadge.style.display = 'inline-block';
+      if (vipInfo) { vipInfo.style.display = 'block'; vipInfo.textContent = '🔥 Total burned: $' + vipData.totalUsd.toFixed(2) + ' — Enhanced jackpot chance active!'; }
+    }
+
+    const newBal = getCredits() + points;
     setCredits(newBal);
     document.getElementById('tx-hash-input').value = '';
     status.style.color = 'var(--neon)';
-    status.textContent = `✅ Dodano ${amount.toLocaleString()} ANAL Credits!`;
-    toast(`🎉 Topped up ${amount.toLocaleString()} ANAL Credits!`);
+    status.textContent = '✅ Burned ' + amount.toLocaleString() + ' $ANAL → +'  + points.toLocaleString() + ' game points!';
+    toast('🔥 Burned ' + amount.toLocaleString() + ' $ANAL! +' + points.toLocaleString() + ' pts');
+    updateVipStatus();
     // Flash balance
     const balEl = document.getElementById('credits-balance');
     if (balEl) { balEl.style.transform='scale(1.3)'; balEl.style.color='#fff'; setTimeout(()=>{balEl.style.transform='';balEl.style.color='var(--amber)';},600); }
@@ -11879,10 +11928,10 @@ window.initWheelGame=function(container){
     '<div id="wh-result" style="min-height:32px;text-align:center;padding:6px;font-family:Courier New,monospace;font-size:13px;color:rgba(255,200,80,.5);">SPIN TO WIN</div>'+
     '<div style="padding:0 16px;width:100%;"><div style="font-size:9px;letter-spacing:2px;color:#cc8800;margin-bottom:6px;text-align:center;">CHOOSE BET</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:10px;" id="wh-bets">'+
-    '<button onclick="wSetBet(500,this)" style="background:#1a0800;border:1px solid #cc880050;color:#ffaa00;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">500</button>'+
-    '<button onclick="wSetBet(1000,this)" style="background:#1a0800;border:1px solid #cc880050;color:#ffaa00;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">1,000</button>'+
-    '<button onclick="wSetBet(2000,this)" style="background:rgba(255,215,0,.18);border:2px solid #ffd700;color:#ffd700;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">2,000 ⭐</button>'+
-    '<button onclick="wSetBet(5000,this)" style="background:#1a0800;border:1px solid #cc880050;color:#ffaa00;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">5,000</button>'+
+    '<button onclick="wSetBet(500,this)" style="background:#1a0800;border:1px solid #cc880050;color:#ffaa00;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">500 pts</button>'+
+    '<button onclick="wSetBet(1000,this)" style="background:#1a0800;border:1px solid #cc880050;color:#ffaa00;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">1K pts</button>'+
+    '<button onclick="wSetBet(2500,this)" style="background:rgba(255,215,0,.18);border:2px solid #ffd700;color:#ffd700;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">2.5K 🏆</button>'+
+    '<button onclick="wSetBet(10000,this)" style="background:rgba(255,80,0,.15);border:1px solid #ff6600;color:#ff9944;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">10K 👑</button>'+
     '</div><button id="wh-spin" onclick="wSpin()" style="width:100%;padding:13px;background:linear-gradient(90deg,#cc4400,#ff6600,#cc4400);border:none;border-radius:10px;color:#fff;font-family:Courier New,monospace;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:2px;margin-bottom:12px;">🎰 SPIN — 2,000 $ANAL</button></div>'+
     '<div style="margin:0 16px 16px;background:#100600;border:1px solid #cc880020;border-radius:8px;padding:8px 12px;width:calc(100% - 32px);font-family:Courier New,monospace;">'+
     '<div style="font-size:9px;color:#cc8800;margin-bottom:5px;text-align:center;letter-spacing:1px;">PRIZE TABLE</div>'+
@@ -11926,7 +11975,16 @@ window.initWheelGame=function(container){
 
   function pick(){
     var pool=SEGS.map(function(s,i){return{s:s,i:i};});
-    if(bet<2000)pool=pool.filter(function(x){return x.s.label!=='JACKPOT';});
+    // Jackpot eligible only with 2500+ bet (jackpot tier)
+    var jpWeight = (bet>=2500) ? (1 * (window.getVipMultiplier ? window.getVipMultiplier() : 1)) : 0;
+    // High roller extra 3x
+    if(bet>=10000) jpWeight = jpWeight * 3;
+    // Apply dynamic jackpot weight
+    pool = pool.map(function(x){ 
+      if(x.s.label==='JACKPOT') return {s:Object.assign({},x.s,{w:Math.max(0,jpWeight)}),i:x.i};
+      return x;
+    });
+    if(jpWeight===0) pool=pool.filter(function(x){return x.s.label!=='JACKPOT';});
     var tw=pool.reduce(function(s,x){return s+x.s.w;},0);
     var r=Math.random()*tw,acc=0;
     for(var j=0;j<pool.length;j++){acc+=pool[j].s.w;if(r<acc)return pool[j].i;}
@@ -11939,7 +11997,10 @@ window.initWheelGame=function(container){
   }
 
   window.wSpin=function(){
-    if(spinning)return;mkAC();spinning=true;
+    if(spinning)return;
+    // Deduct points before spinning
+    if(window.spendPoints && !window.spendPoints(bet)){return;}
+    mkAC();spinning=true;
     var sb=document.getElementById('wh-spin');if(sb){sb.textContent='SPINNING...';sb.style.opacity='.5';}
     document.getElementById('wh-result').innerHTML='';
     var ti=pick();
@@ -11985,7 +12046,7 @@ window.initPokerGame=function(container){
     var counts={};vals.forEach(function(v){counts[v]=(counts[v]||0)+1;});
     var cv=Object.values(counts).sort(function(a,b){return b-a;});
     var isRoyal=flush&&JSON.stringify(vals)==='[8,9,10,11,12]';
-    if(isRoyal)return{name:'ROYAL FLUSH',mult:bet>=2000?'JACKPOT':200};
+    if(isRoyal)return{name:'ROYAL FLUSH',mult:bet>=2500?'JACKPOT':200};
     if(flush&&(straight||aceLow))return{name:'STRAIGHT FLUSH',mult:50};
     if(cv[0]===4)return{name:'FOUR OF A KIND',mult:25};
     if(cv[0]===3&&cv[1]===2)return{name:'FULL HOUSE',mult:9};
@@ -12007,10 +12068,10 @@ window.initPokerGame=function(container){
     '<div style="display:flex;justify-content:center;gap:6px;padding:0 10px 26px;width:100%;">'+cardsH+'</div>'+
     '<div style="padding:0 16px;width:100%;"><div style="font-size:9px;letter-spacing:2px;color:#009900;margin-bottom:6px;text-align:center;">CHOOSE BET</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:10px;" id="pk-bets">'+
-    '<button onclick="pkSetBet(500,this)" style="background:#001500;border:1px solid #00660040;color:#009900;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">500</button>'+
-    '<button onclick="pkSetBet(1000,this)" style="background:#001500;border:1px solid #00660040;color:#009900;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">1,000</button>'+
-    '<button onclick="pkSetBet(2000,this)" style="background:rgba(0,255,68,.1);border:2px solid #00ff44;color:#00ff44;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">2,000 ⭐</button>'+
-    '<button onclick="pkSetBet(5000,this)" style="background:#001500;border:1px solid #00660040;color:#009900;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">5,000</button>'+
+    '<button onclick="pkSetBet(500,this)" style="background:#001500;border:1px solid #00660040;color:#009900;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">500 pts</button>'+
+    '<button onclick="pkSetBet(1000,this)" style="background:#001500;border:1px solid #00660040;color:#009900;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">1K pts</button>'+
+    '<button onclick="pkSetBet(2500,this)" style="background:rgba(0,255,68,.1);border:2px solid #00ff44;color:#00ff44;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">2.5K 🏆</button>'+
+    '<button onclick="pkSetBet(10000,this)" style="background:rgba(0,100,0,.2);border:1px solid #00aa44;color:#00ff88;font-family:Courier New,monospace;font-size:10px;font-weight:700;padding:7px 4px;border-radius:6px;cursor:pointer;">10K 👑</button>'+
     '</div><button id="pk-action" onclick="pkAction()" style="width:100%;padding:13px;background:linear-gradient(90deg,#003300,#005500,#003300);border:2px solid #00aa44;border-radius:10px;color:#00ff44;font-family:Courier New,monospace;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:2px;margin-bottom:12px;">🃏 DEAL — 2,000 $ANAL</button></div>'+
     '<div style="margin:0 16px 16px;background:#001200;border:1px solid #00440020;border-radius:8px;padding:8px 12px;width:calc(100% - 32px);font-family:Courier New,monospace;">'+
     '<div style="font-size:9px;color:#009900;margin-bottom:5px;text-align:center;">PAY TABLE</div>'+
@@ -12063,6 +12124,8 @@ window.initPokerGame=function(container){
   window.pkAction=function(){
     mkAC();
     if(phase==='idle'){
+      // Deduct points on deal
+      if(window.spendPoints && !window.spendPoints(bet)){return;}
       phase='hold';held=[false,false,false,false,false];
       buildDeck();shuffle();hand=deck.slice(0,5);renderCards();
       var rk=document.getElementById('pk-rank');if(rk)rk.innerHTML='<span style="color:rgba(0,200,60,.6);">CLICK CARDS TO HOLD — THEN DRAW</span>';
@@ -12101,6 +12164,76 @@ window.gmBack=function(){
   if(sc&&sc._stopShooter){sc._stopShooter();sc._shooterInit=false;sc.innerHTML='';}
   if(typeof _origGmBack==='function') _origGmBack();
 };
+
+// ══════════════════════════════════════════════
+// VIP SYSTEM — Hidden jackpot multiplier
+// ══════════════════════════════════════════════
+
+function getVipData() {
+  return JSON.parse(localStorage.getItem('anal_vip_data') || '{"totalAnal":0,"totalUsd":0,"burns":[]}');
+}
+
+function getVipMultiplier() {
+  var vip = getVipData();
+  var usd = vip.totalUsd || 0;
+  // Hidden multiplier tiers — player doesn't see these numbers
+  if (usd >= 500) return 50;
+  if (usd >= 200) return 20;
+  if (usd >= 100) return 10;
+  if (usd >= 50)  return 5;
+  if (usd >= 10)  return 2;
+  return 1;
+}
+
+function updateVipStatus() {
+  var vip = getVipData();
+  var analPrice = window._analLivePrice || 0.0011;
+  var JP_THRESHOLD_USD = 55; // 50% of $110 jackpot value
+  var badge = document.getElementById('vip-badge');
+  var info = document.getElementById('vip-total-burned');
+
+  if (vip.totalUsd >= JP_THRESHOLD_USD) {
+    if (badge) badge.style.display = 'inline-block';
+    if (info) {
+      info.style.display = 'block';
+      info.textContent = '🔥 Burned: $' + vip.totalUsd.toFixed(2) + ' — Enhanced jackpot odds active!';
+    }
+  }
+}
+
+// ── Modified jackpot weight picker — uses VIP multiplier ──
+function getJackpotWeight(baseBet) {
+  var mult = getVipMultiplier();
+  // Base jackpot weight = 1. With VIP multiplier up to 50
+  // Only eligible if bet >= 2500 pts (jackpot tier)
+  if (baseBet < 2500) return 0; // not eligible
+  return 1 * mult; // 1x to 50x jackpot chance
+}
+
+// ── Points cost for game bets ──
+var BET_COSTS = {
+  mini:       500,   // no jackpot
+  standard:   1000,  // no jackpot
+  jackpot:    2500,  // jackpot eligible
+  highroller: 10000  // jackpot 3x extra
+};
+
+function canAffordBet(cost) {
+  return getCredits() >= cost;
+}
+
+function spendPoints(cost) {
+  var bal = getCredits();
+  if (bal < cost) { toast('❌ Not enough points! Top up in Credits tab.'); return false; }
+  setCredits(bal - cost);
+  return true;
+}
+
+// Initialize VIP status on load
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(updateVipStatus, 500);
+});
+
 </script>
 
 </body>
