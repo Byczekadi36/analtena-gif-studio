@@ -3890,7 +3890,7 @@ header {
       <!-- CTA button -->
       <div style="padding:0 8px 8px;">
         <div style="background:linear-gradient(90deg,#ff6600,#ffcc00,#ff6600);background-size:200% auto;border-radius:8px;padding:8px;text-align:center;cursor:pointer;animation:jpBtnShine 2s linear infinite;" onclick="gmSelectGame('wheel',document.getElementById('gmcard-wheel'))">
-          <div style="font-size:11px;font-weight:900;color:#000;letter-spacing:1px;">🏎️ RACE FOR JACKPOT</div>
+          <div style="font-size:11px;font-weight:900;color:#000;letter-spacing:1px;">🏆 WIN 50,000 $ANAL</div>
           <div style="font-size:8px;color:rgba(0,0,0,.6);margin-top:1px;">10% of every kill → pool</div>
         </div>
       </div>
@@ -3898,15 +3898,15 @@ header {
       <!-- rules compact -->
       <div style="margin:0 8px 8px;background:rgba(255,170,0,.06);border:1px solid rgba(255,170,0,.15);border-radius:7px;padding:7px 10px;">
         <div style="font-size:8px;color:#ffcc77;line-height:1.8;">
-          🏆 Top scorer wins <b style="color:#ffdd00;">40%</b> weekly<br>
-          🔄 40% rolls to next week<br>
-          🔥 20% burned forever
+          🏆 JACKPOT: <b style="color:#ffdd00;">50,000 $ANAL</b> sponsored by Analtena<br>
+          🔥 All bets burned to <b style="color:#ff6644;">Solana Burn Address</b><br>
+          🏅 Best score this week wins the jackpot
         </div>
       </div>
 
       <!-- status -->
       <div style="border-top:1px solid rgba(255,170,0,.15);padding:4px 10px;display:flex;justify-content:space-between;align-items:center;">
-        <span id="jp-status" style="font-size:7px;color:#ffaa0088;letter-spacing:.5px;">CONNECTING...</span>
+        <a href="https://solscan.io/account/1nc1nerator11111111111111111111111111111111" target="_blank" style="font-size:7px;color:#ff884488;letter-spacing:.5px;text-decoration:none;">🔥 BURN: 1nc1nerator...1111</a>
         <span onclick="jpFetch()" style="font-size:7px;color:#ffaa0066;cursor:pointer;letter-spacing:.5px;">↺ REFRESH</span>
       </div>
     </div>
@@ -10692,8 +10692,9 @@ function buildTickerHTML(d) {
     '</span>' +
     '<span class="ticker-item"><span style="color:' + srcColor + ';font-size:8px;font-weight:800;letter-spacing:.08em;">' + src + '</span></span>' +
     jpItem +
-    '<span class="ticker-item"><span style="font-size:8px;color:#ff8844;letter-spacing:.5px;">🔥 10% of every game → JACKPOT POOL</span></span>' +
-    '<span class="ticker-item"><span style="font-size:8px;color:#aa88ff;letter-spacing:.5px;">🏆 TOP SCORER WINS 40% WEEKLY</span></span>';
+    '<span class="ticker-item"><span style="font-size:11px;font-weight:800;color:#ff8844;letter-spacing:.5px;">🔥 ALL BETS → BURN ADDRESS</span></span>' +
+    '<span class="ticker-item"><span style="font-size:11px;font-weight:800;color:#ffd700;letter-spacing:.5px;">🏆 JACKPOT: 50,000 $ANAL — SPONSORED BY ANALTENA</span></span>' +
+    '<span class="ticker-item"><span style="font-size:11px;font-weight:800;color:#aa88ff;letter-spacing:.5px;">♠ WHEEL OF FORTUNE & VIDEO POKER — PLAY NOW</span></span>';
 
   return core + core;
 }
@@ -11625,7 +11626,7 @@ window.initShooterGame=function(container){
     ctx.textAlign='center'; ctx.fillStyle='#ffd700'; ctx.font='bold 10px Courier New';
     var jp=window._jpBalanceForTicker||0;
     var jpStr=jp>1e6?(jp/1e6).toFixed(2)+'M $ANAL':jp>1e3?(jp/1e3).toFixed(1)+'K $ANAL':Math.round(jp)+' $ANAL';
-    ctx.fillText('🏆 JACKPOT POOL: '+jpStr+' — TOP SCORE THIS WEEK WINS 60%',W/2,H-9);
+    ctx.fillText('🏆 JACKPOT: 50,000 $ANAL — ALL BETS BURNED 🔥',W/2,H-9);
   }
 
   // ── Draw Menu ──
@@ -11654,7 +11655,7 @@ window.initShooterGame=function(container){
     ctx.font='11px Courier New'; ctx.fillStyle='#ffcc88';
     ctx.fillText('Entry: 2,000 $ANAL per week',W/2,H*.35+22);
     ctx.fillStyle='rgba(255,150,0,.7)';
-    ctx.fillText('60% of pool → top scorer • 20% burns 🔥',W/2,H*.35+38);
+    ctx.fillText('WIN 50,000 $ANAL — Sponsored by Analtena Team',W/2,H*.35+38);
 
     // Token legend
     var items=[['💰','100 pts'],['💎','300 pts'],['🔥','50 pts'],['⚡','NITRO!'],['🛡','Shield'],['💀','HAZARD']];
@@ -11866,7 +11867,7 @@ window.initWheelGame=function(container){
     '<div style="margin:0 16px 16px;background:#100600;border:1px solid #cc880020;border-radius:8px;padding:8px 12px;width:calc(100% - 32px);font-family:Courier New,monospace;">'+
     '<div style="font-size:9px;color:#cc8800;margin-bottom:5px;text-align:center;letter-spacing:1px;">PRIZE TABLE</div>'+
     '<div style="display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:9px;">'+
-    '<span style="color:#ffd700;font-weight:700;">🏆 JACKPOT</span><span style="color:#ffd700;text-align:right;">Full Pool (2000+ only)</span>'+
+    '<span style="color:#ffd700;font-weight:700;">🏆 JACKPOT</span><span style="color:#ffd700;text-align:right;">50,000 $ANAL (2000+ only)</span>'+
     '<span style="color:#ff8866;">10x WIN</span><span style="color:#ff8866;text-align:right;">10x your bet</span>'+
     '<span style="color:#ffaa88;">5x WIN</span><span style="color:#ffaa88;text-align:right;">5x your bet</span>'+
     '<span style="color:#cc8844;">3x WIN</span><span style="color:#cc8844;text-align:right;">3x your bet</span>'+
@@ -11994,7 +11995,7 @@ window.initPokerGame=function(container){
     '<div style="margin:0 16px 16px;background:#001200;border:1px solid #00440020;border-radius:8px;padding:8px 12px;width:calc(100% - 32px);font-family:Courier New,monospace;">'+
     '<div style="font-size:9px;color:#009900;margin-bottom:5px;text-align:center;">PAY TABLE</div>'+
     '<div style="display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:9px;">'+
-    '<span style="color:#00ff44;font-weight:700;">Royal Flush</span><span style="color:#ffd700;text-align:right;">JACKPOT 🏆</span>'+
+    '<span style="color:#00ff44;font-weight:700;">Royal Flush</span><span style="color:#ffd700;text-align:right;">50,000 $ANAL 🏆</span>'+
     '<span style="color:#00cc44;">Straight Flush</span><span style="color:#00ff88;text-align:right;">50x</span>'+
     '<span style="color:#00aa44;">Four of a Kind</span><span style="color:#00dd66;text-align:right;">25x</span>'+
     '<span style="color:#009933;">Full House</span><span style="color:#00bb44;text-align:right;">9x</span>'+
