@@ -4087,7 +4087,7 @@ header {
         </div>
         <div class="gm-card-info">
           <div class="gm-card-name">SCRATCH CARD</div>
-          <div class="gm-card-desc">Zdrap 3 pola • od 100 pts</div>
+          <div class="gm-card-desc">Zdrap i wygrywaj • od 100 pts</div>
           <span class="gm-card-badge" style="background:rgba(255,105,180,.15);color:#ff69b4;border-color:rgba(255,105,180,.35);">🏆 JACKPOT</span>
         </div>
       </div>
@@ -4156,7 +4156,7 @@ header {
         <div class="gm-card-info">
           <div class="gm-card-name">CRASH GAME</div>
           <div class="gm-card-desc">Wypłać przed crashem • od 100 pts</div>
-          <span class="gm-card-badge" style="background:rgba(255,68,0,.15);color:#ff6622;border-color:rgba(255,68,0,.35);">🏆 JACKPOT 100x</span>
+          <span class="gm-card-badge" style="background:rgba(255,68,0,.15);color:#ff6622;border-color:rgba(255,68,0,.35);">🏆 100x JACKPOT</span>
         </div>
       </div>
       <!-- WHEEL OF FORTUNE -->
@@ -8403,7 +8403,7 @@ function selectGameCenter(id,btn){
     if(pc){ pc.style.display='flex'; if(!pc._init){ pc._init=true; setTimeout(function(){ window.initPokerGame(pc); },150); } }
   }
   if(id==='crash'){var cc=document.getElementById('gcenter-crash');if(cc){cc.style.display='flex';if(!cc._init){cc._init=true;setTimeout(function(){window.initCrashGame(cc);},150);}}}
-  initGamesPanel();
+    initGamesPanel();
 }
 
 
@@ -11081,133 +11081,137 @@ function saResetAll() {
 window.initScratchGame=function(container){
   container.innerHTML='';
   var isMob=window.innerWidth<700;
-  container.style.cssText='width:100%;min-height:100%;display:flex;flex-direction:column;align-items:center;background:#080005;padding:16px;overflow-y:auto;font-family:Courier New,monospace;';
+  container.style.cssText='width:100%;min-height:100%;display:flex;flex-direction:column;align-items:center;background:#080005;padding:16px;overflow-y:auto;font-family:Courier New,monospace;box-sizing:border-box;';
   var SYMS=[
-    {em:'🦉',name:'ANALTENA',val:'JACKPOT'},
-    {em:'💰',name:'MONEY',val:50},
-    {em:'🔥',name:'FIRE',val:20},
-    {em:'💎',name:'DIAMOND',val:15},
-    {em:'⭐',name:'STAR',val:10},
-    {em:'🍀',name:'CLOVER',val:5}
+    {em:'🦉',val:'JACKPOT',col:'#ffd700'},
+    {em:'💰',val:50,col:'#ffaa00'},
+    {em:'🔥',val:20,col:'#ff8844'},
+    {em:'💎',val:15,col:'#88ddff'},
+    {em:'⭐',val:10,col:'#ffdd44'},
+    {em:'🍀',val:5,col:'#44ff88'}
   ];
-  var bet=100,AC=null,scratching=false;
+  var bet=100,AC=null,busy=false;
   function mkAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();}
-  function beep(f,d,v,t){mkAC();var o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(v||.07,AC.currentTime);g.gain.linearRampToValueAtTime(0,AC.currentTime+d);o.start();o.stop(AC.currentTime+d+.02);}
-  function getSaldo(){return window.getCredits?window.getCredits():0;}
-  function updSaldo(){var el=document.getElementById('sc-saldo');if(el)el.textContent=getSaldo().toLocaleString()+' pts';}
-  function render(){
-    container.innerHTML=
-      '<div style="width:100%;max-width:480px;">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'+
-        '<div style="font-size:'+(isMob?'18':'22')+'px;font-weight:900;color:#ff69b4;letter-spacing:2px;">🎟️ SCRATCH CARD</div>'+
-        '<div style="background:rgba(255,105,180,.08);border:1px solid rgba(255,105,180,.25);border-radius:8px;padding:5px 12px;text-align:center;">'+
-          '<div style="font-size:8px;color:rgba(255,105,180,.5);letter-spacing:1px;">BALANCE</div>'+
-          '<div id="sc-saldo" style="font-size:16px;font-weight:900;color:#ff69b4;">0 pts</div>'+
-        '</div>'+
-      '</div>'+
-      '<div style="background:linear-gradient(90deg,#1a0010,#300020);border:2px solid #ff69b4;border-radius:10px;padding:10px;text-align:center;margin-bottom:14px;">'+
-        '<div style="font-size:9px;color:rgba(255,105,180,.5);letter-spacing:2px;">🏆 JACKPOT</div>'+
-        '<div style="font-size:24px;font-weight:900;color:#ffd700;">100,000 $ANAL</div>'+
-        '<div style="font-size:9px;color:rgba(255,150,0,.5);">3x 🦉 Analtena = JACKPOT (VIP only)</div>'+
-      '</div>'+
-      '<div id="sc-result" style="min-height:44px;background:rgba(0,0,0,.3);border:1px solid rgba(255,105,180,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;padding:8px;font-size:18px;font-weight:900;color:rgba(255,105,180,.4);">Buy a card to play!</div>'+
-      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;" id="sc-grid"></div>'+
-      '<div style="font-size:9px;color:rgba(255,105,180,.5);letter-spacing:2px;margin-bottom:6px;text-align:center;">CHOOSE BET</div>'+
-      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;" id="sc-bets">'+
-        '<button onclick="scSetBet(100,this)" style="background:rgba(255,105,180,.15);border:2px solid #ff69b4;color:#ff69b4;font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:8px 4px;border-radius:7px;cursor:pointer;">100 pts</button>'+
-        '<button onclick="scSetBet(250,this)" style="background:rgba(255,105,180,.06);border:1px solid rgba(255,105,180,.3);color:rgba(255,105,180,.7);font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:8px 4px;border-radius:7px;cursor:pointer;">250 pts</button>'+
-        '<button onclick="scSetBet(500,this)" style="background:rgba(255,105,180,.06);border:1px solid rgba(255,105,180,.3);color:rgba(255,105,180,.7);font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:8px 4px;border-radius:7px;cursor:pointer;">500 🏆</button>'+
-        '<button onclick="scSetBet(1000,this)" style="background:rgba(255,105,180,.06);border:1px solid rgba(255,105,180,.3);color:rgba(255,105,180,.7);font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:8px 4px;border-radius:7px;cursor:pointer;">1K 👑</button>'+
-      '</div>'+
-      '<button id="sc-buy" onclick="scBuy()" style="width:100%;padding:14px;background:linear-gradient(90deg,#880044,#cc0066,#880044);border:none;border-radius:10px;color:#fff;font-family:Courier New,monospace;font-size:16px;font-weight:900;cursor:pointer;letter-spacing:2px;">🎟️ BUY CARD — 100 pts</button>'+
-      '<div style="background:#0d0008;border:1px solid rgba(255,105,180,.15);border-radius:10px;padding:12px;margin-top:12px;">'+
-        '<div style="font-size:10px;color:rgba(255,105,180,.6);margin-bottom:8px;text-align:center;letter-spacing:2px;font-weight:700;">PRIZE TABLE</div>'+
-        '<div style="display:grid;grid-template-columns:auto 1fr auto;gap:5px 10px;font-size:12px;align-items:center;">'+
-          '<span style="font-size:16px;">🦉🦉🦉</span><span style="color:#ffd700;font-weight:900;">JACKPOT</span><span style="color:#ffd700;text-align:right;font-weight:900;">100K $ANAL</span>'+
-          '<span style="font-size:16px;">💰💰💰</span><span style="color:#ffaa00;">3x Money</span><span style="color:#ffaa00;text-align:right;">50x bet</span>'+
-          '<span style="font-size:16px;">🔥🔥🔥</span><span style="color:#ff8844;">3x Fire</span><span style="color:#ff8844;text-align:right;">20x bet</span>'+
-          '<span style="font-size:16px;">💎💎💎</span><span style="color:#88ddff;">3x Diamond</span><span style="color:#88ddff;text-align:right;">15x bet</span>'+
-          '<span style="font-size:16px;">⭐⭐</span><span style="color:#ffdd44;">2x any same</span><span style="color:#ffdd44;text-align:right;">3x bet</span>'+
-          '<span style="font-size:16px;">❌</span><span style="color:#554444;">No match</span><span style="color:#554444;text-align:right;">Lose</span>'+
-        '</div>'+
-      '</div>'+
-      '</div>';
-    updSaldo();
-    buildGrid(null);
-  }
-  function buildGrid(revealed){
-    var grid=document.getElementById('sc-grid');if(!grid)return;grid.innerHTML='';
-    for(var i=0;i<9;i++){
-      var cell=document.createElement('div');
-      cell.style.cssText='aspect-ratio:1;background:linear-gradient(135deg,#2a0020,#1a0015);border:2px solid rgba(255,105,180,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:28px;';
-      if(revealed&&revealed[i]){cell.textContent=revealed[i].em;cell.style.background='linear-gradient(135deg,#1a0010,#0d0008)';}
-      else{cell.innerHTML='<div style="font-size:10px;color:rgba(255,105,180,.4);font-family:Courier New,monospace;">SCRATCH</div>';}
-      grid.appendChild(cell);
-    }
-  }
+  function beep(f,d,v){mkAC();var o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.type='square';o.frequency.value=f;g.gain.setValueAtTime(v||.06,AC.currentTime);g.gain.linearRampToValueAtTime(0,AC.currentTime+d);o.start();o.stop(AC.currentTime+d+.05);}
+  function bal(){return window.getCredits?window.getCredits():0;}
+  function updBal(){var el=document.getElementById('sc-bal');if(el)el.textContent=bal().toLocaleString()+' pts';}
   function pickSym(){
-    var r=Math.random();
-    var vipOk=window.getVipMultiplier&&window.getVipMultiplier()>0&&bet>=500;
-    if(vipOk&&r<0.0002) return SYMS[0];
-    if(r<0.08) return SYMS[1];
-    if(r<0.18) return SYMS[2];
-    if(r<0.28) return SYMS[3];
-    if(r<0.42) return SYMS[4];
+    var r=Math.random(),vip=window.getVipMultiplier&&window.getVipMultiplier()>0&&bet>=500;
+    if(vip&&r<0.0003)return SYMS[0];
+    if(r<0.10)return SYMS[1];
+    if(r<0.22)return SYMS[2];
+    if(r<0.34)return SYMS[3];
+    if(r<0.50)return SYMS[4];
     return SYMS[5];
   }
+
+  container.innerHTML=
+    '<div style="width:100%;max-width:460px;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'+
+      '<div style="font-size:'+(isMob?'17':'21')+'px;font-weight:900;color:#ff69b4;letter-spacing:2px;">🎟️ SCRATCH CARD</div>'+
+      '<div style="background:rgba(255,105,180,.08);border:1px solid rgba(255,105,180,.25);border-radius:8px;padding:4px 12px;text-align:center;">'+
+        '<div style="font-size:8px;color:rgba(255,105,180,.5);letter-spacing:1px;">BALANCE</div>'+
+        '<div id="sc-bal" style="font-size:15px;font-weight:900;color:#ff69b4;">0 pts</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="background:linear-gradient(90deg,#1a0010,#280018);border:2px solid #ff69b4;border-radius:10px;padding:10px;text-align:center;margin-bottom:12px;">'+
+      '<div style="font-size:9px;color:rgba(255,105,180,.5);letter-spacing:2px;">🏆 JACKPOT</div>'+
+      '<div style="font-size:22px;font-weight:900;color:#ffd700;">100,000 $ANAL</div>'+
+      '<div style="font-size:9px;color:rgba(255,150,0,.5);">3x 🦉 Analtena = JACKPOT (VIP + 500+ pts bet)</div>'+
+    '</div>'+
+    '<div id="sc-res" style="min-height:46px;background:rgba(0,0,0,.3);border:1px solid rgba(255,105,180,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;padding:8px;font-size:17px;font-weight:900;color:rgba(255,105,180,.4);">Buy a card to play!</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;" id="sc-grid"></div>'+
+    '<div style="font-size:9px;color:rgba(255,105,180,.5);letter-spacing:2px;margin-bottom:6px;text-align:center;">CHOOSE BET</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;" id="sc-bets">'+
+      '<button onclick="scSetBet(100,this)" style="background:rgba(255,105,180,.15);border:2px solid #ff69b4;color:#ff69b4;font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:8px 4px;border-radius:7px;cursor:pointer;">100 pts</button>'+
+      '<button onclick="scSetBet(250,this)" style="background:rgba(255,105,180,.06);border:1px solid rgba(255,105,180,.3);color:rgba(255,105,180,.6);font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:8px 4px;border-radius:7px;cursor:pointer;">250 pts</button>'+
+      '<button onclick="scSetBet(500,this)" style="background:rgba(255,105,180,.06);border:1px solid rgba(255,105,180,.3);color:rgba(255,105,180,.6);font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:8px 4px;border-radius:7px;cursor:pointer;">500 🏆</button>'+
+      '<button onclick="scSetBet(1000,this)" style="background:rgba(255,105,180,.06);border:1px solid rgba(255,105,180,.3);color:rgba(255,105,180,.6);font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:8px 4px;border-radius:7px;cursor:pointer;">1K 👑</button>'+
+    '</div>'+
+    '<button id="sc-buy" onclick="scBuy()" style="width:100%;padding:13px;background:linear-gradient(90deg,#880044,#cc0066,#880044);border:none;border-radius:10px;color:#fff;font-family:Courier New,monospace;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:2px;margin-bottom:12px;">🎟️ BUY CARD — 100 pts</button>'+
+    '<div style="background:#0d0008;border:1px solid rgba(255,105,180,.12);border-radius:10px;padding:12px;">'+
+      '<div style="font-size:10px;color:rgba(255,105,180,.5);margin-bottom:8px;text-align:center;letter-spacing:2px;font-weight:700;">PRIZE TABLE</div>'+
+      '<div style="display:grid;grid-template-columns:auto 1fr auto;gap:5px 10px;font-size:12px;align-items:center;">'+
+        '<span style="font-size:18px;">🦉🦉🦉</span><span style="color:#ffd700;font-weight:900;">3x Analtena</span><span style="color:#ffd700;text-align:right;font-weight:900;">JACKPOT</span>'+
+        '<span style="font-size:18px;">💰💰💰</span><span style="color:#ffaa00;">3x Money Bag</span><span style="color:#ffaa00;text-align:right;">50x bet</span>'+
+        '<span style="font-size:18px;">🔥🔥🔥</span><span style="color:#ff8844;">3x Fire</span><span style="color:#ff8844;text-align:right;">20x bet</span>'+
+        '<span style="font-size:18px;">💎💎💎</span><span style="color:#88ddff;">3x Diamond</span><span style="color:#88ddff;text-align:right;">15x bet</span>'+
+        '<span style="font-size:18px;">⭐⭐</span><span style="color:#ffdd44;">2x any same</span><span style="color:#ffdd44;text-align:right;">3x bet</span>'+
+        '<span style="font-size:18px;">❌</span><span style="color:#553344;">No match</span><span style="color:#553344;text-align:right;">Lose</span>'+
+      '</div>'+
+    '</div>'+
+    '</div>';
+
+  // Build grid
+  var grid=document.getElementById('sc-grid');
+  for(var i=0;i<9;i++){
+    var cell=document.createElement('div');
+    cell.style.cssText='aspect-ratio:1;background:linear-gradient(135deg,#2a0020,#1a0015);border:2px solid rgba(255,105,180,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;transition:all .2s;';
+    cell.innerHTML='<span style="font-size:11px;color:rgba(255,105,180,.4);font-family:Courier New,monospace;letter-spacing:1px;">TAP</span>';
+    grid.appendChild(cell);
+  }
+  updBal();
+
   window.scSetBet=function(amount,btn){
     bet=amount;
-    container.querySelectorAll('#sc-bets button').forEach(function(b){b.style.background='rgba(255,105,180,.06)';b.style.border='1px solid rgba(255,105,180,.3)';b.style.color='rgba(255,105,180,.7)';});
+    container.querySelectorAll('#sc-bets button').forEach(function(b){b.style.background='rgba(255,105,180,.06)';b.style.border='1px solid rgba(255,105,180,.3)';b.style.color='rgba(255,105,180,.6)';});
     btn.style.background='rgba(255,105,180,.15)';btn.style.border='2px solid #ff69b4';btn.style.color='#ff69b4';
     var bb=document.getElementById('sc-buy');if(bb)bb.textContent='🎟️ BUY CARD — '+amount.toLocaleString()+' pts';
   };
+
   window.scBuy=function(){
-    if(scratching)return;
+    if(busy)return;
+    mkAC();
     if(!window.spendPoints||!window.spendPoints(bet))return;
-    mkAC();scratching=true;updSaldo();
+    busy=true;updBal();
+    // Generate 9 symbols
     var picks=[];for(var i=0;i<9;i++)picks.push(pickSym());
-    var idxs=[0,1,2,3,4,5,6,7,8];idxs.sort(function(){return Math.random()-.5;});
-    var chosen=idxs.slice(0,3);
-    var syms3=chosen.map(function(i){return picks[i];});
-    var counts={};syms3.forEach(function(s){counts[s.em]=(counts[s.em]||0)+1;});
-    var maxC=Math.max.apply(null,Object.values(counts));
-    var winEm=Object.keys(counts).find(function(k){return counts[k]===maxC;});
-    var winObj=SYMS.find(function(s){return s.em===winEm;});
-    var delay=0;
-    chosen.forEach(function(cellIdx,order){
+    // Pick 3 to reveal
+    var all=[0,1,2,3,4,5,6,7,8];all.sort(function(){return Math.random()-.5;});
+    var r3=all.slice(0,3);
+    // Count matches
+    var syms3=r3.map(function(i){return picks[i];});
+    var cnt={};syms3.forEach(function(s){cnt[s.em]=(cnt[s.em]||0)+1;});
+    var maxC=Math.max.apply(null,Object.values(cnt));
+    var winEm=Object.keys(cnt).find(function(k){return cnt[k]===maxC;});
+    var winSym=SYMS.find(function(s){return s.em===winEm;});
+    // Reset grid
+    var grid=container.querySelector('#sc-grid');
+    if(grid){Array.from(grid.children).forEach(function(c){c.innerHTML='<span style="font-size:11px;color:rgba(255,105,180,.4);font-family:Courier New,monospace;letter-spacing:1px;">TAP</span>';c.style.background='linear-gradient(135deg,#2a0020,#1a0015)';});}
+    // Reveal one by one
+    r3.forEach(function(cellIdx,order){
       setTimeout(function(){
-        beep(440+order*110,.06,.06,'square');
-        var grid=document.getElementById('sc-grid');
+        beep(440+order*150,.07,.06);
         if(grid&&grid.children[cellIdx]){
-          grid.children[cellIdx].textContent=picks[cellIdx].em;
-          grid.children[cellIdx].style.background='linear-gradient(135deg,#1a0010,#0d0008)';
+          grid.children[cellIdx].innerHTML='<span style="font-size:32px;">'+picks[cellIdx].em+'</span>';
+          grid.children[cellIdx].style.background='linear-gradient(135deg,#200010,#100008)';
+          grid.children[cellIdx].style.borderColor=picks[cellIdx].col||'rgba(255,105,180,.6)';
         }
         if(order===2){
           setTimeout(function(){
-            var res=document.getElementById('sc-result');
-            scratching=false;
-            if(maxC>=3&&winObj&&winObj.val==='JACKPOT'){
-              if(res)res.innerHTML='<div style="font-size:18px;color:#ffd700;">🏆 3x 🦉 JACKPOT!!! 100,000 $ANAL!</div>';
-              [523,659,784,1047].forEach(function(f,i){beep(f,i*.1,.12,'square');});
-            } else if(maxC>=3&&winObj){
-              var won=bet*winObj.val;window.setCredits&&window.setCredits(getSaldo()+won);
-              if(res)res.innerHTML='<div style="font-size:18px;color:#ffaa00;">🎉 3x '+winObj.em+'! +'+won.toLocaleString()+' pts</div>';
-              beep(660,.1,.1,'square');
+            var res=document.getElementById('sc-res');
+            busy=false;
+            if(maxC>=3&&winSym&&winSym.val==='JACKPOT'){
+              if(res)res.innerHTML='<span style="color:#ffd700;font-size:18px;">🏆 3x 🦉 JACKPOT!!! 100,000 $ANAL!</span>';
+              [523,659,784,1047].forEach(function(f,i){setTimeout(function(){beep(f,.12,.1);},i*120);});
+            } else if(maxC>=3&&winSym){
+              var w=bet*winSym.val;window.setCredits&&window.setCredits(bal()+w);
+              if(res)res.innerHTML='<span style="color:'+winSym.col+';">🎉 3x '+winSym.em+' — +'+w.toLocaleString()+' pts!</span>';
+              beep(660,.1,.08);
             } else if(maxC>=2){
-              var won2=bet*3;window.setCredits&&window.setCredits(getSaldo()+won2);
-              if(res)res.innerHTML='<div style="font-size:16px;color:#ffdd44;">✨ 2x match! +'+won2.toLocaleString()+' pts</div>';
-              beep(440,.08,.08,'square');
+              var w2=bet*3;window.setCredits&&window.setCredits(bal()+w2);
+              if(res)res.innerHTML='<span style="color:#ffdd44;">✨ 2x match — +'+w2.toLocaleString()+' pts!</span>';
+              beep(440,.08,.07);
             } else {
-              if(res)res.innerHTML='<div style="font-size:16px;color:#882244;">💀 No match — try again!</div>';
-              beep(160,.2,.08,'sawtooth');
+              if(res)res.innerHTML='<span style="color:#882244;">💀 No match — try again!</span>';
+              beep(160,.2,.07);
             }
-            updSaldo();
+            updBal();
           },300);
         }
-      },delay);delay+=600;
+      },order*650);
     });
   };
-  render();
 };
 
 // ══ CRASH GAME ══
@@ -11215,132 +11219,148 @@ window.initCrashGame=function(container){
   container.innerHTML='';
   var isMob=window.innerWidth<700;
   container.style.cssText='width:100%;height:100%;display:flex;flex-direction:column;background:#060000;overflow:hidden;font-family:Courier New,monospace;';
-  var bet=100,phase='idle',mult=1.00,cashout=false,animGo=false;
-  var rAF=null,AC=null,history=[];
+  var bet=100,phase='idle',mult=1.0,cashedAt=false,animGo=false,rAF=null,AC=null;
+  var pts=[],crashAt,t0,hist=[];
   function mkAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();}
-  function beep(f,d,v,t){mkAC();var o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.type=t||'square';o.frequency.value=f;g.gain.setValueAtTime(v||.07,AC.currentTime);g.gain.linearRampToValueAtTime(0,AC.currentTime+d);o.start();o.stop(AC.currentTime+d+.02);}
-  function getSaldo(){return window.getCredits?window.getCredits():0;}
-  function updSaldo(){var el=document.getElementById('cr-saldo');if(el)el.textContent=getSaldo().toLocaleString()+' pts';}
+  function beep(f,d,v){mkAC();var o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.type='square';o.frequency.value=f;g.gain.setValueAtTime(v||.06,AC.currentTime);g.gain.linearRampToValueAtTime(0,AC.currentTime+d);o.start();o.stop(AC.currentTime+d+.05);}
+  function bal(){return window.getCredits?window.getCredits():0;}
+  function updBal(){var el=document.getElementById('cr-bal');if(el)el.textContent=bal().toLocaleString()+' pts';}
   function genCrash(){
-    var vipOk=window.getVipMultiplier&&window.getVipMultiplier()>0&&bet>=500;
-    if(vipOk&&Math.random()<0.0005)return 100.00;
+    var vip=window.getVipMultiplier&&window.getVipMultiplier()>0&&bet>=500;
+    if(vip&&Math.random()<0.0008)return 100;
     var r=Math.random();
-    if(r<0.35)return 1.0+Math.random()*.4;
-    if(r<0.60)return 1.4+Math.random()*.6;
-    if(r<0.78)return 2+Math.random()*3;
-    if(r<0.90)return 5+Math.random()*10;
-    if(r<0.97)return 15+Math.random()*35;
-    return 50+Math.random()*49;
+    if(r<0.33)return 1+(Math.random()*.35);
+    if(r<0.58)return 1.35+(Math.random()*.65);
+    if(r<0.76)return 2+(Math.random()*3);
+    if(r<0.88)return 5+(Math.random()*10);
+    if(r<0.96)return 15+(Math.random()*35);
+    return 50+(Math.random()*49);
   }
+  function updHist(){
+    var el=document.getElementById('cr-hist');if(!el)return;
+    el.innerHTML=hist.map(function(hh){
+      var col=hh.m>=10?'#ffd700':hh.m>=2?'#00ff88':'#ff4444';
+      return '<span style="background:rgba(0,0,0,.5);border:1px solid '+col+'44;border-radius:5px;padding:3px 8px;font-size:11px;font-weight:700;color:'+col+';white-space:nowrap;flex-shrink:0;">'+hh.m.toFixed(2)+'x</span>';
+    }).join('');
+  }
+
   container.innerHTML=
-    '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,68,0,.2);">'+
-      '<div style="font-size:'+(isMob?'16':'20')+'px;font-weight:900;color:#ff4400;letter-spacing:2px;">🚀 CRASH GAME</div>'+
-      '<div style="background:rgba(255,68,0,.08);border:1px solid rgba(255,68,0,.3);border-radius:8px;padding:5px 12px;text-align:center;">'+
-        '<div style="font-size:8px;color:rgba(255,68,0,.5);letter-spacing:1px;">BALANCE</div>'+
-        '<div id="cr-saldo" style="font-size:16px;font-weight:900;color:#ff6622;">0 pts</div>'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(255,68,0,.2);">'+
+      '<div style="font-size:'+(isMob?'15':'19')+'px;font-weight:900;color:#ff4400;letter-spacing:2px;">🚀 CRASH GAME</div>'+
+      '<div style="background:rgba(255,68,0,.08);border:1px solid rgba(255,68,0,.3);border-radius:8px;padding:4px 12px;text-align:center;">'+
+        '<div style="font-size:8px;color:rgba(255,68,0,.5);">BALANCE</div>'+
+        '<div id="cr-bal" style="font-size:15px;font-weight:900;color:#ff6622;">0 pts</div>'+
       '</div>'+
     '</div>'+
     '<div style="flex:1;position:relative;overflow:hidden;">'+
       '<canvas id="cr-cv" style="width:100%;height:100%;display:block;"></canvas>'+
-      '<div id="cr-mult" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:'+(isMob?'52':'68')+'px;font-weight:900;color:#00ff88;text-shadow:0 0 20px rgba(0,255,136,.4);pointer-events:none;">1.00x</div>'+
-      '<div style="position:absolute;top:10px;right:10px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.4);border-radius:8px;padding:4px 10px;text-align:center;">'+
-        '<div style="font-size:8px;color:rgba(255,215,0,.6);">JACKPOT AT</div>'+
-        '<div style="font-size:14px;font-weight:900;color:#ffd700;">100x</div>'+
+      '<div id="cr-mult" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:'+(isMob?'50':'66')+'px;font-weight:900;color:#00ff88;pointer-events:none;text-align:center;">1.00x</div>'+
+      '<div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);border:1px solid rgba(255,215,0,.4);border-radius:7px;padding:4px 10px;text-align:center;">'+
+        '<div style="font-size:8px;color:rgba(255,215,0,.5);">JACKPOT AT</div>'+
+        '<div style="font-size:13px;font-weight:900;color:#ffd700;">100x 🏆</div>'+
       '</div>'+
     '</div>'+
-    '<div style="padding:4px 12px;display:flex;gap:5px;overflow-x:auto;border-top:1px solid rgba(255,68,0,.1);min-height:32px;" id="cr-hist"></div>'+
-    '<div style="padding:10px 16px;border-top:1px solid rgba(255,68,0,.2);">'+
+    '<div id="cr-hist" style="padding:4px 10px;display:flex;gap:5px;overflow-x:auto;border-top:1px solid rgba(255,68,0,.1);min-height:30px;align-items:center;"></div>'+
+    '<div style="padding:10px 14px;border-top:1px solid rgba(255,68,0,.2);">'+
       '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;" id="cr-bets">'+
         '<button onclick="crSetBet(100,this)" style="background:rgba(255,68,0,.2);border:2px solid #ff4400;color:#ff6622;font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:7px 4px;border-radius:7px;cursor:pointer;">100 pts</button>'+
-        '<button onclick="crSetBet(250,this)" style="background:rgba(255,68,0,.08);border:1px solid rgba(255,68,0,.3);color:rgba(255,100,0,.7);font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:7px 4px;border-radius:7px;cursor:pointer;">250 pts</button>'+
-        '<button onclick="crSetBet(500,this)" style="background:rgba(255,68,0,.08);border:1px solid rgba(255,68,0,.3);color:rgba(255,100,0,.7);font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:7px 4px;border-radius:7px;cursor:pointer;">500 🏆</button>'+
-        '<button onclick="crSetBet(1000,this)" style="background:rgba(255,68,0,.08);border:1px solid rgba(255,68,0,.3);color:rgba(255,100,0,.7);font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:7px 4px;border-radius:7px;cursor:pointer;">1K 👑</button>'+
+        '<button onclick="crSetBet(250,this)" style="background:rgba(255,68,0,.07);border:1px solid rgba(255,68,0,.3);color:rgba(255,100,0,.6);font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:7px 4px;border-radius:7px;cursor:pointer;">250 pts</button>'+
+        '<button onclick="crSetBet(500,this)" style="background:rgba(255,68,0,.07);border:1px solid rgba(255,68,0,.3);color:rgba(255,100,0,.6);font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:7px 4px;border-radius:7px;cursor:pointer;">500 🏆</button>'+
+        '<button onclick="crSetBet(1000,this)" style="background:rgba(255,68,0,.07);border:1px solid rgba(255,68,0,.3);color:rgba(255,100,0,.6);font-family:Courier New,monospace;font-size:11px;font-weight:700;padding:7px 4px;border-radius:7px;cursor:pointer;">1K 👑</button>'+
       '</div>'+
       '<button id="cr-btn" onclick="crAction()" style="width:100%;padding:13px;background:linear-gradient(90deg,#660000,#cc2200,#660000);border:none;border-radius:10px;color:#fff;font-family:Courier New,monospace;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:2px;">🚀 BET 100 pts & LAUNCH</button>'+
     '</div>';
+
   var cv=document.getElementById('cr-cv');
   var ctx2=cv.getContext('2d');
-  var pts=[],crashPt,startT;
   function resCV(){var p=cv.parentElement;cv.width=p.offsetWidth||300;cv.height=p.offsetHeight||200;}
   resCV();
-  function drawC(){
+  window.addEventListener('resize',resCV);
+
+  function drawCrash(){
     var W=cv.width,H=cv.height;
     ctx2.clearRect(0,0,W,H);
-    ctx2.strokeStyle='rgba(255,68,0,.06)';ctx2.lineWidth=1;
+    ctx2.strokeStyle='rgba(255,50,0,.05)';ctx2.lineWidth=1;
     for(var x=0;x<W;x+=40){ctx2.beginPath();ctx2.moveTo(x,0);ctx2.lineTo(x,H);ctx2.stroke();}
     for(var y=0;y<H;y+=40){ctx2.beginPath();ctx2.moveTo(0,y);ctx2.lineTo(W,y);ctx2.stroke();}
     if(pts.length<2)return;
     var maxM=Math.max.apply(null,pts.map(function(p){return p.m;}))||2;
-    ctx2.beginPath();ctx2.strokeStyle=cashout&&!animGo?'#ffaa00':'#00ff88';ctx2.lineWidth=3;
+    var lastT=pts[pts.length-1].t||1;
+    ctx2.beginPath();
+    ctx2.strokeStyle=animGo?'#00ff88':'#ff4400';
+    ctx2.lineWidth=3;
     pts.forEach(function(pt,i){
-      var px=(pt.t/(pts[pts.length-1].t||1))*W*.85+W*.05;
-      var py=H-20-((pt.m-1)/(Math.max(maxM,2)-1))*(H-50);
+      var px=W*0.05+(pt.t/lastT)*W*0.88;
+      var py=H-20-((pt.m-1)/Math.max(maxM-1,1))*(H-50);
       i===0?ctx2.moveTo(px,py):ctx2.lineTo(px,py);
     });
     ctx2.stroke();
+    if(animGo&&pts.length>0){
+      var lp=pts[pts.length-1];
+      var lpx=W*0.05+(lp.t/lastT)*W*0.88;
+      var lpy=H-20-((lp.m-1)/Math.max(maxM-1,1))*(H-50);
+      ctx2.font='22px serif';ctx2.textAlign='center';ctx2.textBaseline='middle';
+      ctx2.fillText('🚀',lpx,lpy-14);
+    }
   }
-  function addHist(m,won){
-    history.unshift({m:m,won:won});if(history.length>8)history.pop();
-    var el=document.getElementById('cr-hist');if(!el)return;
-    el.innerHTML=history.map(function(hh){
-      var col=hh.m>=10?'#ffd700':hh.m>=2?'#00ff88':'#ff4444';
-      return '<span style="background:rgba(0,0,0,.4);border:1px solid '+col+'40;border-radius:5px;padding:3px 8px;font-size:11px;font-weight:700;color:'+col+';white-space:nowrap;flex-shrink:0;">'+hh.m.toFixed(2)+'x</span>';
-    }).join('');
-  }
+
   function loop(){
     if(!animGo)return;
-    var elapsed=(performance.now()-startT)/1000;
-    mult=Math.round(Math.pow(1.06,elapsed*10)*100)/100;
+    var elapsed=(performance.now()-t0)/1000;
+    mult=Math.round(Math.pow(1.055,elapsed*10)*100)/100;
     pts.push({t:elapsed,m:mult});
     var mel=document.getElementById('cr-mult');
     if(mel)mel.textContent=mult.toFixed(2)+'x';
-    drawC();
-    if(mult>=crashPt){
+    drawCrash();
+    if(mult>=crashAt){
       animGo=false;
-      var won=cashout?Math.floor(bet*cashout):0;
-      if(won>0){window.setCredits&&window.setCredits(getSaldo()+won);}
-      if(mult>=100){
-        var vok=window.getVipMultiplier&&window.getVipMultiplier()>0&&bet>=500;
-        if(vok&&mel){mel.textContent='🏆 JACKPOT!!!';mel.style.color='#ffd700';}
-      }
-      addHist(mult,won);drawC();
+      var won=cashedAt?Math.floor(bet*cashedAt):0;
+      if(won>0){window.setCredits&&window.setCredits(bal()+won);}
+      hist.unshift({m:mult,won:won});if(hist.length>8)hist.pop();updHist();
+      if(mel){mel.textContent=cashedAt?(cashedAt.toFixed(2)+'x ✅'):(mult.toFixed(2)+'x 💥');mel.style.color=cashedAt?'#00ff88':'#ff2200';}
       phase='idle';
       var btn=document.getElementById('cr-btn');
       if(btn){
-        btn.style.background=cashout?'linear-gradient(90deg,#004400,#007700,#004400)':'linear-gradient(90deg,#660000,#cc2200,#660000)';
-        btn.textContent=cashout?'✅ Cashed '+cashout.toFixed(2)+'x → +'+Math.floor(bet*cashout).toLocaleString()+' pts | 🚀 BET AGAIN':'💥 CRASHED '+mult.toFixed(2)+'x | 🚀 BET AGAIN';
         btn.disabled=false;
+        btn.style.background=cashedAt?'linear-gradient(90deg,#003300,#007700,#003300)':'linear-gradient(90deg,#660000,#cc2200,#660000)';
+        btn.textContent=cashedAt?('✅ +'+won.toLocaleString()+' pts | 🚀 BET AGAIN'):('💥 CRASHED '+mult.toFixed(2)+'x | 🚀 BET AGAIN');
       }
-      if(!cashout)beep(100,.3,.1,'sawtooth');
-      updSaldo();return;
+      if(!cashedAt)beep(100,.3,.08);
+      updBal();drawCrash();return;
     }
     rAF=requestAnimationFrame(loop);
   }
+
   window.crSetBet=function(amount,btn){
     if(phase!=='idle')return;bet=amount;
-    container.querySelectorAll('#cr-bets button').forEach(function(b){b.style.background='rgba(255,68,0,.08)';b.style.border='1px solid rgba(255,68,0,.3)';b.style.color='rgba(255,100,0,.7)';});
+    container.querySelectorAll('#cr-bets button').forEach(function(b){b.style.background='rgba(255,68,0,.07)';b.style.border='1px solid rgba(255,68,0,.3)';b.style.color='rgba(255,100,0,.6)';});
     btn.style.background='rgba(255,68,0,.2)';btn.style.border='2px solid #ff4400';btn.style.color='#ff6622';
     var bb=document.getElementById('cr-btn');if(bb)bb.textContent='🚀 BET '+amount.toLocaleString()+' pts & LAUNCH';
   };
+
   window.crAction=function(){
     mkAC();
     if(phase==='idle'){
       if(!window.spendPoints||!window.spendPoints(bet))return;
-      updSaldo();phase='flying';cashout=false;mult=1.00;pts=[];
-      crashPt=genCrash();startT=performance.now();animGo=true;
+      updBal();phase='flying';cashedAt=false;mult=1.0;pts=[];
+      crashAt=genCrash();t0=performance.now();animGo=true;
+      var mel=document.getElementById('cr-mult');if(mel){mel.style.color='#00ff88';mel.textContent='1.00x';}
       var btn=document.getElementById('cr-btn');
       if(btn){btn.textContent='💥 CASH OUT NOW';btn.style.background='linear-gradient(90deg,#004400,#00aa00,#004400)';}
-      var mel=document.getElementById('cr-mult');if(mel){mel.style.color='#00ff88';}
       loop();
-    } else if(phase==='flying'&&!cashout){
-      cashout=mult;beep(880,.1,.1,'square');
+    } else if(phase==='flying'&&!cashedAt){
+      cashedAt=mult;
+      var won=Math.floor(bet*mult);
+      window.setCredits&&window.setCredits(bal()+won);
+      updBal();beep(880,.12,.1);
       var btn=document.getElementById('cr-btn');
-      if(btn){btn.textContent='💰 Cashed '+mult.toFixed(2)+'x — waiting for crash...';btn.disabled=true;}
+      if(btn){btn.textContent='💰 Cashed '+mult.toFixed(2)+'x — +'+won.toLocaleString()+' pts | Waiting...';btn.disabled=true;}
     }
   };
+
   container._stopCrash=function(){animGo=false;if(rAF)cancelAnimationFrame(rAF);};
-  addHist(2.34,true);addHist(1.12,false);addHist(5.67,true);
-  updSaldo();
+  hist=[{m:2.34,won:true},{m:1.12,won:false},{m:5.67,won:true},{m:1.01,won:false}];
+  updHist();updBal();
 };
 
 
