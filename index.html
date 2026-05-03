@@ -4065,7 +4065,7 @@ header {
   <!-- Prize amount -->
   <div style="padding:14px 12px 8px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(255,200,0,.18) 0%,transparent 70%);">
     <div style="font-size:9px;letter-spacing:3px;color:rgba(255,200,80,.7);text-transform:uppercase;margin-bottom:5px;font-family:Courier New,monospace;">JACKPOT PRIZE</div>
-    <div style="font-size:36px;font-weight:900;color:#ffd700;line-height:1;letter-spacing:1px;text-shadow:0 0 30px rgba(255,200,0,.9),0 0 60px rgba(255,150,0,.4);">100,000</div>
+    <div style="font-size:22px;font-weight:900;color:#ffd700;line-height:1;letter-spacing:2px;text-shadow:0 0 20px rgba(255,200,0,.9),0 0 40px rgba(255,150,0,.4);white-space:nowrap;">100,000</div>
     <div style="font-size:13px;font-weight:900;color:#ffcc44;margin-top:4px;letter-spacing:2px;text-shadow:0 0 10px rgba(255,200,0,.4);">$ANAL TOKENS</div>
     <div id="jp-usd" style="font-size:12px;color:#ff9900;margin-top:3px;font-weight:700;"></div>
     <div style="font-size:9px;color:rgba(255,170,0,.6);margin-top:4px;font-family:Courier New,monospace;">🦉 SPONSORED BY ANALTENA TEAM</div>
@@ -8386,6 +8386,7 @@ var gMarioScore=0,gMarioBest=parseInt(localStorage.getItem('mario_best')||'0'),g
 var gMarioAnimId=null,gMarioAlive=false;
 var gCfWins=0,gCfLosses=0,gCfPick=null;
 var gChartStreak=[],gChartScore=0,gChartAnswer=null;
+var SLOT_SYMS = ['7️⃣','🍒','🍋','💎','🦉','🌙'];
 var gSlotBet=10,gSlotSpinning=false,gLeverPulled=false;
 var gSlotResults=['💎','🦉','💎'],gSlotsFrame=0;
 var gLogoImg=new Image();
@@ -8443,112 +8444,156 @@ function initSlotsCanvas(){
 function drawSlotSymbolVector(ctx, sym, cx, cy, r) {
   ctx.save();
   ctx.translate(cx, cy);
-  var s = r; // size unit
+  var s = r;
 
   if (sym === '7️⃣' || sym === '7') {
-    // Red/gold 7
-    ctx.font = 'bold ' + Math.round(s * 2.2) + 'px Arial, sans-serif';
+    // Neonowe czerwone 7 z obrysem
+    var g7 = ctx.createLinearGradient(-s, -s, s, s);
+    g7.addColorStop(0, '#ff4444'); g7.addColorStop(1, '#cc0000');
+    ctx.font = 'bold ' + Math.round(s*2.1) + 'px "Arial Black",Arial,sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#cc0000';
-    ctx.strokeStyle = '#ff6600'; ctx.lineWidth = s * 0.15;
+    ctx.strokeStyle = '#ffcc00'; ctx.lineWidth = s*0.18; ctx.lineJoin = 'round';
     ctx.strokeText('7', 0, 0);
-    ctx.fillText('7', 0, 0);
+    ctx.fillStyle = g7; ctx.fillText('7', 0, 0);
+    // Glow
+    ctx.shadowColor = '#ff2200'; ctx.shadowBlur = s*1.2;
+    ctx.fillStyle = 'rgba(255,80,0,0.3)'; ctx.fillText('7', 0, 0);
+    ctx.shadowBlur = 0;
 
   } else if (sym === '🍒' || sym === 'CHR') {
-    // Cherry — two red circles + stems
+    // Dwie wiśnie — klasyczny slot
     var cr = s * 0.38;
-    // Left cherry
-    ctx.fillStyle = '#cc0000';
+    // Lewa wiśnia — gradient
+    var gl = ctx.createRadialGradient(-cr*0.7-cr*0.1, cr*0.3-cr*0.1, 0, -cr*0.7, cr*0.3, cr);
+    gl.addColorStop(0, '#ff6666'); gl.addColorStop(0.5, '#cc0000'); gl.addColorStop(1, '#880000');
+    ctx.fillStyle = gl;
     ctx.beginPath(); ctx.arc(-cr*0.7, cr*0.3, cr, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#ff3333';
-    ctx.beginPath(); ctx.arc(-cr*0.7 - cr*0.2, cr*0.3 - cr*0.25, cr*0.25, 0, Math.PI*2); ctx.fill();
-    // Right cherry
-    ctx.fillStyle = '#cc0000';
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath(); ctx.arc(-cr*0.7-cr*0.2, cr*0.3-cr*0.25, cr*0.28, 0, Math.PI*2); ctx.fill();
+    // Prawa wiśnia
+    var gr = ctx.createRadialGradient(cr*0.7-cr*0.1, cr*0.3-cr*0.1, 0, cr*0.7, cr*0.3, cr);
+    gr.addColorStop(0, '#ff6666'); gr.addColorStop(0.5, '#cc0000'); gr.addColorStop(1, '#880000');
+    ctx.fillStyle = gr;
     ctx.beginPath(); ctx.arc(cr*0.7, cr*0.3, cr, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#ff3333';
-    ctx.beginPath(); ctx.arc(cr*0.7 - cr*0.2, cr*0.3 - cr*0.25, cr*0.25, 0, Math.PI*2); ctx.fill();
-    // Stems
-    ctx.strokeStyle = '#228822'; ctx.lineWidth = s * 0.1;
-    ctx.beginPath(); ctx.moveTo(-cr*0.7, -cr*0.7); ctx.lineTo(-cr*0.7, cr*0.3 - cr); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cr*0.7, -cr*0.7); ctx.lineTo(cr*0.7, cr*0.3 - cr); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath(); ctx.arc(cr*0.7-cr*0.2, cr*0.3-cr*0.25, cr*0.28, 0, Math.PI*2); ctx.fill();
+    // Łodygi (zielone)
+    ctx.strokeStyle = '#33cc33'; ctx.lineWidth = s*0.11; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-cr*0.7, -cr*0.7); ctx.lineTo(-cr*0.7, cr*0.3-cr); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cr*0.7, -cr*0.7); ctx.lineTo(cr*0.7, cr*0.3-cr); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(-cr*0.7, -cr*0.7); ctx.lineTo(cr*0.7, -cr*0.7); ctx.stroke();
+    // Listek
+    ctx.fillStyle = '#44dd22';
+    ctx.beginPath(); ctx.ellipse(0, -cr*0.9, cr*0.35, cr*0.18, -0.4, 0, Math.PI*2); ctx.fill();
 
   } else if (sym === '🍋' || sym === 'LEM') {
-    // Lemon — yellow ellipse
-    ctx.fillStyle = '#ffe000';
-    ctx.beginPath(); ctx.ellipse(0, 0, s*0.72, s*0.58, 0, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#ffcc00';
-    ctx.beginPath(); ctx.ellipse(-s*0.1, -s*0.1, s*0.3, s*0.22, 0, 0, Math.PI*2); ctx.fill();
+    // Cytryna z teksturą
+    var glem = ctx.createRadialGradient(-s*0.2, -s*0.2, 0, 0, 0, s*0.8);
+    glem.addColorStop(0, '#ffff66'); glem.addColorStop(0.5, '#ffdd00'); glem.addColorStop(1, '#cc9900');
+    ctx.fillStyle = glem;
+    ctx.beginPath(); ctx.ellipse(0, 0, s*0.72, s*0.55, 0, 0, Math.PI*2); ctx.fill();
+    // Shine
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.beginPath(); ctx.ellipse(-s*0.18, -s*0.18, s*0.28, s*0.18, -0.4, 0, Math.PI*2); ctx.fill();
     // Tips
-    ctx.fillStyle = '#ffd000';
-    ctx.beginPath(); ctx.ellipse(-s*0.7, 0, s*0.18, s*0.12, 0.5, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(s*0.7, 0, s*0.18, s*0.12, -0.5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#ddbb00';
+    ctx.beginPath(); ctx.ellipse(-s*0.7, 0, s*0.17, s*0.1, 0.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(s*0.7, 0, s*0.17, s*0.1, -0.5, 0, Math.PI*2); ctx.fill();
+    // Outline
+    ctx.strokeStyle = '#aa8800'; ctx.lineWidth = s*0.06;
+    ctx.beginPath(); ctx.ellipse(0, 0, s*0.72, s*0.55, 0, 0, Math.PI*2); ctx.stroke();
 
   } else if (sym === '💎' || sym === 'DIA') {
-    // Diamond — blue gem
-    ctx.fillStyle = '#00aaff';
+    // Diament — niebieski kryształ
+    var gd = ctx.createLinearGradient(-s*0.7, -s*0.9, s*0.45, s*0.9);
+    gd.addColorStop(0, '#88ddff'); gd.addColorStop(0.3, '#0099ff'); gd.addColorStop(0.7, '#0055cc'); gd.addColorStop(1, '#003388');
+    ctx.fillStyle = gd;
     ctx.beginPath();
-    ctx.moveTo(0, -s*0.9);
-    ctx.lineTo(s*0.7, -s*0.2);
-    ctx.lineTo(s*0.45, s*0.9);
-    ctx.lineTo(-s*0.45, s*0.9);
-    ctx.lineTo(-s*0.7, -s*0.2);
-    ctx.closePath(); ctx.fill();
-    // Shine
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.moveTo(0, -s*0.9); ctx.lineTo(s*0.7, -s*0.2);
+    ctx.lineTo(s*0.45, s*0.9); ctx.lineTo(-s*0.45, s*0.9);
+    ctx.lineTo(-s*0.7, -s*0.2); ctx.closePath(); ctx.fill();
+    // Górna faceta (shine)
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
     ctx.beginPath();
-    ctx.moveTo(0, -s*0.9);
-    ctx.lineTo(s*0.7, -s*0.2);
-    ctx.lineTo(0, 0);
-    ctx.lineTo(-s*0.7, -s*0.2);
-    ctx.closePath(); ctx.fill();
+    ctx.moveTo(0, -s*0.9); ctx.lineTo(s*0.7, -s*0.2);
+    ctx.lineTo(0, s*0.05); ctx.lineTo(-s*0.7, -s*0.2); ctx.closePath(); ctx.fill();
+    // Środkowa faceta
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.beginPath();
+    ctx.moveTo(s*0.7, -s*0.2); ctx.lineTo(s*0.45, s*0.9);
+    ctx.lineTo(0, s*0.05); ctx.closePath(); ctx.fill();
     // Outline
-    ctx.strokeStyle = '#0066cc'; ctx.lineWidth = s * 0.08;
+    ctx.strokeStyle = '#66bbff'; ctx.lineWidth = s*0.07;
     ctx.beginPath();
     ctx.moveTo(0, -s*0.9); ctx.lineTo(s*0.7, -s*0.2);
     ctx.lineTo(s*0.45, s*0.9); ctx.lineTo(-s*0.45, s*0.9);
     ctx.lineTo(-s*0.7, -s*0.2); ctx.closePath(); ctx.stroke();
+    // Glow
+    ctx.shadowColor = '#0088ff'; ctx.shadowBlur = s*0.8;
+    ctx.strokeStyle = 'rgba(100,200,255,0.3)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0,-s*0.9); ctx.lineTo(s*0.7,-s*0.2); ctx.lineTo(s*0.45,s*0.9); ctx.lineTo(-s*0.45,s*0.9); ctx.lineTo(-s*0.7,-s*0.2); ctx.closePath(); ctx.stroke();
+    ctx.shadowBlur = 0;
 
   } else if (sym === '🦉' || sym === 'OWL') {
-    // Owl — body + head + eyes
-    // Body
+    // Sowa Analtena
     ctx.fillStyle = '#8B6914';
-    ctx.beginPath(); ctx.ellipse(0, s*0.3, s*0.55, s*0.65, 0, 0, Math.PI*2); ctx.fill();
-    // Head
-    ctx.fillStyle = '#a07820';
-    ctx.beginPath(); ctx.arc(0, -s*0.25, s*0.48, 0, Math.PI*2); ctx.fill();
-    // Ears
-    ctx.fillStyle = '#8B6914';
-    ctx.beginPath(); ctx.moveTo(-s*0.3, -s*0.62); ctx.lineTo(-s*0.48, -s*0.95); ctx.lineTo(-s*0.12, -s*0.68); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(s*0.3, -s*0.62); ctx.lineTo(s*0.48, -s*0.95); ctx.lineTo(s*0.12, -s*0.68); ctx.fill();
-    // Eyes
+    ctx.beginPath(); ctx.ellipse(0, s*0.3, s*0.52, s*0.62, 0, 0, Math.PI*2); ctx.fill();
+    // Głowa
+    var gh = ctx.createRadialGradient(-s*0.1, -s*0.35, 0, 0, -s*0.2, s*0.5);
+    gh.addColorStop(0, '#c09020'); gh.addColorStop(1, '#8B6914');
+    ctx.fillStyle = gh;
+    ctx.beginPath(); ctx.arc(0, -s*0.25, s*0.46, 0, Math.PI*2); ctx.fill();
+    // Uszy
+    ctx.fillStyle = '#7a5c10';
+    ctx.beginPath(); ctx.moveTo(-s*0.3, -s*0.6); ctx.lineTo(-s*0.48, -s*0.95); ctx.lineTo(-s*0.12, -s*0.65); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(s*0.3, -s*0.6); ctx.lineTo(s*0.48, -s*0.95); ctx.lineTo(s*0.12, -s*0.65); ctx.fill();
+    // Oczy (białe)
     ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(-s*0.2, -s*0.28, s*0.22, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(s*0.2, -s*0.28, s*0.22, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#1a0033';
-    ctx.beginPath(); ctx.arc(-s*0.18, -s*0.26, s*0.12, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(s*0.22, -s*0.26, s*0.12, 0, Math.PI*2); ctx.fill();
-    // Beak
+    ctx.beginPath(); ctx.arc(-s*0.2, -s*0.28, s*0.21, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(s*0.2, -s*0.28, s*0.21, 0, Math.PI*2); ctx.fill();
+    // Tęczówki
+    ctx.fillStyle = '#ff8800';
+    ctx.beginPath(); ctx.arc(-s*0.2, -s*0.28, s*0.13, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(s*0.2, -s*0.28, s*0.13, 0, Math.PI*2); ctx.fill();
+    // Źrenice
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.arc(-s*0.18, -s*0.27, s*0.07, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(s*0.22, -s*0.27, s*0.07, 0, Math.PI*2); ctx.fill();
+    // Dziób
     ctx.fillStyle = '#ffaa00';
-    ctx.beginPath(); ctx.moveTo(-s*0.1, -s*0.08); ctx.lineTo(0, s*0.08); ctx.lineTo(s*0.1, -s*0.08); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-s*0.1, -s*0.08); ctx.lineTo(0, s*0.08); ctx.lineTo(s*0.1, -s*0.08); ctx.closePath(); ctx.fill();
+    // Glow neon fioletowy
+    ctx.shadowColor = '#aa66ff'; ctx.shadowBlur = s*0.6;
+    ctx.strokeStyle = 'rgba(170,100,255,0.3)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, s*0.3, s*0.52, 0, Math.PI*2); ctx.stroke();
+    ctx.shadowBlur = 0;
 
   } else if (sym === '🌙' || sym === 'MON') {
-    // Moon — crescent
-    ctx.fillStyle = '#ffd700';
+    // Księżyc złoty
+    var gm = ctx.createRadialGradient(-s*0.15, -s*0.15, 0, 0, 0, s*0.85);
+    gm.addColorStop(0, '#ffe566'); gm.addColorStop(0.5, '#ffcc00'); gm.addColorStop(1, '#cc9900');
+    ctx.fillStyle = gm;
     ctx.beginPath(); ctx.arc(0, 0, s*0.82, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#faf6ee'; // matches reel background
+    // Cięcie księżyca
+    ctx.fillStyle = '#faf6ee';
     ctx.beginPath(); ctx.arc(s*0.32, -s*0.18, s*0.62, 0, Math.PI*2); ctx.fill();
-    // Stars around
-    ctx.fillStyle = '#ffd700';
-    [[s*0.7, -s*0.72],[s*0.85, s*0.2],[-s*0.1, -s*0.92]].forEach(function(p){
-      ctx.beginPath(); ctx.arc(p[0], p[1], s*0.08, 0, Math.PI*2); ctx.fill();
+    // Glow
+    ctx.shadowColor = '#ffdd00'; ctx.shadowBlur = s*0.8;
+    ctx.strokeStyle = 'rgba(255,220,0,0.4)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 0, s*0.82, 0, Math.PI*2); ctx.stroke();
+    ctx.shadowBlur = 0;
+    // Gwiazdki
+    [[s*0.7,-s*0.75],[s*0.88,s*0.18],[-s*0.1,-s*0.95]].forEach(function(p){
+      ctx.fillStyle = '#ffd700'; ctx.globalAlpha = 0.8;
+      ctx.beginPath(); ctx.arc(p[0], p[1], s*0.09, 0, Math.PI*2); ctx.fill();
     });
+    ctx.globalAlpha = 1;
 
   } else {
-    // Fallback — plain text (any unknown symbol)
-    ctx.font = 'bold ' + Math.round(s*1.6) + 'px Arial';
+    // Fallback
+    ctx.font = 'bold ' + Math.round(s*1.4) + 'px Arial';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#333';
+    ctx.fillStyle = '#aaaaaa';
     ctx.fillText(sym.substring(0,2), 0, 0);
   }
   ctx.restore();
