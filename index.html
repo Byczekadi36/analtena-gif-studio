@@ -8303,74 +8303,47 @@ function selectGameCenter(id,btn){
 
 
 function initSlotsCanvas(){
-  var canvas=document.getElementById('slots-canvas');
-  if(!canvas) return;
-  var isMob=window.innerWidth<700;
-  // On mobile use most of screen width, desktop cap smaller for aesthetics
-  var W=isMob?Math.min(window.innerWidth-24,380):Math.min(window.innerWidth-360,340);
-  W=Math.max(W,240);
-  var H=Math.round(W*1.62);
-  canvas.width=W;canvas.height=H;
-  canvas.style.width=W+'px';canvas.style.height=H+'px';
-  /* old init removed */
-  canvas.onclick=function(){if(!gSlotSpinning&&!gLeverPulled)pullLever();};
+  var container=document.getElementById('gcenter-slots');
+  if(!container)return;
+  if(!document.getElementById('slots5-cv')){
+    // First time: build the 5-reel UI
+    container.innerHTML='';
+    container.style.cssText='display:flex;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;background:#04000e;padding:0;position:relative;';
+    var isMob=window.innerWidth<700;
+    var CW=isMob?Math.min(window.innerWidth-8,640):Math.min(window.innerWidth-320,740);
+    var CH=Math.round(CW*0.72);
+    container.innerHTML=`
+      <div style="width:100%;text-align:center;padding:10px 0 4px;flex-shrink:0;">
+        <div style="font-size:11px;letter-spacing:3px;color:rgba(160,80,255,.7);font-family:Courier New,monospace;">PREMIUM CYBER CASINO</div>
+        <div id="slot5-jackpot-display" style="font-size:13px;font-weight:900;color:#ffd700;letter-spacing:1px;margin-top:2px;">JACKPOT: 100,000 $ANAL 🏆</div>
+      </div>
+      <canvas id="slots5-cv" width="${CW}" height="${CH}" style="cursor:pointer;flex-shrink:0;display:block;max-width:100%;"></canvas>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 16px;flex-shrink:0;width:100%;max-width:${CW}px;box-sizing:border-box;">
+        <button onclick="slot5BetDown()" style="width:36px;height:36px;background:rgba(160,80,255,.2);border:1.5px solid rgba(160,80,255,.5);border-radius:8px;color:#aa66ff;font-size:18px;cursor:pointer;flex-shrink:0;">−</button>
+        <div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:#ffd700;font-family:Courier New,monospace;">BET: <span id="slot5-bet-display">500</span> pts</div>
+        <button onclick="slot5BetUp()" style="width:36px;height:36px;background:rgba(160,80,255,.2);border:1.5px solid rgba(160,80,255,.5);border-radius:8px;color:#aa66ff;font-size:18px;cursor:pointer;flex-shrink:0;">+</button>
+        <button onclick="slot5Spin()" id="slot5-spinbtn" style="padding:0 20px;height:36px;background:linear-gradient(90deg,#7722ff,#ff2277);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:900;cursor:pointer;flex-shrink:0;letter-spacing:1px;">⚡ SPIN</button>
+      </div>
+      <div id="slot5-result" style="min-height:28px;text-align:center;font-size:15px;font-weight:900;color:#ffd700;padding:0 16px 8px;flex-shrink:0;letter-spacing:1px;"></div>
+    `;
+    // Reset state
+    gSlot5Spinning=false; slot5AnimActive=false; gSlot5Frame=0;
+    gSlot5Particles=[]; gSlot5LastWin=''; gSlot5WinFrame=0;
+    if(gSlot5RAFid){cancelAnimationFrame(gSlot5RAFid);gSlot5RAFid=null;}
+    var cv=document.getElementById('slots5-cv');
+    if(cv){cv.onclick=function(){if(!gSlot5Spinning)slot5Spin();};}
+    slot5Draw();
+  } else {
+    // Already initialized — ensure spin button is enabled
+    var btn=document.getElementById('slot5-spinbtn');
+    if(btn&&!gSlot5Spinning){btn.disabled=false;btn.textContent='⚡ SPIN';}
+    // Reset stuck spinning state
+    if(gSlot5Spinning&&!slot5AnimActive){
+      gSlot5Spinning=false;
+      if(btn){btn.disabled=false;btn.textContent='⚡ SPIN';}
+    }
+  }
 }
-
-
-// ═══ SLOT SYMBOLS — vector drawing (works everywhere) ═══
-
-function vsRRect(ctx,x,y,w,h,r){r=Math.min(r||0,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
-
-/* ═══════════════════════════════════════════════════
-   PREMIUM 5-REEL CYBER-MEME SLOT MACHINE
-   ═══════════════════════════════════════════════════ */
-
-var SLOT_SYMS_META = {
-  '💰':{ name:'ANAL TOKEN', color:'#ffd700', glow:'rgba(255,215,0,0.8)', mult:3 },
-  '🦉':{ name:'DEGEN OWL',  color:'#aa66ff', glow:'rgba(170,102,255,0.8)', mult:5 },
-  '💎':{ name:'DIAMOND',    color:'#00ccff', glow:'rgba(0,204,255,0.8)', mult:4 },
-  '🚀':{ name:'MOON',       color:'#ff4488', glow:'rgba(255,68,136,0.8)', mult:6 },
-  '🦍':{ name:'APE',        color:'#88ff44', glow:'rgba(136,255,68,0.8)', mult:7 },
-  '📈':{ name:'CHART',      color:'#44ffaa', glow:'rgba(68,255,170,0.8)', mult:2 },
-};
-var SLOT5_SYMS = ['💰','🦉','💎','🚀','🦍','📈'];
-var gSlot5Bet=500, gSlot5Spinning=false, gSlot5Frame=0;
-var gSlot5Reels=[['💰','💎','🦉','🚀','📈'],['🦍','💰','🚀','💎','🦉'],['💎','🚀','💰','📈','🦍'],['🦉','💰','💎','🚀','📈'],['📈','🦉','💰','💎','🚀']];
-var gSlot5SpinVelocity=[0,0,0,0,0], gSlot5SpinPos=[0,0,0,0,0], gSlot5SpinTarget=[0,0,0,0,0];
-var gSlot5LastWin='', gSlot5WinFrame=0, gSlot5Particles=[];
-var gSlot5RAFid=null;
-
-function initSlotsCanvas(){
-  var container = document.getElementById('gcenter-slots');
-  if(!container) return;
-  container.innerHTML = '';
-  container.style.cssText = 'display:flex;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;background:#04000e;padding:0;position:relative;';
-
-  var isMob = window.innerWidth < 700;
-  var CW = isMob ? Math.min(window.innerWidth - 8, 640) : Math.min(window.innerWidth - 320, 740);
-  var CH = Math.round(CW * 0.72);
-
-  container.innerHTML = `
-    <div style="width:100%;text-align:center;padding:10px 0 4px;flex-shrink:0;">
-      <div style="font-size:11px;letter-spacing:3px;color:rgba(160,80,255,.7);font-family:Courier New,monospace;">PREMIUM CYBER CASINO</div>
-      <div id="slot5-jackpot-display" style="font-size:13px;font-weight:900;color:#ffd700;letter-spacing:1px;margin-top:2px;">JACKPOT: 100,000 $ANAL 🏆</div>
-    </div>
-    <canvas id="slots5-cv" width="${CW}" height="${CH}" style="cursor:pointer;flex-shrink:0;display:block;max-width:100%;"></canvas>
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 16px;flex-shrink:0;width:100%;max-width:${CW}px;box-sizing:border-box;">
-      <button onclick="slot5BetDown()" style="width:36px;height:36px;background:rgba(160,80,255,.2);border:1.5px solid rgba(160,80,255,.5);border-radius:8px;color:#aa66ff;font-size:18px;cursor:pointer;flex-shrink:0;">−</button>
-      <div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:#ffd700;font-family:Courier New,monospace;">BET: <span id="slot5-bet-display">500</span> pts</div>
-      <button onclick="slot5BetUp()" style="width:36px;height:36px;background:rgba(160,80,255,.2);border:1.5px solid rgba(160,80,255,.5);border-radius:8px;color:#aa66ff;font-size:18px;cursor:pointer;flex-shrink:0;">+</button>
-      <button onclick="slot5Spin()" id="slot5-spinbtn" style="padding:0 20px;height:36px;background:linear-gradient(90deg,#7722ff,#ff2277);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:900;cursor:pointer;flex-shrink:0;letter-spacing:1px;">⚡ SPIN</button>
-    </div>
-    <div id="slot5-result" style="min-height:28px;text-align:center;font-size:15px;font-weight:900;color:#ffd700;padding:0 16px 8px;flex-shrink:0;letter-spacing:1px;"></div>
-  `;
-
-  var cv = document.getElementById('slots5-cv');
-  cv.onclick = function(){ if(!gSlot5Spinning) slot5Spin(); };
-  if(gSlot5RAFid){ cancelAnimationFrame(gSlot5RAFid); gSlot5RAFid=null; }
-  slot5Draw();
-}
-
 function slot5BetDown(){
   var bets=[100,250,500,1000,2500,5000];
   var ci=bets.indexOf(gSlot5Bet); if(ci>0) gSlot5Bet=bets[ci-1];
@@ -8385,6 +8358,9 @@ function slot5BetUp(){
 function slot5Spin(){
   if(gSlot5Spinning) return;
   if(!window.spendPoints||!window.spendPoints(gSlot5Bet)) return;
+  // Reset animation state before new spin
+  slot5AnimActive=false;
+  if(gSlot5RAFid){cancelAnimationFrame(gSlot5RAFid);gSlot5RAFid=null;}
   gSlot5Spinning=true; gSlot5LastWin=''; gSlot5WinFrame=0; gSlot5Particles=[];
   var btn=document.getElementById('slot5-spinbtn'); if(btn){btn.disabled=true;btn.textContent='◆ ◆ ◆';}
   var res=document.getElementById('slot5-result'); if(res) res.textContent='';
@@ -8865,7 +8841,8 @@ function doFlip(){
 
     // 3D coin effect: scaleX = cos(angle) gives 3D flip illusion
     var scaleX=Math.cos(ang);
-    var showOwl=(Math.abs(Math.cos(ang))>0.05)&&(Math.round(ang/Math.PI)%2===0);
+    var cosAng=Math.cos(ang);
+    var showOwl=(Math.abs(cosAng)>0.05)&&(cosAng>0);
     var cx=W/2,cy=H/2;
     var R=Math.min(W,H)*0.38;
 
@@ -8929,6 +8906,16 @@ function doFlip(){
     if(frame<duration){
       cfFlipRAF=requestAnimationFrame(flipLoop);
     } else {
+      // Snap angle to correct final position based on result
+      // heads: cos(angle)>0 → nearest even multiple of PI
+      // tails: cos(angle)<0 → nearest odd multiple of PI
+      var rounds=Math.round(angle/(Math.PI*2));
+      if(result==='heads'){
+        angle=rounds*Math.PI*2; // cos=1, shows owl
+      } else {
+        angle=rounds*Math.PI*2+Math.PI; // cos=-1, shows ANAL
+      }
+      drawCoin3D(angle);
       cfFlipActive=false;
       // Result
       gCfWins+=result===gCfPick?1:0;gCfLosses+=result!==gCfPick?1:0;
