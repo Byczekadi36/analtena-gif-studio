@@ -8494,6 +8494,7 @@ function csDraw(){
       }
       /* clip to reel window */
       ctx.save(); ctx.beginPath(); csRR(ctx,rx,ry,RW,RH,6); ctx.clip();
+      ctx.fillStyle='white';
       ctx.fillText(sym,cx2,cy2);
       ctx.restore();
       ctx.restore();
