@@ -3302,6 +3302,17 @@ header {
 @keyframes jpSpin{to{transform:rotate(360deg)}}
 @keyframes jpCoin{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(60px) rotate(480deg)}}
 @keyframes jpBtnShine{0%{background-position:0% center}100%{background-position:200% center}}
+
+/* Mobile touch improvements */
+@media (max-width: 700px) {
+  button, [onclick] { 
+    -webkit-tap-highlight-color: rgba(160,80,255,0.3);
+    touch-action: manipulation;
+    min-height: 36px;
+  }
+  canvas { touch-action: manipulation; }
+  .gmc { touch-action: manipulation; }
+}
 </style>
 </head>
 <body>
@@ -4250,7 +4261,7 @@ setInterval(function(){var b=document.getElementById('gm-bal-display2');if(b&&wi
             <div style="font-size:13px;letter-spacing:3px;color:rgba(160,80,255,.7);font-family:Courier New,monospace;">GOLDEN OWL FLIP</div>
             <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:2px;">Owl vs $ANAL · Double or Nothing</div>
           </div>
-          <canvas id="cf-coin-canvas" width="320" height="260" style="display:block;margin:0 auto;max-width:100%;border-radius:12px;background:rgba(0,0,0,0.3);"></canvas>
+          <canvas id="cf-coin-canvas" width="320" height="260" style="display:block;margin:0 auto;width:min(320px,90vw);height:min(260px,73vw);max-width:100%;border-radius:12px;background:rgba(0,0,0,0.3);touch-action:manipulation;"></canvas>
           <div style="display:flex;gap:10px;margin:10px 0;">
             <div id="pick-heads" onclick="cfPick('heads')" style="flex:1;padding:12px;background:rgba(255,215,0,.08);border:2px solid rgba(255,215,0,0.25);border-radius:10px;color:rgba(255,215,0,.6);font-size:13px;font-weight:900;cursor:pointer;text-align:center;transition:all .15s;letter-spacing:1px;">🦉 HEADS</div>
             <div id="pick-tails" onclick="cfPick('tails')" style="flex:1;padding:12px;background:rgba(170,100,255,.08);border:2px solid rgba(170,100,255,0.25);border-radius:10px;color:rgba(170,100,255,.6);font-size:13px;font-weight:900;cursor:pointer;text-align:center;transition:all .15s;letter-spacing:1px;">💰 TAILS</div>
@@ -8305,44 +8316,82 @@ function selectGameCenter(id,btn){
 function initSlotsCanvas(){
   var container=document.getElementById('gcenter-slots');
   if(!container)return;
-  if(!document.getElementById('slots5-cv')){
-    // First time: build the 5-reel UI
-    container.innerHTML='';
-    container.style.cssText='display:flex;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;background:#04000e;padding:0;position:relative;';
-    var isMob=window.innerWidth<700;
-    var CW=isMob?Math.min(window.innerWidth-8,640):Math.min(window.innerWidth-320,740);
-    var CH=Math.round(CW*0.72);
-    container.innerHTML=`
-      <div style="width:100%;text-align:center;padding:10px 0 4px;flex-shrink:0;">
-        <div style="font-size:11px;letter-spacing:3px;color:rgba(160,80,255,.7);font-family:Courier New,monospace;">PREMIUM CYBER CASINO</div>
-        <div id="slot5-jackpot-display" style="font-size:13px;font-weight:900;color:#ffd700;letter-spacing:1px;margin-top:2px;">JACKPOT: 100,000 $ANAL 🏆</div>
-      </div>
-      <canvas id="slots5-cv" width="${CW}" height="${CH}" style="cursor:pointer;flex-shrink:0;display:block;max-width:100%;"></canvas>
-      <div style="display:flex;align-items:center;gap:10px;padding:8px 16px;flex-shrink:0;width:100%;max-width:${CW}px;box-sizing:border-box;">
-        <button onclick="slot5BetDown()" style="width:36px;height:36px;background:rgba(160,80,255,.2);border:1.5px solid rgba(160,80,255,.5);border-radius:8px;color:#aa66ff;font-size:18px;cursor:pointer;flex-shrink:0;">−</button>
-        <div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:#ffd700;font-family:Courier New,monospace;">BET: <span id="slot5-bet-display">500</span> pts</div>
-        <button onclick="slot5BetUp()" style="width:36px;height:36px;background:rgba(160,80,255,.2);border:1.5px solid rgba(160,80,255,.5);border-radius:8px;color:#aa66ff;font-size:18px;cursor:pointer;flex-shrink:0;">+</button>
-        <button onclick="slot5Spin()" id="slot5-spinbtn" style="padding:0 20px;height:36px;background:linear-gradient(90deg,#7722ff,#ff2277);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:900;cursor:pointer;flex-shrink:0;letter-spacing:1px;">⚡ SPIN</button>
-      </div>
-      <div id="slot5-result" style="min-height:28px;text-align:center;font-size:15px;font-weight:900;color:#ffd700;padding:0 16px 8px;flex-shrink:0;letter-spacing:1px;"></div>
-    `;
-    // Reset state
-    gSlot5Spinning=false; slot5AnimActive=false; gSlot5Frame=0;
-    gSlot5Particles=[]; gSlot5LastWin=''; gSlot5WinFrame=0;
-    if(gSlot5RAFid){cancelAnimationFrame(gSlot5RAFid);gSlot5RAFid=null;}
-    var cv=document.getElementById('slots5-cv');
-    if(cv){cv.onclick=function(){if(!gSlot5Spinning)slot5Spin();};}
-    slot5Draw();
-  } else {
-    // Already initialized — ensure spin button is enabled
+
+  // Always reset spinning state on re-init
+  gSlot5Spinning=false;
+  slot5AnimActive=false;
+  if(gSlot5RAFid){cancelAnimationFrame(gSlot5RAFid);gSlot5RAFid=null;}
+
+  // If already has canvas - just reset and redraw
+  var existingCv=document.getElementById('slots5-cv');
+  if(existingCv){
+    gSlot5Particles=[]; gSlot5WinFrame=0;
     var btn=document.getElementById('slot5-spinbtn');
-    if(btn&&!gSlot5Spinning){btn.disabled=false;btn.textContent='⚡ SPIN';}
-    // Reset stuck spinning state
-    if(gSlot5Spinning&&!slot5AnimActive){
-      gSlot5Spinning=false;
-      if(btn){btn.disabled=false;btn.textContent='⚡ SPIN';}
-    }
+    if(btn){btn.disabled=false;btn.textContent='\u26A1 SPIN';}
+    var res=document.getElementById('slot5-result');
+    if(res)res.textContent='';
+    slot5Draw();
+    return;
   }
+
+  // Build UI from scratch
+  var isMob=window.innerWidth<700;
+  var availW=container.offsetWidth||window.innerWidth;
+  var CW=isMob?Math.min(availW-4,480):Math.min(availW-8,720);
+  CW=Math.max(CW,280);
+  var CH=Math.round(CW*0.68);
+
+  container.innerHTML='';
+  container.style.cssText='display:flex;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;overflow-x:hidden;background:#04000e;padding:0;position:relative;';
+
+  // Header
+  var hdr=document.createElement('div');
+  hdr.style.cssText='width:100%;text-align:center;padding:8px 0 4px;flex-shrink:0;';
+  hdr.innerHTML='<div style="font-size:10px;letter-spacing:3px;color:rgba(160,80,255,.6);font-family:Courier New,monospace;">PREMIUM CYBER CASINO</div>'
+    +'<div style="font-size:12px;font-weight:900;color:#ffd700;letter-spacing:1px;margin-top:2px;">JACKPOT: 100,000 $ANAL \uD83C\uDFC6</div>';
+  container.appendChild(hdr);
+
+  // Canvas
+  var cv=document.createElement('canvas');
+  cv.id='slots5-cv';
+  cv.width=CW; cv.height=CH;
+  cv.style.cssText='cursor:pointer;flex-shrink:0;display:block;max-width:100%;';
+  cv.onclick=function(){if(!gSlot5Spinning)slot5Spin();};
+  container.appendChild(cv);
+
+  // Controls row
+  var ctrl=document.createElement('div');
+  ctrl.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 12px;flex-shrink:0;width:100%;box-sizing:border-box;max-width:'+CW+'px;';
+  ctrl.innerHTML=''
+    +'<button onclick="slot5BetDown()" style="width:34px;height:34px;background:rgba(160,80,255,.2);border:1.5px solid rgba(160,80,255,.5);border-radius:8px;color:#aa66ff;font-size:18px;cursor:pointer;flex-shrink:0;touch-action:manipulation;">\u2212</button>'
+    +'<div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:#ffd700;font-family:Courier New,monospace;">BET: <span id="slot5-bet-display">'+gSlot5Bet.toLocaleString()+'</span> pts</div>'
+    +'<button onclick="slot5BetUp()" style="width:34px;height:34px;background:rgba(160,80,255,.2);border:1.5px solid rgba(160,80,255,.5);border-radius:8px;color:#aa66ff;font-size:18px;cursor:pointer;flex-shrink:0;touch-action:manipulation;">+</button>'
+    +'<button onclick="slot5Spin()" id="slot5-spinbtn" style="padding:0 16px;height:34px;background:linear-gradient(90deg,#7722ff,#ff2277);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:900;cursor:pointer;flex-shrink:0;letter-spacing:1px;touch-action:manipulation;">\u26A1 SPIN</button>';
+  container.appendChild(ctrl);
+
+  // Result label
+  var res=document.createElement('div');
+  res.id='slot5-result';
+  res.style.cssText='min-height:24px;text-align:center;font-size:14px;font-weight:900;color:#ffd700;padding:2px 16px 6px;flex-shrink:0;letter-spacing:1px;';
+  container.appendChild(res);
+
+  // Reset game state
+  gSlot5Particles=[]; gSlot5LastWin=''; gSlot5WinFrame=0;
+
+  // CRITICAL: draw after canvas is in DOM + layout computed
+  setTimeout(function(){
+    var cv2=document.getElementById('slots5-cv');
+    if(!cv2)return;
+    var realW=container.offsetWidth||window.innerWidth;
+    var isMob2=window.innerWidth<700;
+    var CW2=isMob2?Math.min(realW-4,480):Math.min(realW-8,720);
+    CW2=Math.max(CW2,280);
+    if(Math.abs(cv2.width-CW2)>20){
+      cv2.width=CW2;
+      cv2.height=Math.round(CW2*0.68);
+    }
+    slot5Draw();
+  },80);
 }
 function slot5BetDown(){
   var bets=[100,250,500,1000,2500,5000];
@@ -8357,7 +8406,7 @@ function slot5BetUp(){
 
 function slot5Spin(){
   if(gSlot5Spinning) return;
-  if(!window.spendPoints||!window.spendPoints(gSlot5Bet)) return;
+  if(!window.spendPoints||!window.spendPoints(gSlot5Bet)){var r9=document.getElementById('slot5-result');if(r9){r9.style.color='#ff4444';r9.textContent='Not enough points!';}return;}
   // Reset animation state before new spin
   slot5AnimActive=false;
   if(gSlot5RAFid){cancelAnimationFrame(gSlot5RAFid);gSlot5RAFid=null;}
@@ -11063,7 +11112,7 @@ window.initWheelGame=function(container){
         '<div id="wh-pointer" style="position:absolute;top:2px;left:50%;transform:translateX(-50%);z-index:10;filter:drop-shadow(0 0 8px #ffd700);">'+
           '<svg width="28" height="36" viewBox="0 0 28 36"><polygon points="14,36 0,0 28,0" fill="url(#pg)" stroke="rgba(255,215,0,0.6)" stroke-width="1.5"/><defs><linearGradient id="pg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#fff8cc"/><stop offset="100%" style="stop-color:#cc8800"/></linearGradient></defs></svg>'+
         '</div>'+
-        '<canvas id="wh-cv" width="'+WS+'" height="'+WS+'" style="border-radius:50%;display:block;margin-top:36px;box-shadow:0 0 40px rgba(160,80,255,.5),0 0 80px rgba(255,80,180,.15);cursor:pointer;"></canvas>'+
+        '<canvas id="wh-cv" width="'+WS+'" height="'+WS+'" style="border-radius:50%;display:block;margin-top:'+(isMobile?'28px':'36px')+';box-shadow:0 0 40px rgba(160,80,255,.5);cursor:pointer;touch-action:manipulation;"></canvas>'+
       '</div>'+
       '<div id="wh-result" style="margin-top:10px;min-height:44px;text-align:center;font-family:Courier New,monospace;font-size:'+(isMobile?'15px':'18px')+';font-weight:900;color:#ffd700;width:100%;display:flex;align-items:center;justify-content:center;background:rgba(160,80,255,.06);border-radius:10px;border:1px solid rgba(160,80,255,.2);padding:8px;"></div>'+
       '<div id="wh-saldo" style="font-size:12px;color:rgba(255,215,0,.6);margin-top:6px;font-family:Courier New,monospace;text-align:center;"></div>'+
