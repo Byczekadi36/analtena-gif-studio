@@ -6821,491 +6821,130 @@ async function verifyDeposit() {
     return;
   }
 
-  const used = JSON.parse(localStorage.getItem('anal_used_tx') || '[]');
-  if (used.includes(hash)) {
-    status.style.color = 'var(--neon2)';
-    status.textContent = '❌ Ten TX hash był już użyty';
+  // Walidacja formatu hasha po stronie klienta
+  if (!/^[A-Za-z0-9]{43,90}$/.test(hash)) {
+    status.style.color = '#ff4444';
+    status.textContent = '❌ Invalid TX hash format';
     return;
   }
 
-  // Loading state
+  // Lokalny cache — szybki check (serwer też sprawdza)
+  const used = JSON.parse(localStorage.getItem('anal_used_tx') || '[]');
+  if (used.includes(hash)) {
+    status.style.color = '#ff4444';
+    status.textContent = '❌ This TX hash was already claimed.';
+    return;
+  }
+
+  // Pobierz adres portfela
+  const vd = getVipData ? getVipData() : {};
+  const userWallet = vd.address || document.getElementById('wallet-input')?.value?.trim() || '';
+
+  if (!userWallet) {
+    status.style.color = '#ff4444';
+    status.textContent = '❌ Connect your wallet first';
+    return;
+  }
+
+  // Loading
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Weryfikuję...'; btn.style.background = 'rgba(123,97,255,0.5)'; }
   status.style.color = 'var(--muted)';
   status.textContent = '🔍 Checking transaction on X1 blockchain...';
 
-  let amount = 0;
-  let txFound = false;
-
   try {
-    // Try backend API first (avoids CORS)
+    // JEDYNA weryfikacja — przez bezpieczny serwer z Redis
     const apiResp = await fetch('/api/verify-tx', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ hash, address: ANAL_DEPOSIT_ADDRESS })
-    }).catch(()=>null);
+      body: JSON.stringify({ hash, walletAddress: userWallet })
+    });
 
-    if (apiResp && apiResp.ok) {
-      const apiData = await apiResp.json();
-      if (apiData.amount !== undefined) {
-        amount = apiData.amount;
-        txFound = true;
-      }
+    const apiData = await apiResp.json().catch(() => ({}));
+
+    if (!apiResp.ok) {
+      // Serwer zwrócił błąd — pokaż konkretny komunikat
+      status.style.color = '#ff4444';
+      status.textContent = '❌ ' + (apiData.error || 'Verification failed');
+      if (btn) { btn.disabled = false; btn.textContent = '🔥 VERIFY BURN & CLAIM POINTS'; btn.style.background = 'linear-gradient(135deg,var(--neon3),var(--neon2))'; }
+      return;
     }
 
-    // Fallback: direct RPC (may work if CORS allowed)
-    if (!txFound) {
-      status.textContent = '🔍 Łączę z X1 RPC...';
-      // X1 Network first (ANAL token is on X1), Solana as fallback
-      const RPC_ENDPOINTS = [
-        'https://rpc.mainnet.x1.xyz',
-        'https://xolana.xen.network',
-        'https://rpc2.mainnet.x1.xyz',
-        'https://api.mainnet-beta.solana.com',
-        'https://rpc.ankr.com/solana'
-      ];
-
-      for (const rpc of RPC_ENDPOINTS) {
-        try {
-          status.textContent = '🔍 Checking Solana blockchain...';
-          const resp = await fetch(rpc, {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({
-              jsonrpc:'2.0', id:1,
-              method:'getTransaction',
-              params:[hash, {encoding:'jsonParsed', commitment:'finalized', maxSupportedTransactionVersion:0}]
-            })
-          });
-          if (!resp.ok) continue;
-          const data = await resp.json();
-          if (!data.result) continue;
-
-          const tx = data.result;
-          txFound = true;
-
-          const pre  = tx?.meta?.preTokenBalances  || [];
-          const post = tx?.meta?.postTokenBalances || [];
-
-          // ── Metoda 1: Spadek salda nadawcy (najlepsza dla burn address) ──
-          // Szukamy konta które STRACIŁO tokeny — niezależnie dokąd poszły
-          for (const preB of pre) {
-            const postB = post.find(p => p.accountIndex === preB.accountIndex);
-            const preAmt  = parseFloat(preB?.uiTokenAmount?.uiAmount || 0);
-            const postAmt = parseFloat(postB?.uiTokenAmount?.uiAmount || 0);
-            const diff = preAmt - postAmt;
-            if (diff > 0 && Math.floor(diff) > amount) {
-              amount = Math.floor(diff);
-            }
-          }
-
-          // ── Metoda 2: Wzrost salda odbiorcy ──
-          if (amount === 0) {
-            for (const postB of post) {
-              const preB = pre.find(p => p.accountIndex === postB.accountIndex);
-              const preAmt  = parseFloat(preB?.uiTokenAmount?.uiAmount || 0);
-              const postAmt = parseFloat(postB?.uiTokenAmount?.uiAmount || 0);
-              const diff = postAmt - preAmt;
-              if (diff > 0 && Math.floor(diff) > amount) {
-                amount = Math.floor(diff);
-              }
-            }
-          }
-
-          // ── Metoda 3: Instrukcje transfer/burn ──
-          if (amount === 0) {
-            const allIx = [
-              ...(tx?.transaction?.message?.instructions || []),
-              ...(tx?.meta?.innerInstructions?.flatMap(i => i.instructions) || [])
-            ];
-            for (const ix of allIx) {
-              const t    = ix.parsed?.type || '';
-              const info = ix.parsed?.info || {};
-              if (['transfer','transferChecked','burn','burnChecked'].includes(t)) {
-                const raw = parseInt(info.tokenAmount?.amount || info.amount || '0');
-                const dec = parseInt(info.tokenAmount?.decimals ?? 9);
-                const parsed = dec > 0 ? Math.floor(raw / Math.pow(10, dec)) : raw;
-                if (parsed > amount) amount = parsed;
-              }
-            }
-          }
-
-          break;
-        } catch(e) { continue; }
-      }
+    if (!apiData.success || apiData.amount === undefined) {
+      status.style.color = '#ff4444';
+      status.textContent = '❌ Could not verify transaction';
+      if (btn) { btn.disabled = false; btn.textContent = '🔥 VERIFY BURN & CLAIM POINTS'; btn.style.background = 'linear-gradient(135deg,var(--neon3),var(--neon2))'; }
+      return;
     }
-  } catch(e) {}
 
-  // Restore button
-  if (btn) { btn.disabled = false; btn.textContent = '✅ Verify deposit'; btn.style.background = 'linear-gradient(135deg,var(--neon3),var(--neon2))'; }
+    // Sukces — przyznaj punkty
+    const amount = apiData.amount;
 
-  if (!txFound) {
-    status.style.color = 'var(--neon2)';
-    status.textContent = '❌ Cannot connect to blockchain. Check your internet or try again.';
-    return;
-  }
-
-  if (amount > 0) {
-    used.push(hash);
-    localStorage.setItem('anal_used_tx', JSON.stringify(used));
-
-    // ── TIERED BURN-TO-PLAY SYSTEM v2 ──────────────────────────
-    // Tiers: 1-999→10pts, 1000-4999→12pts, 5000-9999→15pts, 10000+→20pts
-    // Daily cap: 50,000 $ANAL/wallet/day — above cap = 3pts (anti-whale)
-    // Streak bonus: +5% per consecutive day (max 7 days = +35%)
-    var DAILY_CAP = 50000;
-    var burnData = JSON.parse(localStorage.getItem('anal_burn_data') || '{"dayBurned":0,"lastBurnDate":"","streakDays":1,"lastStreakDate":"","burnPressure":0}');
-    var today = new Date().toISOString().slice(0,10);
-    // Reset daily cap if new day
+    // Tiered burn system
+    const DAILY_CAP = 50000;
+    const burnData = JSON.parse(localStorage.getItem('anal_burn_data') || '{"dayBurned":0,"lastBurnDate":"","streakDays":1,"lastStreakDate":"","burnPressure":0}');
+    const today = new Date().toISOString().slice(0,10);
     if (burnData.lastBurnDate !== today) { burnData.dayBurned = 0; burnData.lastBurnDate = today; }
-    // Streak logic
-    var yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
     if (burnData.lastStreakDate === yesterday) { burnData.streakDays = Math.min((burnData.streakDays||1)+1, 7); }
     else if (burnData.lastStreakDate !== today) { burnData.streakDays = 1; }
     burnData.lastStreakDate = today;
-    var streakBonus = Math.min((burnData.streakDays-1)*0.05, 0.35);
-    // Tiered points calculation with daily cap
-    var cappedAmt = Math.min(amount, Math.max(0, DAILY_CAP - burnData.dayBurned));
-    var overAmt   = Math.max(0, amount - Math.max(0, DAILY_CAP - burnData.dayBurned));
-    var baseRate;
-    if (cappedAmt >= 10000)      baseRate = 20;
-    else if (cappedAmt >= 5000)  baseRate = 15;
-    else if (cappedAmt >= 1000)  baseRate = 12;
-    else                         baseRate = 10;
-    var basePoints = Math.floor(cappedAmt * baseRate + overAmt * 3);
-    var points = Math.floor(basePoints * (1 + streakBonus));
-    // Update daily burn tracking
+    const streakBonus = Math.min((burnData.streakDays-1)*0.05, 0.35);
+    const cappedAmt = Math.min(amount, Math.max(0, DAILY_CAP - burnData.dayBurned));
+    const overAmt = Math.max(0, amount - Math.max(0, DAILY_CAP - burnData.dayBurned));
+    let baseRate;
+    if (cappedAmt >= 10000) baseRate = 20;
+    else if (cappedAmt >= 5000) baseRate = 15;
+    else if (cappedAmt >= 1000) baseRate = 12;
+    else baseRate = 10;
+    const basePoints = Math.floor(cappedAmt * baseRate + overAmt * 3);
+    const points = Math.floor(basePoints * (1 + streakBonus));
     burnData.dayBurned = (burnData.dayBurned||0) + amount;
-    // Burn Pressure update (global community pressure, stored per-wallet as proxy)
-    // Pressure increases by amount/1000 per burn, capped at 100, resets after jackpot
-    var pressureGain = Math.min(amount / 1000, 20); // max +20 pressure per single burn
+    const pressureGain = Math.min(amount / 1000, 20);
     burnData.burnPressure = Math.min(100, (burnData.burnPressure||0) + pressureGain);
     window._burnPressure = burnData.burnPressure;
     localStorage.setItem('anal_burn_data', JSON.stringify(burnData));
-    // Badge for 10k+ single burn
+
+    // Whale badge
     if (amount >= 10000) {
-      var owned = JSON.parse(localStorage.getItem('anal_owned') || '[]');
+      const owned = JSON.parse(localStorage.getItem('anal_owned') || '[]');
       if (!owned.includes('whale_badge')) { owned.push('whale_badge'); localStorage.setItem('anal_owned', JSON.stringify(owned)); }
     }
-    // Show streak notification in status
-    var streakMsg = burnData.streakDays > 1 ? ' 🔥 Day '+burnData.streakDays+' streak! +'+Math.round(streakBonus*100)+'% bonus!' : '';
 
-    // ── VIP TRACKING — track total burned per wallet ──
-    var vipData = JSON.parse(localStorage.getItem('anal_vip_data') || '{"totalAnal":0,"totalUsd":0,"burns":[]}');
-    var analPrice = window._analLivePrice || 0.0011;
-    var usdValue = amount * analPrice;
-    vipData.totalAnal += amount;
+    const streakMsg = burnData.streakDays > 1 ? ' 🔥 Day '+burnData.streakDays+' streak! +'+Math.round(streakBonus*100)+'% bonus!' : '';
+
+    // Zapisz punkty i VIP data
+    const analPrice = window._analLivePrice || 0.0011;
+    const usdValue = amount * analPrice;
+    const vipData = getVipData();
+    vipData.totalBurned = (vipData.totalBurned || 0) + amount;
     vipData.totalUsd = (vipData.totalUsd || 0) + usdValue;
-    vipData.burns.push({hash: hash, amount: amount, usd: usdValue.toFixed(2), ts: Date.now()});
-    localStorage.setItem('anal_vip_data', JSON.stringify(vipData));
+    vipData.burns = vipData.burns || [];
+    vipData.burns.push({ hash, amount, usd: usdValue, ts: Date.now(), pts: points });
+    saveVipData(vipData);
 
-    // ── JACKPOT THRESHOLD — show VIP badge after 50% of jackpot value ──
-    // Jackpot = 100,000 $ANAL ≈ $110 USD. 50% = $55 USD
-    var JP_THRESHOLD_USD = 55;
-    if (vipData.totalUsd >= JP_THRESHOLD_USD) {
-      var vipBadge = document.getElementById('vip-badge');
-      var vipInfo = document.getElementById('vip-total-burned');
-      if (vipBadge) vipBadge.style.display = 'inline-block';
-      var pDisp = getBurnPressureDisplay();
-      if (vipInfo) { vipInfo.style.display = 'block'; vipInfo.textContent = pDisp.emoji + ' Jackpot heat: ' + pDisp.label + ' — Total burned: $' + vipData.totalUsd.toFixed(2); vipInfo.style.color = pDisp.color; }
-    }
+    // Dodaj do używanych TX (lokalny cache)
+    const usedNow = JSON.parse(localStorage.getItem('anal_used_tx') || '[]');
+    usedNow.push(hash);
+    if (usedNow.length > 200) usedNow.splice(0, usedNow.length - 200);
+    localStorage.setItem('anal_used_tx', JSON.stringify(usedNow));
 
-    const newBal = getCredits() + points;
-    setCredits(newBal);
-    document.getElementById('tx-hash-input').value = '';
+    // Dodaj punkty
+    setCredits((getCredits() || 0) + points);
+    if (window.initGamesPanel) initGamesPanel();
+
     status.style.color = 'var(--neon)';
     status.textContent = '✅ Burned ' + amount.toLocaleString() + ' $ANAL → +' + points.toLocaleString() + ' pts' + streakMsg;
     toast('🔥 Burned ' + amount.toLocaleString() + ' $ANAL! +' + points.toLocaleString() + ' pts' + (burnData.streakDays>1?' 🔥x'+burnData.streakDays:''));
+
+    if (btn) { btn.disabled = false; btn.textContent = '🔥 VERIFY BURN & CLAIM POINTS'; btn.style.background = 'linear-gradient(135deg,var(--neon3),var(--neon2))'; }
     updateVipStatus();
-    // Flash balance
-    const balEl = document.getElementById('credits-balance');
-    if (balEl) { balEl.style.transform='scale(1.3)'; balEl.style.color='#fff'; setTimeout(()=>{balEl.style.transform='';balEl.style.color='var(--amber)';},600); }
-  } else {
-    status.style.color = 'var(--neon2)';
-    status.textContent = '❌ No $ANAL transfer to our address found in this TX. Make sure you sent to the correct address.';
+
+  } catch(e) {
+    status.style.color = '#ff4444';
+    status.textContent = '❌ Network error. Try again.';
+    if (btn) { btn.disabled = false; btn.textContent = '🔥 VERIFY BURN & CLAIM POINTS'; btn.style.background = 'linear-gradient(135deg,var(--neon3),var(--neon2))'; }
   }
 }
-
-function buyItem(id, cost, name) {
-  const bal = getCredits();
-  if (bal < cost) {
-    toast(`❌ Not enough credits! You need ${cost.toLocaleString()} ANAL`);
-    return;
-  }
-
-  // Check if already owned (for non-card items)
-  const owned = JSON.parse(localStorage.getItem('anal_owned') || '[]');
-  const nonStackable = ['music','style_premium','verified'];
-  if (nonStackable.includes(id) && owned.includes(id)) {
-    toast(`✅ Already owned: ${name}`);
-    return;
-  }
-
-  setCredits(bal - cost);
-
-  // Save to owned
-  if (nonStackable.includes(id)) {
-    owned.push(id);
-    localStorage.setItem('anal_owned', JSON.stringify(owned));
-  }
-
-  // Save card
-  const cards = getCards();
-  cards.push({ id, name, num: cards.filter(c=>c.id===id).length+1, date: Date.now() });
-  saveCards(cards);
-
-  // Apply effect immediately
-  applyUnlocks();
-
-  // Special effects per item
-  if (id === 'style_premium') {
-    toast('🎨 Premium styles unlocked! Check Animation Style in AI Generator.');
-    // Switch to AI panel to show
-    setTimeout(()=>{
-      const aiTab = document.querySelector('.ptab[onclick*="ai"]');
-      if (aiTab) switchPanel('ai', aiTab);
-    }, 1500);
-  } else if (id === 'music') {
-    toast('🎵 Custom music unlocked! Check the Tools tab.');
-    setTimeout(()=>{
-      const toolsTab = document.querySelector('.ptab[onclick*="tools"]');
-      if (toolsTab) switchPanel('tools', toolsTab);
-    }, 1500);
-  } else if (id === 'verified') {
-    toast('✅ Verified badge activated!');
-  } else {
-    toast(`🎉 Purchased: ${name}!`);
-  }
-}
-
-function applyUnlocks() {
-  const owned = JSON.parse(localStorage.getItem('anal_owned') || '[]');
-
-  // Premium styles
-  const styleSelect = document.getElementById('anim-style');
-  if (styleSelect) {
-    styleSelect.querySelectorAll('.premium-style').forEach(opt => {
-      if (owned.includes('style_premium')) {
-        opt.disabled = false;
-        opt.textContent = opt.textContent.replace('🔒 ','').replace(' [Premium]','');
-      } else {
-        opt.disabled = true;
-      }
-    });
-  }
-
-  // Custom music
-  const locked = document.getElementById('custom-music-locked');
-  const unlocked = document.getElementById('custom-music-unlocked');
-  if (locked && unlocked) {
-    if (owned.includes('music')) {
-      locked.style.display = 'none';
-      unlocked.style.display = 'block';
-    } else {
-      locked.style.display = 'block';
-      unlocked.style.display = 'none';
-    }
-  }
-
-  // Verified badge
-  const pill = document.querySelector('.verified-pill');
-  const pillDot = document.querySelector('.vpill-dot');
-  if (pill && owned.includes('verified')) {
-    pill.style.background = 'rgba(0,255,204,0.15)';
-    pill.style.borderColor = 'rgba(0,255,204,0.5)';
-    if (pillDot) pillDot.style.background = 'var(--neon)';
-    const walletEl = document.getElementById('hdr-wallet');
-    if (walletEl && !walletEl.textContent.includes('✅')) {
-      walletEl.textContent = '✅ ' + walletEl.textContent;
-    }
-  }
-
-  // Update shop — show OWNED on bought items
-  updateShopUI(owned);
-}
-
-function updateShopUI(owned) {
-  const shopMap = {
-    music: document.querySelector('.shop-item[onclick*="music"]'),
-    style_premium: document.querySelector('.shop-item[onclick*="style_premium"]'),
-    verified: document.querySelector('.shop-item[onclick*="verified"]'),
-  };
-  for (const [id, el] of Object.entries(shopMap)) {
-    if (!el) continue;
-    if (owned.includes(id)) {
-      el.style.opacity = '0.5';
-      el.style.cursor = 'default';
-      const priceEl = el.querySelector('span:last-child');
-      if (priceEl) priceEl.textContent = '✅ Owned';
-    }
-  }
-}
-
-function loadCustomMusic(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const url = URL.createObjectURL(file);
-  // Stop current music
-  if (window._currentAudio) { window._currentAudio.pause(); window._currentAudio = null; }
-  // Play custom track
-  const audio = new Audio(url);
-  audio.loop = true;
-  audio.volume = 0.5;
-  audio.play().catch(()=>{});
-  window._currentAudio = audio;
-  window._customMusicUrl = url;
-  document.getElementById('custom-music-name').textContent = '▶ ' + file.name;
-  toast('🎵 Gra: ' + file.name);
-}
-
-function renderMyCards(){}
-
-
-// Init credits on load
-document.addEventListener('DOMContentLoaded', ()=>{
-  setCredits(getCredits());
-  renderMyCards();
-  applyUnlocks();
-});
-
-function setPrompt(txt) {
-  document.getElementById('prompt-input').value = txt;
-  toast('Prompt set!');
-}
-
-function addTextLayer() {
-  const name = prompt('Layer name:', 'Text layer');
-  if (!name) return;
-  const list = document.getElementById('layers-list');
-  list.innerHTML += `<div class="layer-row"><div class="layer-icon">T</div><div class="layer-name">${name}</div><button class="layer-vis">👁</button></div>`;
-  toast('Layer added');
-}
-
-function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
-
-// ── PARTICLES ──────────────────────────────────────────────────────
-function initParticles() {
-  const container = document.getElementById('particles');
-  if (!container) return;
-  const emojis = ['🚀','💎','🌕','💰','🦉','⭐','✨','🔥'];
-  for (let i = 0; i < 18; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.cssText = `
-      left: ${Math.random()*100}%;
-      width: ${Math.random()*16+8}px;
-      height: ${Math.random()*16+8}px;
-      animation-duration: ${Math.random()*15+10}s;
-      animation-delay: ${Math.random()*15}s;
-      font-size: ${Math.random()*16+10}px;
-      background: transparent;
-    `;
-    p.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-    p.style.display = 'flex';
-    p.style.alignItems = 'center';
-    p.style.justifyContent = 'center';
-    container.appendChild(p);
-  }
-}
-initParticles();
-
-let toastTimer;
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
-}
-
-// ── CANVAS SCALING — desktop + mobile ─────────────────────────────
-function fitCanvasToScreen() {
-  const canvas = document.getElementById('main-canvas');
-  if (!canvas || !canvas.width) return;
-  const wrap = canvas.parentElement;
-  const stage = document.querySelector('.canvas-stage');
-  if (!stage) return;
-
-  const isMobile = window.innerWidth <= 768;
-
-  if (isMobile) {
-    // Mobile: fit to smaller of screen width OR available stage height
-    // (stage may be small if left-panel takes a lot of vertical space)
-    const stageH = stage.clientHeight > 80 ? stage.clientHeight - 16 : window.innerHeight * 0.4;
-    const stageW = window.innerWidth - 16;
-    const size = Math.min(stageW, stageH, canvas.width || 480);
-    canvas.style.width  = size + 'px';
-    canvas.style.height = size + 'px';
-    if (wrap) { wrap.style.width = size + 'px'; wrap.style.height = size + 'px'; }
-  } else {
-    // Desktop: fit to available stage area (keeps aspect ratio)
-    const stageW = stage.clientWidth - 48;
-    const stageH = stage.clientHeight - 48;
-    const size = Math.min(stageW, stageH, canvas.width);
-    canvas.style.width  = size + 'px';
-    canvas.style.height = size + 'px';
-    if (wrap) { wrap.style.width = size + 'px'; wrap.style.height = size + 'px'; }
-  }
-}
-
-window.addEventListener('resize', fitCanvasToScreen);
-window.addEventListener('orientationchange', () => setTimeout(fitCanvasToScreen, 300));
-
-
-// ── GATE PARTICLES ─────────────────────────────────────────
-function initGateParticles() {
-  const canvas = document.getElementById('gate-particles');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  function resize() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
-  resize();
-  window.addEventListener('resize', resize);
-  const pts = Array.from({length:70}, () => ({
-    x: Math.random()*canvas.width, y: Math.random()*canvas.height,
-    r: Math.random()*1.8+0.3,
-    vx: (Math.random()-.5)*.4, vy: (Math.random()-.5)*.4,
-    c: Math.random()>.5 ? 'rgba(123,97,255,' : 'rgba(0,255,204,'
-  }));
-  let running = true;
-  function draw() {
-    if (!document.getElementById('gate') || document.getElementById('gate').style.display === 'none') { running=false; return; }
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    pts.forEach(p => {
-      p.x+=p.vx; p.y+=p.vy;
-      if(p.x<0||p.x>canvas.width) p.vx*=-1;
-      if(p.y<0||p.y>canvas.height) p.vy*=-1;
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle = p.c+(0.25+Math.random()*.25)+')';
-      ctx.fill();
-    });
-    if(running) requestAnimationFrame(draw);
-  }
-  draw();
-  // Floating emojis
-  const emojis = document.getElementById('gate-emojis');
-  if (emojis) {
-    ['🦉','🚀','💜','💎','🪙','🔥','⚡','🌙'].forEach((e,i) => {
-      const d = document.createElement('div');
-      d.className = 'float-e';
-      d.textContent = e;
-      d.style.left = (10 + Math.random()*80) + '%';
-      d.style.bottom = '-30px';
-      d.style.animationDuration = (5+Math.random()*8)+'s';
-      d.style.animationDelay = (Math.random()*6)+'s';
-      emojis.appendChild(d);
-    });
-  }
-}
-document.addEventListener('DOMContentLoaded', () => {
-  initGateParticles();
-  // Resume music if it was playing before navigation, else do nothing (honourEntry handles it)
-  const wasPlaying = localStorage.getItem('anal_music_playing');
-  if (wasPlaying) {
-    setTimeout(() => {
-      playTrack(wasPlaying);
-    }, 800);
-  }
-});
-
-// ── GALLERY IMPORT ─────────────────────────────────────────────────
 async function checkGalleryImport() {
   const raw = localStorage.getItem('anal_gallery_import');
   if (!raw) return;
