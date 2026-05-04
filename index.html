@@ -4873,6 +4873,12 @@ function honourEntry() {
 }
 function enterApp(addr, verified) {
   state.walletAddr = addr;
+  // Zapisz adres do vip_data żeby verifyDeposit mógł go użyć
+  if (addr && !addr.startsWith('HONOUR')) {
+    var vd2 = getVipData();
+    vd2.address = addr;
+    saveVipData(vd2);
+  }
   document.getElementById('gate').style.display = 'none';
   document.getElementById('app').classList.add('visible');
   const short = addr.slice(0,4)+'…'+addr.slice(-4);
@@ -6811,17 +6817,18 @@ function fallbackCopy(text) {
 
 async function verifyDeposit() {
   const hash = document.getElementById('tx-hash-input').value.trim();
-  const btn = document.getElementById('verify-btn');
+  const btn  = document.getElementById('verify-btn');
   const status = document.getElementById('deposit-status');
 
+  // Walidacja — hash musi być wpisany
   if (!hash) {
     status.style.color = 'var(--neon2)';
     status.textContent = '⚠️ Paste TX hash first!';
-    if (btn) { btn.style.animation = 'none'; btn.style.background = 'var(--neon2)'; setTimeout(()=>{ btn.style.background = 'linear-gradient(135deg,var(--neon3),var(--neon2))'; },1000); }
+    if (btn) { btn.style.background = 'var(--neon2)'; setTimeout(()=>{ btn.style.background = 'linear-gradient(135deg,var(--neon3),var(--neon2))'; },1000); }
     return;
   }
 
-  // Walidacja formatu hasha po stronie klienta
+  // Walidacja formatu hasha
   if (!/^[A-Za-z0-9]{43,90}$/.test(hash)) {
     status.style.color = '#ff4444';
     status.textContent = '❌ Invalid TX hash format';
@@ -6836,33 +6843,25 @@ async function verifyDeposit() {
     return;
   }
 
-  // Pobierz adres portfela
-  const vd = getVipData ? getVipData() : {};
-  const userWallet = vd.address || document.getElementById('wallet-input')?.value?.trim() || '';
-
-  if (!userWallet) {
-    status.style.color = '#ff4444';
-    status.textContent = '❌ Connect your wallet first';
-    return;
-  }
-
   // Loading
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Weryfikuję...'; btn.style.background = 'rgba(123,97,255,0.5)'; }
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Verifying...'; btn.style.background = 'rgba(123,97,255,0.5)'; }
   status.style.color = 'var(--muted)';
   status.textContent = '🔍 Checking transaction on X1 blockchain...';
 
   try {
-    // JEDYNA weryfikacja — przez bezpieczny serwer z Redis
+    // Weryfikacja przez serwer — walletAddress opcjonalny (serwer sam wykrywa sendera z TX)
+    const vd = (typeof getVipData === 'function') ? getVipData() : {};
+    const walletHint = vd.address || (typeof state !== 'undefined' && state.walletAddr && !state.walletAddr.startsWith('HONOUR') ? state.walletAddr : '') || '';
+
     const apiResp = await fetch('/api/verify-tx', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ hash, walletAddress: userWallet })
+      body: JSON.stringify({ hash, walletAddress: walletHint })
     });
 
     const apiData = await apiResp.json().catch(() => ({}));
 
     if (!apiResp.ok) {
-      // Serwer zwrócił błąd — pokaż konkretny komunikat
       status.style.color = '#ff4444';
       status.textContent = '❌ ' + (apiData.error || 'Verification failed');
       if (btn) { btn.disabled = false; btn.textContent = '🔥 VERIFY BURN & CLAIM POINTS'; btn.style.background = 'linear-gradient(135deg,var(--neon3),var(--neon2))'; }
@@ -6876,10 +6875,8 @@ async function verifyDeposit() {
       return;
     }
 
-    // Sukces — przyznaj punkty
+    // ── Sukces — przyznaj punkty ──────────────────────────────
     const amount = apiData.amount;
-
-    // Tiered burn system
     const DAILY_CAP = 50000;
     const burnData = JSON.parse(localStorage.getItem('anal_burn_data') || '{"dayBurned":0,"lastBurnDate":"","streakDays":1,"lastStreakDate":"","burnPressure":0}');
     const today = new Date().toISOString().slice(0,10);
@@ -6912,24 +6909,28 @@ async function verifyDeposit() {
 
     const streakMsg = burnData.streakDays > 1 ? ' 🔥 Day '+burnData.streakDays+' streak! +'+Math.round(streakBonus*100)+'% bonus!' : '';
 
-    // Zapisz punkty i VIP data
+    // Zapisz VIP data (użyj sendera z TX jeśli wallet nieznany)
+    const senderAddr = apiData.sender || walletHint;
     const analPrice = window._analLivePrice || 0.0011;
     const usdValue = amount * analPrice;
-    const vipData = getVipData();
+    const vipData = (typeof getVipData === 'function') ? getVipData() : {};
+    if (senderAddr && !senderAddr.startsWith('HONOUR')) vipData.address = senderAddr;
     vipData.totalBurned = (vipData.totalBurned || 0) + amount;
-    vipData.totalUsd = (vipData.totalUsd || 0) + usdValue;
+    vipData.totalUsd    = (vipData.totalUsd || 0) + usdValue;
     vipData.burns = vipData.burns || [];
     vipData.burns.push({ hash, amount, usd: usdValue, ts: Date.now(), pts: points });
-    saveVipData(vipData);
+    if (typeof saveVipData === 'function') saveVipData(vipData);
 
-    // Dodaj do używanych TX (lokalny cache)
+    // Dodaj hash do lokalnego cache
     const usedNow = JSON.parse(localStorage.getItem('anal_used_tx') || '[]');
     usedNow.push(hash);
     if (usedNow.length > 200) usedNow.splice(0, usedNow.length - 200);
     localStorage.setItem('anal_used_tx', JSON.stringify(usedNow));
 
     // Dodaj punkty
-    setCredits((getCredits() || 0) + points);
+    if (typeof setCredits === 'function' && typeof getCredits === 'function') {
+      setCredits((getCredits() || 0) + points);
+    }
     if (window.initGamesPanel) initGamesPanel();
 
     status.style.color = 'var(--neon)';
@@ -6937,7 +6938,8 @@ async function verifyDeposit() {
     toast('🔥 Burned ' + amount.toLocaleString() + ' $ANAL! +' + points.toLocaleString() + ' pts' + (burnData.streakDays>1?' 🔥x'+burnData.streakDays:''));
 
     if (btn) { btn.disabled = false; btn.textContent = '🔥 VERIFY BURN & CLAIM POINTS'; btn.style.background = 'linear-gradient(135deg,var(--neon3),var(--neon2))'; }
-    updateVipStatus();
+    if (typeof updateVipStatus === 'function') updateVipStatus();
+    if (typeof renderBurnHistory === 'function') renderBurnHistory();
 
   } catch(e) {
     status.style.color = '#ff4444';
@@ -6945,6 +6947,7 @@ async function verifyDeposit() {
     if (btn) { btn.disabled = false; btn.textContent = '🔥 VERIFY BURN & CLAIM POINTS'; btn.style.background = 'linear-gradient(135deg,var(--neon3),var(--neon2))'; }
   }
 }
+
 async function checkGalleryImport() {
   const raw = localStorage.getItem('anal_gallery_import');
   if (!raw) return;
@@ -11174,6 +11177,9 @@ function renderBurnHistory() {
 
 function getVipData() {
   return JSON.parse(localStorage.getItem('anal_vip_data') || '{"totalAnal":0,"totalUsd":0,"burns":[]}');
+}
+function saveVipData(data) {
+  localStorage.setItem('anal_vip_data', JSON.stringify(data));
 }
 
 function getVipMultiplier() {
